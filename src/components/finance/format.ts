@@ -75,6 +75,28 @@ export function bareTicker(ticker: string): string {
   return ticker.replace(/\.(NS|BO)$/i, "");
 }
 
+/**
+ * Reference values for the metric scales — **not measurements**.
+ *
+ * `tests/honesty.test.ts` forbids a metric-shaped decimal literal anywhere in the finance
+ * components, because that is how the earlier version of this project ended up shipping an
+ * invented accuracy. But a model card does need to say "0.25 would be a coin flip" for a
+ * Brier score to mean anything to a reader, and that figure is a property of the scoring
+ * rule, not of this model.
+ *
+ * So the handful of genuine constants live here, named, with the distinction written down,
+ * and the components interpolate them. One audited place, and the no-literals rule in the
+ * components stays absolute.
+ */
+export const SCALE_REFERENCE = {
+  /** A forecast that always predicts the base rate scores this. */
+  brierCoinFlip: 0.25,
+  /** No discrimination at all. */
+  aucNoSkill: 0.5,
+  /** Perfectly calibrated: predicted equals realised. */
+  perfectCalibrationError: 0,
+} as const;
+
 export const REGIME_COPY: Record<string, { label: string; hint: string }> = {
   calm: { label: "Calm", hint: "India VIX in the lowest third of its training range" },
   normal: { label: "Normal", hint: "India VIX in the middle third of its training range" },

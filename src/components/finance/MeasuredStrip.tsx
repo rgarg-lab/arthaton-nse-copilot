@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { MlResult } from "@/lib/ml/client";
 import type { MetricsPayload } from "@/schemas/finance";
 import { Disclaimer } from "./Disclaimer";
-import { count, fixed, percent, probability } from "./format";
+import { SCALE_REFERENCE, count, fixed, percent, probability } from "./format";
 
 /**
  * The landing page's numbers strip — and the reason it exists is worth stating.
@@ -94,7 +94,7 @@ export function MeasuredStrip({
             <Cell
               value={fixed(d.brier, 3)}
               label="Brier score"
-              note="a calibrated probability, scored as one; 0.25 would be a coin flip"
+              note={`a calibrated probability, scored as one; ${SCALE_REFERENCE.brierCoinFlip} would be a coin flip`}
             />
             <Cell
               value={percent(base.always_up.accuracy, 1)}

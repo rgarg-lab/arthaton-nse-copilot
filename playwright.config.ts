@@ -61,8 +61,13 @@ export default defineConfig({
      * would start and the first DB-backed call would die with ECONNRESET. Waiting on a
      * route that needs a query closes the window, and costs nothing when the directory is
      * already warm. Cold starts are the normal case in CI.
+     *
+     * `/api/outbox` rather than `/api/learners`: the learner routes are retired (§7.1), and
+     * waiting on a route that no longer exists is a ten-minute silent timeout with
+     * "Timed out waiting from config.webServer" as the only clue. `/api/outbox` selects
+     * from the outbox table, so it still closes the migration window.
      */
-    url: `${BASE}/api/learners`,
+    url: `${BASE}/api/outbox`,
     reuseExistingServer: !process.env.CI,
     // A cold build (no .next) is 2-3 minutes on its own before the server even starts.
     timeout: 600_000,
@@ -71,6 +76,10 @@ export default defineConfig({
       // No provider keys, and mock mode asserted rather than inferred.
       LLM_MODE: "mock",
       LLM_CACHE: "on",
+      // Gemini only (§4.1). Empty means *no* fallbacks — see fallbackModels() in
+      // src/lib/llm/router.ts, which is the one reader that distinguishes an absent
+      // variable from an explicitly empty one.
+      LLM_FALLBACKS: "",
       // A separate data directory so a smoke run never disturbs local demo data.
       PGLITE_DIR: ".pglite-test",
       AUTH_SECRET: process.env.AUTH_SECRET ?? "e2e-secret-not-for-production",

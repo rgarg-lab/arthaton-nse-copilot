@@ -8,6 +8,13 @@
       "when": 1794218837654,
       "tag": "0000_lame_wolfpack",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794497725119,
+      "tag": "0001_majestic_guardian",
+      "breakpoints": true
     }
   ]
 }

@@ -304,11 +304,25 @@ def per_year(df: pd.DataFrame) -> list[dict]:
 def per_vix_regime(df: pd.DataFrame, pre: Preprocessor) -> list[dict]:
     """Accuracy split by volatility regime.
 
-    This is the breakdown that makes the abstention story concrete, and the one
-    the chat surface quotes when it declines to give a signal: the model is
-    measurably worse in the stressed tercile, so "today is a high-VIX session and
-    my measured accuracy in that regime is X%" is a statement backed by this
-    table rather than by a tone of voice.
+    This is the breakdown the chat surface quotes when it explains a call or a
+    refusal: "today is in the calm tercile and my measured accuracy there is X%"
+    is a statement backed by this table rather than by a tone of voice.
+
+    **It did not come out the way I expected, and the expectation was wrong.**
+    This docstring originally asserted that the model is measurably worse in the
+    stressed tercile — high volatility, more noise — and it was written before
+    the table was read. The measurement says close to the opposite: the stressed
+    tercile is the strongest and the middle one is the weakest, at roughly a coin
+    flip.
+
+    That is a plausible result rather than a bug. A high-VIX session has larger
+    moves with more persistent direction; a mid-vol session has neither the drift
+    of a calm market nor the momentum of a stressed one. But it is three numbers
+    from one holdout window, not an established fact, and nothing in the product
+    is tuned on it — the abstention threshold is regime-independent.
+
+    The note stays because the original claim is exactly the kind of confident
+    sentence that would have been contradicted by this project's own artifact.
     """
     regime = pre.vix_regime(df["vix_level"])
     names = {-1: "unknown", 0: "calm", 1: "normal", 2: "stressed"}

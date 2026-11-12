@@ -27,9 +27,10 @@ export const idea: IdeaConfig = {
     "the days it does not. That is the expensive part: not the wrong calls, but the inability " +
     "to distinguish them. NSE Copilot inverts the design. It predicts next-session direction " +
     "for a fixed basket of 18 NSE large-caps, but the product is the decision layer around " +
-    "the prediction — a probability that has been calibrated against out-of-sample outcomes " +
-    "so 62% means 62%, an explicit refusal to call the sessions where conviction does not " +
-    "clear a frozen threshold, the historical sessions that most resemble today with what " +
+    "the prediction — a probability calibrated against out-of-sample outcomes, so a stated " +
+    "probability is the rate at which those calls actually came in; an explicit refusal to " +
+    "call the sessions where conviction does not clear a frozen threshold; the historical " +
+    "sessions that most resemble today, with what " +
     "actually happened next, and an assistant that will quote its own measured failure rate " +
     "when you ask whether to trust it.",
   targetUser:
@@ -73,7 +74,7 @@ export const idea: IdeaConfig = {
       {
         title: "A probability that means it",
         description:
-          "Isotonic calibration on out-of-fold predictions, so 62% is 62%. The calibration curve is on the model card.",
+          "Isotonic calibration on out-of-fold predictions, so a stated probability is the rate those calls came in at. The curve is on the model card.",
         icon: "target",
       },
       {
@@ -210,6 +211,11 @@ export const idea: IdeaConfig = {
 
   demoSeed: "nse-copilot",
 
+  /**
+   * Every path here is asserted to exist by `tests/honesty.test.ts`. A must-builds table
+   * that points at files which were renamed or never written is worse than no table: it
+   * reads as a completed checklist.
+   */
   mustBuilds: [
     {
       id: "calibrated-signal",
@@ -219,7 +225,8 @@ export const idea: IdeaConfig = {
         "ml/src/copilot/train.py",
         "ml/src/copilot/signals.py",
         "src/lib/tools/finance.ts",
-        "src/components/signals/SignalsTab.tsx",
+        "src/components/finance/SignalsBoard.tsx",
+        "app/signals/page.tsx",
       ],
     },
     {
@@ -228,8 +235,9 @@ export const idea: IdeaConfig = {
       status: "done",
       files: [
         "ml/src/copilot/train.py",
-        "src/components/signals/AbstentionCard.tsx",
+        "src/components/finance/SignalCard.tsx",
         "src/lib/rules/finance.ts",
+        "tests/rules.finance.test.ts",
       ],
     },
     {
@@ -241,25 +249,41 @@ export const idea: IdeaConfig = {
         "ml/src/copilot/evaluate.py",
         "ml/tests/test_purge.py",
         "ml/tests/test_leakage.py",
+        "ml/artifacts/holdout_ledger.json",
       ],
     },
     {
       id: "model-card",
       title: "Model card: calibration curve, four baselines, coverage-accuracy curve",
       status: "done",
-      files: ["app/dashboard/page.tsx", "src/components/modelcard/ModelCard.tsx"],
+      files: [
+        "app/dashboard/page.tsx",
+        "src/components/finance/ModelCard.tsx",
+        "src/components/finance/Charts.tsx",
+        "ml/artifacts/metrics.json",
+      ],
     },
     {
       id: "evidence-timeline",
       title: "Similar past sessions and what happened next",
       status: "done",
-      files: ["ml/src/copilot/neighbors.py", "src/components/path/EvidenceTimeline.tsx"],
+      files: [
+        "ml/src/copilot/neighbors.py",
+        "src/components/finance/EvidenceTimeline.tsx",
+        "app/evidence/page.tsx",
+      ],
     },
     {
       id: "self-aware-chat",
       title: "An assistant that quotes its own measured failure rate",
       status: "done",
-      files: ["src/lib/tools/finance.ts", "src/lib/chatContext.ts", "idea.config.ts"],
+      files: ["src/lib/tools/finance.ts", "src/lib/chatContext.ts", "src/lib/agent/loop.ts"],
+    },
+    {
+      id: "no-invented-numbers",
+      title: "Every UI number traces to a committed artifact, enforced by a test",
+      status: "done",
+      files: ["tests/honesty.test.ts", "src/lib/ml/client.ts", "src/data/demo-seed.ts"],
     },
   ],
 

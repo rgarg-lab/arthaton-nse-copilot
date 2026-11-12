@@ -63,7 +63,11 @@ const BUILTIN_TOOLS = new Set([
   "rag_lookup",
   "web_search",
   "fetch_url",
-  "ml_predict",
+  // `ml_predict` was in this list and has been removed along with the tool itself: it
+  // fabricated a label and a score when no endpoint was configured, which is a second
+  // path to "the model" that invents numbers. The list is what tells the mock which tools
+  // are the template's rather than this idea's, so a stale entry here would make the mock
+  // de-prioritise a real tool of the same name.
   "create_task",
   "send_message",
   "schedule_reminder",

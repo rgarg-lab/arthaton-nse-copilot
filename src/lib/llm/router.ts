@@ -29,9 +29,27 @@ export function primaryModel(): string {
   return env("LLM_PRIMARY") ?? DEFAULT_PRIMARY;
 }
 
+/**
+ * The fallback chain, where **an explicitly empty value means "no fallbacks"**.
+ *
+ * This is the one place `env()` is deliberately not used. `env()` collapses absent and
+ * blank into `undefined` — the right call almost everywhere, because a blank line in a
+ * scaffolded `.env.local` means "not configured" — but here the two have to differ:
+ *
+ * - `LLM_FALLBACKS` **absent**  → the template's default chain. A fresh clone of the
+ *   starter gets sensible fallbacks without having to know they exist.
+ * - `LLM_FALLBACKS=` **present and empty** → no fallbacks at all.
+ *
+ * This build needs the second (§4.1: "LLM_FALLBACKS= — deliberately empty — Gemini only").
+ * Without the distinction, setting it to empty silently restored a chain ending in
+ * Anthropic and Groq models whose keys are deliberately unset, so every live turn would
+ * have attempted two providers it could never reach before falling through to the mock —
+ * slow, and a misrepresentation of what this project actually depends on.
+ */
 export function fallbackModels(): string[] {
-  const raw = env("LLM_FALLBACKS") ?? DEFAULT_FALLBACKS;
-  return raw
+  const raw = process.env.LLM_FALLBACKS;
+  const source = raw === undefined ? DEFAULT_FALLBACKS : raw;
+  return source
     .split(",")
     .map((m) => m.trim())
     .filter(Boolean);

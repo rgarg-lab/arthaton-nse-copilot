@@ -8,6 +8,7 @@ import { anthropicProvider } from "@/lib/llm/providers/anthropic";
 import { geminiProvider } from "@/lib/llm/providers/gemini";
 import { groqProvider } from "@/lib/llm/providers/openai-compatible";
 import { CONNECTORS } from "@/lib/integrations";
+import { getHealth, mlEndpoint } from "@/lib/ml/client";
 import { assertToolsExist } from "@/lib/tools";
 
 /**
@@ -56,12 +57,12 @@ export async function preflight(): Promise<PreflightReport> {
     });
   }
 
-  if (idea.name === "Starter" || idea.partnerTool.name === "TBD at kickoff") {
+  if (idea.name === "Starter") {
     checks.push({
       name: "idea filled in",
       status: "warn",
       detail: "idea.config.ts is still the neutral placeholder.",
-      fix: "Run /new-idea, or edit idea.config.ts, before recording anything.",
+      fix: "Edit idea.config.ts before recording anything.",
     });
   }
 
@@ -188,6 +189,61 @@ export async function preflight(): Promise<PreflightReport> {
       fix: connector.isConfigured()
         ? undefined
         : `Optional. Set ${connector.requires.join(" and ")} to deliver through ${connector.name}; approvals fall back to the outbox otherwise.`,
+    });
+  }
+
+  // ── the ML service ──────────────────────────────────────────────────────────
+  /**
+   * The one check a judge most needs before recording anything.
+   *
+   * It is a `warn` rather than a `fail` when the service is down, because the app is
+   * genuinely usable without it — the landing page, the agent loop, memory, approvals and
+   * the outbox all work, and the model-backed panels show an explicit error rather than
+   * inventing figures. But the demo is not worth recording in that state, so the check
+   * reports exactly what is missing and the command that fixes it.
+   */
+  const ml = await getHealth();
+  if (ml.source === "service") {
+    const stale = (ml.data.data?.sessions_behind ?? 0) > 2;
+    const missing = Object.entries(ml.data.artifacts)
+      .filter(([, present]) => !present)
+      .map(([name]) => name);
+    checks.push({
+      name: "ML service",
+      status: ml.data.status === "ok" && !stale ? "ok" : "warn",
+      detail:
+        `${ml.data.status} at ${mlEndpoint()} in ${ml.elapsedMs}ms · ` +
+        `${(ml.data.panel_rows ?? 0).toLocaleString("en-IN")} panel rows · ` +
+        `data to ${ml.data.data?.last_session ?? "unknown"} ` +
+        `(${ml.data.data?.sessions_behind ?? "?"} sessions behind)` +
+        (missing.length > 0 ? ` · missing: ${missing.join(", ")}` : ""),
+      fix: stale
+        ? "Data is more than two sessions old. Run `python ml/tasks.py refresh` before submitting."
+        : missing.length > 0
+          ? `Regenerate the missing artifacts: \`python ml/tasks.py refresh\`.`
+          : undefined,
+    });
+    checks.push({
+      name: "no training on request",
+      status: ml.data.trains_on_request === false ? "ok" : "fail",
+      detail:
+        ml.data.trains_on_request === false
+          ? "artifacts are loaded at startup; the request path does no fitting"
+          : "the service reports that it trains on request",
+      fix:
+        ml.data.trains_on_request === false
+          ? undefined
+          : "§4.3 forbids training on the request path. Check ml/src/copilot/api.py.",
+    });
+  } else {
+    checks.push({
+      name: "ML service",
+      status: "warn",
+      detail: `not reachable at ${mlEndpoint()} — ${ml.reason}`,
+      fix:
+        "Start it with `python ml/tasks.py serve` (or `make -C ml serve`). Without it the " +
+        "signals, model card and evidence pages show an explicit error instead of figures — " +
+        "which is correct behaviour, but not what you want on camera.",
     });
   }
 

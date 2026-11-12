@@ -82,11 +82,34 @@ describe("the consequences it guards", () => {
     delete process.env.LLM_MAX_TOOL_STEPS;
   });
 
-  it("a blank fallback list does not empty the model chain", async () => {
+  /**
+   * **This assertion is inverted from the template's, deliberately.**
+   *
+   * The template asserted that a blank `LLM_FALLBACKS` still yields a non-empty chain,
+   * which follows from `env()`'s doctrine that blank means "unconfigured" and unconfigured
+   * means "use the default". That is right for a domain-agnostic starter.
+   *
+   * This project needs the opposite, and §4.1 is explicit about it: one LLM provider,
+   * `LLM_FALLBACKS=` "deliberately empty — Gemini only". Under the old behaviour, setting
+   * it empty silently restored a chain ending in Anthropic and Groq models whose keys are
+   * deliberately unset, so every live turn attempted two unreachable providers before
+   * falling through to the mock.
+   *
+   * So `fallbackModels()` is now the one reader that distinguishes *absent* from *present
+   * and empty*: absent keeps the default chain (a fresh clone of the starter still works),
+   * empty means none. The reasoning is in `src/lib/llm/router.ts`, and
+   * `tests/honesty.test.ts` covers both branches.
+   */
+  it("a blank fallback list means no fallbacks, while an absent one keeps the default", async () => {
+    const { fallbackModels, DEFAULT_FALLBACKS } = await import("@/lib/llm/router");
+
     process.env.LLM_FALLBACKS = "";
-    const { fallbackModels } = await import("@/lib/llm/router");
-    expect(fallbackModels().length).toBeGreaterThan(0);
+    expect(fallbackModels(), "an explicit empty value must mean none").toEqual([]);
+
     delete process.env.LLM_FALLBACKS;
+    expect(fallbackModels().length, "an absent value must keep the default chain").toBe(
+      DEFAULT_FALLBACKS.split(",").length,
+    );
   });
 
   it("a blank provider key reads as unconfigured", async () => {

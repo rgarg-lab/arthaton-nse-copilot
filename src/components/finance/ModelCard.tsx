@@ -3,7 +3,15 @@ import type { MetricsPayload } from "@/schemas/finance";
 import { ErrorState } from "@/components/common/EmptyState";
 import { Disclaimer } from "./Disclaimer";
 import { CalibrationPlot, CoveragePlot } from "./Charts";
-import { count, fixed, percent, probability, sessionDate, signedPercent } from "./format";
+import {
+  SCALE_REFERENCE,
+  count,
+  fixed,
+  percent,
+  probability,
+  sessionDate,
+  signedPercent,
+} from "./format";
 
 /**
  * The model card. Every figure on it is read from `ml/artifacts/metrics.json`.
@@ -191,11 +199,15 @@ export function ModelCard({ result }: { result: MlResult<MetricsPayload> }) {
             value={percent(d.balanced_accuracy, 2)}
             hint="corrects for the up/down mix"
           />
-          <MetricTile label="AUC" value={fixed(d.auc, 4)} hint="0.5 would be no skill" />
+          <MetricTile
+            label="AUC"
+            value={fixed(d.auc, 4)}
+            hint={`${SCALE_REFERENCE.aucNoSkill} would be no skill at all`}
+          />
           <MetricTile
             label="Brier score"
             value={fixed(d.brier, 4)}
-            hint="lower is better; 0.25 is a coin flip"
+            hint={`lower is better; ${SCALE_REFERENCE.brierCoinFlip} is a coin flip`}
           />
           <MetricTile label="Log loss" value={fixed(d.log_loss, 4)} hint="penalises confident errors" />
         </div>

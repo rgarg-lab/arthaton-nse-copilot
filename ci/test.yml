@@ -1,6 +1,14 @@
-# Every push to main and every pull request: types, lint, and the full Vitest suite on both
-# platforms the team uses. The Windows leg is the one that catches line-ending and
-# path-separator problems before they reach main.
+# PARKED, not inactive. This file belongs at `.github/workflows/test.yml`; the `gh` token
+# on the build machine lacks the `workflow` scope, so it cannot be written there. One
+# command activates it — see HUMAN_TASKS.md task 3:
+#
+#     gh auth refresh -h github.com -s workflow
+#     git mv ci/test.yml .github/workflows/test.yml
+#
+# Every push to main and every pull request: types, lint, the full Vitest suite on both
+# platforms, and the Python suite. The Windows leg catches line-ending and path-separator
+# problems; the Python leg is the one that matters most here, because it runs the leakage
+# and purge tests against the committed artifacts.
 name: test
 
 on:
@@ -29,6 +37,35 @@ jobs:
         run: npm run lint
       - name: Tests
         run: npm test
+
+  # The ML service: the leakage and purge tests, run against the committed panel and
+  # artifacts. This is the leg that would catch a change to features.py reintroducing
+  # look-ahead, or a retrain whose artifact no longer loads in a fresh process — both of
+  # which happened during the build and neither of which the TypeScript suite can see.
+  ml:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: pip install -e "./ml[dev]"
+      - name: Lint
+        run: python -m ruff check ml/src ml/tests
+      - name: Tests
+        run: python -m pytest ml -q
+      - name: Artifacts are committed and complete
+        # A clone that is missing an artifact is a clone that cannot run. The old project
+        # had an untracked `rag/` that `main.py` imported, so a fresh clone died at import.
+        run: |
+          for f in model.pkl calibrator.pkl metrics.json latest_signals.json \
+                   feature_importance.json holdout_ledger.json; do
+            test -s "ml/artifacts/$f" || { echo "missing ml/artifacts/$f"; exit 1; }
+          done
+          test -s ml/data/processed/panel.parquet || { echo "missing panel.parquet"; exit 1; }
 
   # The browser smoke test (tests/e2e/): one journey through the deterministic core against
   # a throwaway Postgres, with the model key invalid on purpose. Ubuntu only — it needs a
