@@ -1,0 +1,499 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dagre from "@dagrejs/dagre";
+import { Check, X } from "lucide-react";
+import {
+  Background,
+  BackgroundVariant,
+  Controls,
+  Handle,
+  MarkerType,
+  Position,
+  ReactFlow,
+  ReactFlowProvider,
+  useEdgesState,
+  useNodesState,
+  useReactFlow,
+  type Edge,
+  type Node,
+  type NodeProps,
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+
+import type { SkillStatus } from "@/schemas";
+import { prereqMap, type PrereqMap } from "@/lib/graph";
+import type { GraphEdge, GraphEvidence } from "@/lib/graphEvidence";
+import type { Evidence } from "@/schemas";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
+import type { SkillLite } from "../path/types";
+import { BranchOverlay } from "./BranchOverlay";
+import { EdgeCard } from "./EdgeCard";
+import { CandidateList } from "./CandidateList";
+import styles from "./graph.module.css";
+
+/** Status language: identity is never colour alone — every status has a glyph and a label. */
+export const STATUS_STYLE: Record<SkillStatus, { label: string; glyph: string; badge: "acquired" | "progress" | "gap" | "unrelated" }> = {
+  acquired: { label: "Acquired", glyph: "✓", badge: "acquired" },
+  "in-progress": { label: "In progress", glyph: "▶", badge: "progress" },
+  gap: { label: "Gap", glyph: "○", badge: "gap" },
+  unrelated: { label: "Not on your path", glyph: "·", badge: "unrelated" },
+};
+
+const DOMAIN_LABEL: Record<string, string> = {
+  foundations: "Foundations",
+  "web-frontend": "Web frontend",
+  "web-backend": "Web backend",
+  "data-engineering": "Data engineering",
+  "machine-learning": "Machine learning",
+  "data-analysis": "Data analysis",
+  "ai-engineering": "AI engineering",
+  security: "Security",
+  cloud: "Cloud",
+  devops: "DevOps",
+};
+const domainLabel = (d: string) => DOMAIN_LABEL[d] ?? d.replace(/-/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+
+type SkillNodeData = {
+  label: string;
+  status: SkillStatus;
+  highlighted: boolean;
+  dimmed: boolean;
+  level: number;
+  [key: string]: unknown;
+};
+
+const NODE_W = 188;
+const NODE_H = 32;
+/** The one arrow colour; matches .edge in graph.module.css. */
+const EDGE_MARKER = "rgba(255,255,255,0.30)";
+
+function SkillNode({ data, selected }: NodeProps<Node<SkillNodeData>>) {
+  const style = STATUS_STYLE[data.status];
+  return (
+    <div
+      className={cn(styles.node, styles[`node_${data.status}`], data.highlighted && styles.nodeHighlighted, data.dimmed && styles.nodeDimmed, selected && styles.nodeSelected)}
+      style={{ width: NODE_W, height: NODE_H }}
+      title={`${data.label} — ${style.label}${data.level ? ` (level ${data.level})` : ""}`}
+    >
+      <Handle type="target" position={Position.Top} className={styles.handle} />
+      <span className={styles.glyph} aria-hidden>
+        {data.status === "acquired" ? <Check /> : style.glyph}
+      </span>
+      <span className={styles.nodeLabel}>{data.label}</span>
+      {data.level > 0 && <span className={styles.level}>L{data.level}</span>}
+      <Handle type="source" position={Position.Bottom} className={styles.handle} />
+    </div>
+  );
+}
+
+const nodeTypes = { skill: SkillNode };
+
+/** Layout over the path-driving edges only: mined candidates are evidence, not structure. */
+function dagreLayout(skills: SkillLite[], prereqs: PrereqMap): Map<string, { x: number; y: number }> {
+  const g = new dagre.graphlib.Graph();
+  g.setGraph({ rankdir: "TB", nodesep: 16, ranksep: 52, marginx: 12, marginy: 12 });
+  g.setDefaultEdgeLabel(() => ({}));
+  for (const s of skills) g.setNode(s.id, { width: NODE_W, height: NODE_H });
+  const ids = new Set(skills.map((s) => s.id));
+  for (const s of skills) for (const p of prereqs.get(s.id) ?? []) if (ids.has(p)) g.setEdge(p, s.id);
+  dagre.layout(g);
+  return new Map(skills.map((s) => [s.id, { x: g.node(s.id).x - NODE_W / 2, y: g.node(s.id).y - NODE_H / 2 }]));
+}
+
+/** Fold any dagre rank wider than `maxWidth` into several rows, shifting later ranks down. */
+function wrapRanks(positions: Map<string, { x: number; y: number }>, maxWidth: number): Map<string, { x: number; y: number }> {
+  const GAP_X = 12;
+  const GAP_Y = 12;
+  const ranks = new Map<number, string[]>();
+  for (const [id, p] of positions) ranks.set(p.y, [...(ranks.get(p.y) ?? []), id]);
+  const out = new Map<string, { x: number; y: number }>();
+  const cols = Math.max(1, Math.floor(maxWidth / (NODE_W + GAP_X)));
+  let shift = 0;
+  for (const y of [...ranks.keys()].sort((a, b) => a - b)) {
+    const ids = ranks.get(y)!.sort((a, b) => positions.get(a)!.x - positions.get(b)!.x);
+    if (ids.length <= cols) {
+      const width = ids.length * (NODE_W + GAP_X) - GAP_X;
+      ids.forEach((id, i) => out.set(id, { x: i * (NODE_W + GAP_X) - width / 2, y: y + shift }));
+      continue;
+    }
+    const rows = Math.ceil(ids.length / cols);
+    const width = cols * (NODE_W + GAP_X) - GAP_X;
+    ids.forEach((id, i) => {
+      const r = Math.floor(i / cols);
+      const c = i % cols;
+      out.set(id, { x: c * (NODE_W + GAP_X) - width / 2, y: y + shift + r * (NODE_H + GAP_Y) });
+    });
+    shift += (rows - 1) * (NODE_H + GAP_Y);
+  }
+  return out;
+}
+
+/**
+ * The learner's own subgraph, top to bottom; memoised per (skills, focus set, canvas width).
+ * Before there is a path to focus on, `focusIds` is null and the whole taxonomy is laid out
+ * instead, so the pane is never empty.
+ */
+function computeLayout(skills: SkillLite[], prereqs: PrereqMap, focusIds: Set<string> | null, maxWidth: number): Map<string, { x: number; y: number }> {
+  // Ranks fold to the canvas width rather than a fixed one: anything wider only reads after a
+  // pan, and panning slices the node labels at the canvas edge.
+  const wrapTo = Math.max(NODE_W + 12, maxWidth - 24);
+  const subset = focusIds ? skills.filter((s) => focusIds.has(s.id)) : skills;
+  return wrapRanks(dagreLayout(subset, prereqs), wrapTo);
+}
+
+export type GraphHighlight = { catalogId: string; title: string; evidence: Evidence } | null;
+
+type Props = {
+  skills: SkillLite[];
+  /** Tiered edges with provenance (server-built slice of skill_edges.json). */
+  evidence: GraphEvidence;
+  skillStatus: Record<string, SkillStatus>;
+  levels: Record<string, number>;
+  highlight: GraphHighlight;
+  /** Clears the traced path item (the "Tracing" strip's close button). */
+  onClearHighlight?: () => void;
+  onSelectSkill?: (skillId: string) => void;
+  /** Open this arrow's card, details expanded, once the canvas is laid out (the landing badge lands here). */
+  initialEdge?: { from: string; to: string } | null;
+};
+
+/** Pointer interaction on an edge, reported with viewport coordinates for the popover. */
+export type EdgeInteraction = { kind: "enter" | "leave" | "click"; edge: GraphEdge; clientX: number; clientY: number };
+
+type InnerProps = Props & {
+  prereqs: PrereqMap;
+  selectedSkill: string | null;
+  /** Measured width of the canvas element; 0 before the first measurement. */
+  canvasWidth: number;
+  /** A deep-linked arrow: the view zooms onto its two skills and the arrow is drawn highlighted. */
+  focusEdge: { from: string; to: string } | null;
+  onEdgeInteraction: (i: EdgeInteraction) => void;
+  onPaneClick: () => void;
+};
+
+function SkillGraphInner({ skills, evidence, prereqs, skillStatus, levels, highlight, onSelectSkill, selectedSkill, canvasWidth, focusEdge, onEdgeInteraction, onPaneClick }: InnerProps) {
+  const { fitView } = useReactFlow();
+
+  // Focus = every skill the path touches plus everything it builds on (over path-driving edges).
+  const focusIds = useMemo(() => {
+    const seed = skills.filter((s) => (skillStatus[s.id] ?? "unrelated") !== "unrelated").map((s) => s.id);
+    if (seed.length === 0) return null;
+    const out = new Set<string>();
+    const stack = [...seed];
+    while (stack.length) {
+      const id = stack.pop()!;
+      if (out.has(id)) continue;
+      out.add(id);
+      for (const p of prereqs.get(id) ?? []) stack.push(p);
+    }
+    return out;
+  }, [skills, prereqs, skillStatus]);
+
+  const laid = useMemo(() => computeLayout(skills, prereqs, focusIds, canvasWidth || 1900), [skills, prereqs, focusIds, canvasWidth]);
+
+  const edgeByKey = useMemo(() => new Map(evidence.edges.map((e) => [`${e.from}->${e.to}`, e])), [evidence]);
+
+  const highlightSet = useMemo(() => {
+    const ids = new Set<string>();
+    const edgeKeys = new Set<string>();
+    for (const g of highlight?.evidence.gapSkillsCovered ?? []) {
+      g.graphPath.forEach((id, i) => {
+        ids.add(id);
+        if (i > 0) edgeKeys.add(`${g.graphPath[i - 1]}->${id}`);
+      });
+    }
+    return { ids, edgeKeys };
+  }, [highlight]);
+
+  const build = useCallback(() => {
+    const dim = highlightSet.ids.size > 0;
+    const visible = skills.filter((s) => laid.has(s.id));
+    const ids = new Set(visible.map((s) => s.id));
+    const nodes: Node<SkillNodeData>[] = visible.map((s) => ({
+      id: s.id,
+      type: "skill",
+      position: laid.get(s.id)!,
+      data: {
+        label: s.name,
+        status: skillStatus[s.id] ?? "unrelated",
+        highlighted: highlightSet.ids.has(s.id),
+        dimmed: dim && !highlightSet.ids.has(s.id),
+        level: levels[s.id] ?? 0,
+      },
+    }));
+    // Only the path-driving (authored ∪ promoted) arrows are drawn, every one in the same stroke:
+    // the evidence behind an arrow is one click away, never a line style. Mined candidates are
+    // listed in the selected skill's card, not drawn.
+    const shown = evidence.edges.filter((e) => e.drivesPath && ids.has(e.from) && ids.has(e.to));
+    const edges: Edge[] = shown.map((e) => {
+      const key = `${e.from}->${e.to}`;
+      const on = highlightSet.edgeKeys.has(key) || (focusEdge !== null && e.from === focusEdge.from && e.to === focusEdge.to);
+      const selectedEnd = selectedSkill !== null && (e.from === selectedSkill || e.to === selectedSkill);
+      return {
+        id: key,
+        source: e.from,
+        target: e.to,
+        animated: on,
+        interactionWidth: 30,
+        className: cn(styles.edge, on && styles.edgeOn, dim && !on && styles.edgeDim, selectedEnd && styles.edgeNear),
+        markerEnd: { type: MarkerType.ArrowClosed, color: on ? "#a78bfa" : EDGE_MARKER, width: 14, height: 14 },
+        data: { key },
+      };
+    });
+    return { nodes: nodes as Node[], edges };
+  }, [skills, evidence, laid, skillStatus, highlightSet, levels, selectedSkill, focusEdge]);
+
+  const interact = useCallback(
+    (kind: EdgeInteraction["kind"]) => (event: React.MouseEvent, edge: Edge) => {
+      const ge = edgeByKey.get(edge.id);
+      if (ge) onEdgeInteraction({ kind, edge: ge, clientX: event.clientX, clientY: event.clientY });
+    },
+    [edgeByKey, onEdgeInteraction],
+  );
+
+  const initial = useMemo(() => build(), [build]);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
+
+  useEffect(() => {
+    const next = build();
+    setNodes(next.nodes);
+    setEdges(next.edges);
+  }, [build, setNodes, setEdges]);
+
+  // Refit only when the laid-out graph, the traced item or the deep-linked arrow changes — never on a
+  // selection, hover or zoom. A deep link zooms onto the arrow's two skills.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (focusEdge && laid.has(focusEdge.from) && laid.has(focusEdge.to)) {
+        fitView({ nodes: [{ id: focusEdge.from }, { id: focusEdge.to }], duration: 600, padding: 0.12, maxZoom: 1.6 });
+      } else if (highlightSet.ids.size > 0) fitView({ nodes: [...highlightSet.ids].map((id) => ({ id })), duration: 600, padding: 0.5 });
+      else fitView({ duration: 500, padding: 0.08, minZoom: 0.7 });
+    }, 50);
+    return () => clearTimeout(t);
+  }, [laid, highlightSet, focusEdge, fitView]);
+
+  return (
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      nodeTypes={nodeTypes}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onNodeClick={(_, node) => node.type === "skill" && onSelectSkill?.(node.id)}
+      onEdgeMouseEnter={interact("enter")}
+      onEdgeMouseLeave={interact("leave")}
+      onEdgeClick={interact("click")}
+      onPaneClick={onPaneClick}
+      fitView
+      minZoom={0.1}
+      maxZoom={2}
+      nodesConnectable={false}
+      proOptions={{ hideAttribution: true }}
+      className={styles.flow}
+    >
+      <Background variant={BackgroundVariant.Dots} gap={26} size={1.2} color="rgba(255,255,255,0.09)" />
+      <Controls showInteractive={false} className={styles.controls} />
+    </ReactFlow>
+  );
+}
+
+type PopoverState = { edge: GraphEdge; x: number; y: number; canvasWidth: number; canvasHeight: number; pinned: boolean; details: boolean };
+
+/**
+ * Skill-graph explorer (§7 renderings 1 and 3): the learner's own subgraph, gap colouring,
+ * click-to-highlight evidence paths, one arrow style for every prerequisite, and a click card
+ * per arrow that opens to the full provenance.
+ */
+export function SkillGraph({ skills, evidence, skillStatus, levels, highlight, onClearHighlight, onSelectSkill, initialEdge }: Props) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [popover, setPopover] = useState<PopoverState | null>(null);
+  // The deep-linked arrow stays highlighted until the visitor clicks the pane or picks a skill.
+  const [focusLink, setFocusLink] = useState<{ from: string; to: string } | null>(initialEdge ?? null);
+  const [canvasWidth, setCanvasWidth] = useState(0);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const leaveTimer = useRef<number | null>(null);
+  // Memoised: a fresh map each render would relayout and refit the view on every hover or zoom click.
+  const prereqs = useMemo(() => prereqMap(evidence.edges), [evidence]);
+  // Measured so the layout can fold its ranks to the canvas instead of a fixed width.
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setCanvasWidth(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const skill = selected ? skills.find((s) => s.id === selected) : null;
+  const status = skill ? (skillStatus[skill.id] ?? "unrelated") : null;
+  const counts: Record<SkillStatus, number> = { acquired: 0, "in-progress": 0, gap: 0, unrelated: 0 };
+  for (const s of skills) counts[skillStatus[s.id] ?? "unrelated"]++;
+  const nameOf = (id: string) => skills.find((s) => s.id === id)?.name ?? id;
+
+  const candidatesOfSelected = useMemo(
+    () => (selected ? evidence.edges.filter((e) => !e.drivesPath && (e.from === selected || e.to === selected)) : []),
+    [evidence, selected],
+  );
+
+  const clearLeaveTimer = useCallback(() => {
+    if (leaveTimer.current !== null) window.clearTimeout(leaveTimer.current);
+    leaveTimer.current = null;
+  }, []);
+  const onEdgeInteraction = useCallback(
+    (i: EdgeInteraction) => {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      const place = rect
+        ? { x: i.clientX - rect.left, y: i.clientY - rect.top, canvasWidth: rect.width, canvasHeight: rect.height }
+        : { x: i.clientX, y: i.clientY, canvasWidth: 0, canvasHeight: 0 };
+      if (i.kind === "click") {
+        clearLeaveTimer();
+        setPopover((cur) => (cur?.pinned && cur.edge === i.edge ? null : { edge: i.edge, ...place, pinned: true, details: false }));
+        return;
+      }
+      if (i.kind === "enter") {
+        clearLeaveTimer();
+        setPopover((cur) => (cur?.pinned ? cur : { edge: i.edge, ...place, pinned: false, details: false }));
+        return;
+      }
+      // leave: give the pointer a moment to reach the popover itself.
+      clearLeaveTimer();
+      leaveTimer.current = window.setTimeout(() => setPopover((cur) => (cur?.pinned ? cur : null)), 160);
+    },
+    [clearLeaveTimer],
+  );
+  const closePopover = useCallback(() => {
+    clearLeaveTimer();
+    setPopover(null);
+  }, [clearLeaveTimer]);
+  // Deep link: pin the requested arrow's card with its details open, centred on the canvas.
+  useEffect(() => {
+    if (!initialEdge) return;
+    const edge = evidence.edges.find((e) => e.drivesPath && e.from === initialEdge.from && e.to === initialEdge.to);
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!edge || !rect) return;
+    setPopover({ edge, x: rect.width * 0.5, y: rect.height * 0.3, canvasWidth: rect.width, canvasHeight: rect.height, pinned: true, details: true });
+  }, [initialEdge, evidence]);
+  // Escape closes whatever is open: the pinned card first, then the selected skill.
+  useEffect(() => {
+    if (!popover?.pinned && !selected) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (popover?.pinned) closePopover();
+      else setSelected(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [popover?.pinned, selected, closePopover]);
+
+  return (
+    <div className={styles.wrap}>
+      <ul className={styles.legend} data-testid="graph-legend" aria-label="Legend">
+        {(Object.keys(STATUS_STYLE) as SkillStatus[]).map((k) => (
+          <li key={k} className={cn(styles.legendItem, styles[`legend_${STATUS_STYLE[k].badge}`])}>
+            <span className={styles.legendDot} aria-hidden />
+            {STATUS_STYLE[k].label}
+            <span className={styles.legendCount}>{counts[k]}</span>
+          </li>
+        ))}
+      </ul>
+
+      {highlight && (
+        <p className={styles.trace} data-testid="graph-highlight">
+          <span className="label-caps">Tracing</span>
+          <strong>{highlight.title}</strong>
+          <span className={styles.traceChain}>
+            {highlight.evidence.gapSkillsCovered
+              .map((g) => g.graphPath.map((id) => skills.find((s) => s.id === id)?.name ?? id).join(" → "))
+              .join(" · ")}
+          </span>
+          {onClearHighlight && (
+            <button type="button" className={styles.traceClear} onClick={onClearHighlight} aria-label="Stop tracing">
+              <X />
+            </button>
+          )}
+        </p>
+      )}
+
+      <div className={styles.canvas} data-testid="skill-graph" ref={canvasRef}>
+
+        <ReactFlowProvider>
+          <SkillGraphInner
+            skills={skills}
+            evidence={evidence}
+            skillStatus={skillStatus}
+            levels={levels}
+            highlight={highlight}
+            prereqs={prereqs}
+            selectedSkill={selected}
+            canvasWidth={canvasWidth}
+            focusEdge={focusLink}
+            onEdgeInteraction={onEdgeInteraction}
+            onPaneClick={() => {
+              closePopover();
+              setSelected(null);
+              setFocusLink(null);
+            }}
+            onSelectSkill={(id) => {
+              setSelected(id);
+              closePopover();
+              setFocusLink(null);
+              onSelectSkill?.(id);
+            }}
+          />
+        </ReactFlowProvider>
+
+        {popover && (
+          <EdgeCard
+            key={`${popover.edge.from}->${popover.edge.to}:${popover.pinned ? "pinned" : "hover"}`}
+            defaultOpen={popover.details}
+            edge={popover.edge}
+            evidence={evidence}
+            nameOf={nameOf}
+            x={popover.x}
+            y={popover.y}
+            pinned={popover.pinned}
+            canvasWidth={popover.canvasWidth}
+            canvasHeight={popover.canvasHeight}
+            onMouseEnter={clearLeaveTimer}
+            onMouseLeave={() => {
+              if (!popover.pinned) closePopover();
+            }}
+            onClose={closePopover}
+          />
+        )}
+
+        {skill && status && (
+          <div className={styles.detail} data-testid="graph-selected" role="dialog" aria-label={`${skill.name}: details`}>
+            <div className={styles.detailHead}>
+              <Badge variant={STATUS_STYLE[status].badge} dot>
+                {STATUS_STYLE[status].label}
+              </Badge>
+              <span className={styles.detailDomain}>{domainLabel(skill.domain)}</span>
+              <button type="button" className={styles.detailClose} onClick={() => setSelected(null)} aria-label="Close" data-testid="graph-selected-close">
+                <X />
+              </button>
+            </div>
+            <strong className={styles.detailTitle}>{skill.name}</strong>
+            <p className={styles.detailMeta}>
+              {levels[skill.id] ? `Your level ${levels[skill.id]} of 3` : "No level recorded"}
+              {(prereqs.get(skill.id) ?? []).length > 0 && <> · builds on {(prereqs.get(skill.id) ?? []).map(nameOf).join(", ")}</>}
+            </p>
+            <CandidateList candidates={candidatesOfSelected} skillId={skill.id} evidence={evidence} nameOf={nameOf} />
+            <BranchOverlay
+              skillId={skill.id}
+              evidence={evidence}
+              nameOf={nameOf}
+              onSelectSkill={(id) => {
+                setSelected(id);
+                closePopover();
+                onSelectSkill?.(id);
+              }}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

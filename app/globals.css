@@ -1,0 +1,417 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design tokens. Dark-only, high-contrast: near-black ink, white text, white
+ * primary actions, violet used as light (glows, gradients, progress) rather
+ * than as a fill; Inter throughout with tight negative tracking at display
+ * sizes. The landing footer alone uses the aurora group. Everything below
+ * is referenced by utility name (bg-brand, text-ink-2, rounded-card, ...);
+ * component styles should never restate raw values.
+ */
+@theme {
+  /* --- palette: black & white with a violet light -------------------- */
+  --color-ink: #050506;
+  --color-surface-1: #0c0c0e;
+  --color-surface-2: #131316;
+  --color-surface-3: #1a1a1e;
+  --color-glass: rgb(255 255 255 / 3.5%);
+  --color-glass-strong: rgb(255 255 255 / 7%);
+  --color-line: rgb(255 255 255 / 11%);
+  --color-line-strong: rgb(255 255 255 / 23%);
+
+  --color-ink-1: #f5f5f7;
+  --color-ink-2: rgb(255 255 255 / 60%);
+  --color-ink-3: rgb(255 255 255 / 46%); /* ≥4.5:1 on every surface for 10–13px text */
+  --color-ink-4: rgb(255 255 255 / 24%);
+
+  --color-brand: #f5f5f7;
+  --color-brand-foreground: #090909;
+  --color-brand-soft: rgb(255 255 255 / 8%);
+  --color-brand-line: rgb(255 255 255 / 30%);
+  --color-brand-glow: rgb(255 255 255 / 13%);
+
+  --color-violet: #a78bfa;
+  --color-violet-2: #7565ff;
+  --color-violet-soft: rgb(167 139 250 / 12%);
+  --color-violet-line: rgb(167 139 250 / 40%);
+  --color-violet-glow: rgb(167 139 250 / 70%);
+  --color-violet-haze: rgb(135 101 255 / 7%);
+
+  --color-coral: #ff6b6b;
+  --color-coral-soft: rgb(255 107 107 / 10%);
+  --color-coral-line: rgb(255 107 107 / 40%);
+
+  /* semantic: skill-graph statuses (dashboard.ts skillStatus) */
+  --color-status-acquired: var(--color-ink-1);
+  --color-status-acquired-soft: rgb(255 255 255 / 9%);
+  --color-status-acquired-line: rgb(255 255 255 / 45%);
+  --color-status-progress: var(--color-violet);
+  --color-status-progress-soft: var(--color-violet-soft);
+  --color-status-progress-line: var(--color-violet-line);
+  --color-status-gap: var(--color-coral);
+  --color-status-gap-soft: var(--color-coral-soft);
+  --color-status-gap-line: var(--color-coral-line);
+  --color-status-unrelated: var(--color-ink-3);
+  --color-status-unrelated-soft: rgb(255 255 255 / 3%);
+  --color-status-unrelated-line: var(--color-line);
+
+  /* semantic: skill-graph edge tiers (learner evidence, §9.3); amber marks a link under human review */
+  --color-evidence-review: #f2b544;
+  --color-evidence-review-soft: rgb(242 181 68 / 12%);
+  --color-evidence-review-line: rgb(242 181 68 / 45%);
+
+  /* semantic: dashboard marks (validated on surface-1: L band, ≥3:1, ΔE vs the gray ≥ 21) */
+  --color-viz: #8f7cff;
+  --color-viz-soft: rgb(143 124 255 / 22%);
+  --color-viz-muted: #6b6b70;
+  --color-viz-track: rgb(255 255 255 / 8%);
+
+  /* semantic: path-diff banner */
+  --color-diff: var(--color-violet);
+  --color-diff-soft: rgb(167 139 250 / 9%);
+  --color-diff-line: rgb(167 139 250 / 50%);
+  --color-diff-halo: rgb(167 139 250 / 10%);
+
+  /* footer: aurora (used only by the landing footer, per reference) */
+  --color-aurora-ink: #07050d;
+  --color-aurora-text: #f6f5f8;
+  --color-aurora-text-2: rgb(206 204 215 / 74%);
+  --color-aurora-text-3: rgb(210 207 218 / 64%);
+  --color-aurora-sky: #87ccff;
+  --color-aurora-sky-2: rgb(142 196 255 / 92%);
+  --color-aurora-indigo: rgb(72 59 255 / 50%);
+  --color-aurora-magenta: rgb(213 57 157 / 46%);
+  --color-aurora-red: rgb(218 55 45 / 57%);
+  --color-aurora-blue: rgb(39 84 224 / 20%);
+  --color-aurora-pink: rgb(255 62 119 / 19%);
+  --color-aurora-light: rgb(147 91 255 / 11%);
+
+  /* --- shadcn semantic aliases (kept so registry components drop in) --- */
+  --color-background: var(--color-ink);
+  --color-foreground: var(--color-ink-1);
+  --color-card: var(--color-surface-1);
+  --color-card-foreground: var(--color-ink-1);
+  --color-popover: var(--color-surface-2);
+  --color-popover-foreground: var(--color-ink-1);
+  --color-primary: var(--color-brand);
+  --color-primary-foreground: var(--color-brand-foreground);
+  --color-secondary: var(--color-surface-2);
+  --color-secondary-foreground: var(--color-ink-1);
+  --color-muted: var(--color-surface-2);
+  --color-muted-foreground: var(--color-ink-2);
+  --color-accent: var(--color-glass-strong);
+  --color-accent-foreground: var(--color-ink-1);
+  --color-destructive: var(--color-coral);
+  --color-destructive-foreground: var(--color-ink-1);
+  --color-border: var(--color-line);
+  --color-input: var(--color-glass);
+  --color-ring: var(--color-brand);
+  --color-chart-1: var(--color-violet);
+  --color-chart-2: var(--color-ink-1);
+  --color-chart-3: var(--color-coral);
+  --color-chart-4: var(--color-ink-2);
+  --color-chart-5: var(--color-ink-4);
+  --color-sidebar: var(--color-surface-1);
+  --color-sidebar-foreground: var(--color-ink-1);
+  --color-sidebar-primary: var(--color-brand);
+  --color-sidebar-primary-foreground: var(--color-brand-foreground);
+  --color-sidebar-accent: var(--color-glass-strong);
+  --color-sidebar-accent-foreground: var(--color-ink-1);
+  --color-sidebar-border: var(--color-line);
+  --color-sidebar-ring: var(--color-brand);
+
+  /* --- type ---------------------------------------------------------- */
+  --font-display: var(--font-inter), "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: var(--font-inter), "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  --font-heading: var(--font-display);
+
+  --text-label: 0.625rem; /* 10px tracked uppercase */
+  --text-label--line-height: 1;
+  --text-label--letter-spacing: 0.17em;
+  --text-label--font-weight: 650;
+  --text-body: 0.9375rem; /* 15px */
+  --text-body--line-height: 1.6;
+  --text-lead: 1.0625rem; /* 17px */
+  --text-lead--line-height: 1.6;
+  --text-display-sm: clamp(2rem, 3.25vw, 3.625rem); /* footer heading scale */
+  --text-display-sm--line-height: 1.06;
+  --text-display-sm--letter-spacing: -0.047em;
+  --text-display-sm--font-weight: 420;
+  --text-display: clamp(3.625rem, min(7vw, 13vh), 6.75rem); /* hero h1 scale */
+  --text-display--line-height: 0.88;
+  --text-display--letter-spacing: -0.075em;
+  --text-display--font-weight: 590;
+  --text-wordmark: clamp(5.375rem, 13.4vw, 12.8125rem);
+  --text-wordmark--line-height: 0.72;
+  --text-wordmark--letter-spacing: -0.087em;
+  --text-wordmark--font-weight: 540;
+
+  /* --- shape --------------------------------------------------------- */
+  --radius-chip: 6px;
+  --radius-card: 12px;
+  --radius-panel: 16px;
+  --radius-float: 16px;
+  --radius-pill: 999px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-4xl: 28px;
+
+  --shadow-float: 0 18px 45px rgb(0 0 0 / 35%);
+  --shadow-lift: 0 60px 120px -40px rgb(0 0 0 / 80%);
+  --shadow-brand: 0 12px 30px var(--color-brand-glow);
+  --shadow-brand-hover: 0 18px 38px rgb(255 255 255 / 19%);
+  --shadow-glow-dot: 0 0 10px var(--color-violet), 0 0 20px var(--color-violet-glow);
+  --shadow-inset-top: inset 0 1px 0 rgb(255 255 255 / 8%);
+
+  /* --- motion -------------------------------------------------------- */
+  --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-glow-dot: glow-dot 2.4s ease-in-out infinite;
+  --animate-spark: spark 2.6s ease-in-out infinite;
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-spin-loader: spin 0.8s linear infinite;
+
+  @keyframes spark {
+    0%,
+    100% {
+      opacity: 0.66;
+      transform: scale(0.88) rotate(0deg);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.12) rotate(20deg);
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+  @keyframes glow-dot {
+    0%,
+    100% {
+      box-shadow: 0 0 8px var(--color-violet), 0 0 18px var(--color-violet-glow);
+    }
+    50% {
+      box-shadow: 0 0 12px var(--color-violet), 0 0 30px var(--color-violet-glow);
+    }
+  }
+}
+
+:root {
+  color-scheme: dark;
+  /* durations are plain vars: Tailwind has no duration namespace */
+  --dur-fast: 220ms;
+  --dur-base: 450ms;
+  --dur-slow: 800ms;
+  --dur-reveal: 1000ms;
+  --radius: 0.625rem;
+  /* legacy shadcn var names, aliased so pre-existing utilities keep working */
+  --background: var(--color-ink);
+  --foreground: var(--color-ink-1);
+  --card: var(--color-surface-1);
+  --card-foreground: var(--color-ink-1);
+  --popover: var(--color-surface-2);
+  --popover-foreground: var(--color-ink-1);
+  --primary: var(--color-brand);
+  --primary-foreground: var(--color-brand-foreground);
+  --secondary: var(--color-surface-2);
+  --secondary-foreground: var(--color-ink-1);
+  --muted: var(--color-surface-2);
+  --muted-foreground: var(--color-ink-2);
+  --accent: var(--color-glass-strong);
+  --accent-foreground: var(--color-ink-1);
+  --destructive: var(--color-coral);
+  --border: var(--color-line);
+  --input: var(--color-glass);
+  --ring: var(--color-brand);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans bg-ink text-ink-1 antialiased;
+    font-size: 16px;
+  }
+  body {
+    @apply bg-ink text-ink-1 text-body;
+    font-optical-sizing: auto;
+  }
+  ::selection {
+    background: var(--color-brand);
+    color: var(--color-brand-foreground);
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility label-caps {
+  font-size: var(--text-label);
+  line-height: 1;
+  letter-spacing: 0.17em;
+  font-weight: 650;
+  text-transform: uppercase;
+}
+
+@utility glass {
+  background: var(--color-glass);
+  border: 1px solid var(--color-line);
+  backdrop-filter: blur(14px);
+}
+
+@utility bg-cursor-light {
+  /* 500px radial that follows the cursor on the hero (reference pattern) */
+  background: radial-gradient(
+    circle,
+    rgb(255 255 255 / 12%),
+    var(--color-violet-haze) 30%,
+    transparent 70%
+  );
+  filter: blur(16px);
+  mix-blend-mode: screen;
+  opacity: 0.65;
+}
+
+@utility text-gradient-violet {
+  color: transparent;
+  background: linear-gradient(135deg, #ffffff, #b8a5ff 48%, #7565ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+@utility bg-aurora {
+  background:
+    radial-gradient(43% 47% at 47% 94%, var(--color-aurora-indigo) 0%, rgb(79 43 216 / 25%) 40%, transparent 77%),
+    radial-gradient(27% 41% at 67% 83%, var(--color-aurora-magenta) 0%, rgb(148 39 135 / 24%) 45%, transparent 78%),
+    radial-gradient(24% 42% at 36% 99%, var(--color-aurora-red) 0%, rgb(137 22 45 / 26%) 45%, transparent 78%);
+  filter: blur(20px);
+  mix-blend-mode: screen;
+}
+
+@utility bg-aurora-2 {
+  background:
+    radial-gradient(34% 37% at 38% 62%, var(--color-aurora-blue), transparent 73%),
+    radial-gradient(28% 34% at 75% 77%, var(--color-aurora-pink), transparent 72%),
+    linear-gradient(180deg, rgb(6 5 13 / 25%) 0%, rgb(6 5 13 / 10%) 48%, rgb(13 5 23 / 30%) 100%);
+}
+
+@utility bg-vignette {
+  background:
+    linear-gradient(180deg, rgb(5 3 11 / 38%) 0%, rgb(5 3 11 / 16%) 50%, rgb(5 3 11 / 12%) 100%),
+    radial-gradient(ellipse at center, transparent 35%, rgb(3 2 8 / 36%) 100%);
+}
+
+@utility bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.85'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+}
+
+/*
+ * .ring-orbit — a violet light that circulates around a control's edge so a
+ * first-time visitor cannot miss it. A pseudo-element sits behind the label
+ * (z-index -1, inside an explicit stacking context so it still paints over the
+ * button's own background), carries a conic gradient that is transparent for
+ * most of the sweep and violet for one short arc, and is masked down to a 2px
+ * band hugging the border by the padding + content-box-exclude mask pair. The
+ * sweep is driven by the registered --ring-angle; where @property is not
+ * supported the property falls back to the 0deg declared on the rule and the
+ * keyframes flip 0deg -> 360deg discretely, which renders identically, so the
+ * ring is simply static instead of animated. Radius is inherited, so the ring
+ * follows whatever shape the host control already has.
+ */
+@property --ring-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes ring-orbit-sweep {
+  from {
+    --ring-angle: 0deg;
+  }
+  to {
+    --ring-angle: 360deg;
+  }
+}
+
+.ring-orbit {
+  position: relative;
+  isolation: isolate;
+}
+
+.ring-orbit::before {
+  --ring-angle: 0deg;
+
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--ring-angle),
+    transparent 0%,
+    transparent 74%,
+    var(--color-violet-2) 88%,
+    var(--color-violet) 97%,
+    var(--color-violet) 99%,
+    transparent 100%
+  );
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: ring-orbit-sweep 3s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No sweep: hold a soft, even violet edge so the control is still marked. */
+  .ring-orbit::before {
+    background: conic-gradient(
+      from 0deg,
+      var(--color-violet-2),
+      var(--color-violet) 50%,
+      var(--color-violet-2)
+    );
+    opacity: 0.5;
+    animation: none;
+  }
+}

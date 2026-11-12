@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=75.8.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nse-copilot-ml"
+version = "0.1.0"
+description = "NSE Copilot ML service — data, features, purged walk-forward evaluation, calibrated direction model. No LLM dependency (see BUILD_SPEC.md §4.1)."
+requires-python = "==3.12.*"
+license = { text = "MIT" }
+
+# Every version is pinned exactly. A floating range here would let a judge's
+# `pip install` resolve a different numpy/sklearn than the one the committed
+# artifacts were produced with, and unpickling would break.
+dependencies = [
+  "numpy==2.2.3",
+  "pandas==2.2.3",
+  "pyarrow==19.0.1",
+  "scikit-learn==1.6.1",
+  "lightgbm==4.6.0",
+  "scipy==1.15.2",
+  "yfinance==0.2.54",
+  "fastapi==0.115.11",
+  "uvicorn==0.34.0",
+  "pydantic==2.10.6",
+  "joblib==1.4.2",
+  "python-dateutil==2.9.0.post0",
+]
+
+[project.optional-dependencies]
+# FinBERT is a separate extra: torch is ~2.5GB and nothing in the request path
+# needs it. `make data` runs with or without it (news_available=0 without).
+sentiment = [
+  "transformers==4.49.0",
+  "torch==2.6.0",
+]
+dev = [
+  "pytest==8.3.5",
+  "httpx==0.28.1",
+  "ruff==0.9.9",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

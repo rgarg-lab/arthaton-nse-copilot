@@ -1,0 +1,47 @@
+{
+  "suite": "placeholder",
+  "cases": [
+    {
+      "id": "answers-at-all",
+      "input": "What can you do?",
+      "expected": ".+",
+      "scorer": "regex",
+      "notes": "The floor: the agent must produce a non-empty answer with no keys configured."
+    },
+    {
+      "id": "uses-a-tool",
+      "input": "Do you know my preferences?",
+      "expected": "search_memory",
+      "scorer": "contains",
+      "notes": "The agent should consult memory rather than claiming not to know."
+    },
+    {
+      "id": "arithmetic-in-code",
+      "input": "What is 18% of 2,450?",
+      "expected": "calculate",
+      "scorer": "contains",
+      "notes": "Numbers must be routed through the calculate tool, not done in the model's head."
+    },
+    {
+      "id": "verifies-before-asserting",
+      "input": "Summarise what you know and tell me how sure you are.",
+      "expected": "verify",
+      "scorer": "contains",
+      "notes": "Extract then verify: a claim should be checked before it is presented."
+    },
+    {
+      "id": "declares-mock-mode",
+      "input": "Is this a real model answer?",
+      "expected": "mock",
+      "scorer": "contains",
+      "notes": "Honesty check. With no keys the answer must say it is not a real model call."
+    },
+    {
+      "id": "remembers-on-request",
+      "input": "Remember that I prefer short answers.",
+      "expected": ".+",
+      "scorer": "regex",
+      "notes": "Replace with a save_memory assertion once the idea's memory types are settled."
+    }
+  ]
+}

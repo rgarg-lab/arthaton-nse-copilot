@@ -1,0 +1,44 @@
+{
+  "label": "Placeholder demo",
+  "sessionTitle": "Placeholder session",
+  "memory": [
+    {
+      "type": "preference",
+      "content": "Prefers short answers with the number first and the reasoning after.",
+      "source": "seed",
+      "metadata": { "confidence": 1 }
+    },
+    {
+      "type": "fact",
+      "content": "Works in Asia/Kolkata; a working week runs Monday to Friday.",
+      "source": "seed",
+      "metadata": { "confidence": 1 }
+    },
+    {
+      "type": "note",
+      "content": "This is placeholder memory shipped with the template. Replace seed/placeholder.json at kickoff.",
+      "source": "seed",
+      "metadata": {}
+    }
+  ],
+  "documents": [
+    {
+      "title": "Template notes",
+      "kind": "paste",
+      "sourceRef": null,
+      "chunks": [
+        "The agent loop exposes only the tools named in idea.config.ts under agent.enabledTools.",
+        "Every external action becomes a pending_actions row and waits for a human to approve it.",
+        "Dates, money and comparisons are computed by the calculate tool in code, never by the model."
+      ]
+    }
+  ],
+  "outbox": [
+    {
+      "connector": "mock",
+      "kind": "send_message",
+      "body": "Placeholder delivered message, so the outbox is not empty on first run.",
+      "status": "delivered"
+    }
+  ]
+}

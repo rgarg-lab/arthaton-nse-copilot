@@ -1,0 +1,372 @@
+/*
+  The hero's bot preview. Replaces the rotating-rings stand-in that filled this column when
+  no 3D scene is configured.
+
+  Two constraints shaped it. It must not scroll the page sideways at 390px — the mobile
+  overflow assertion in the smoke suite is there because this column broke it once — so
+  every width is relative and the card is allowed to shrink. And it must stay transparent
+  enough that the aurora behind the hero still reads; the old `.loader` was opaque and
+  flattened it, which is half of why the column looked dead.
+*/
+
+.wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  pointer-events: none;
+}
+
+/* Desktop: occupy the right half, where the scene sat. */
+@media (min-width: 901px) {
+  .wrap {
+    left: 50%;
+    padding: 32px;
+  }
+}
+
+/* The violet bloom the card floats on, so it does not read as a flat rectangle pasted
+   over the aurora. */
+.glow {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  /* No `filter: blur()` here. A radial gradient is already soft, and blurring a region
+     this large forces an extra compositor pass on every aurora frame behind it. */
+  background: radial-gradient(circle at 50% 45%, var(--color-violet-haze), transparent 70%);
+}
+
+.card {
+  position: relative;
+  width: min(100%, 430px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid var(--color-line);
+  background: var(--color-glass-strong);
+  backdrop-filter: blur(18px);
+  box-shadow:
+    0 24px 60px -24px rgb(0 0 0 / 0.55),
+    0 0 0 1px rgb(255 255 255 / 0.03) inset;
+}
+
+/* ── header ───────────────────────────────────────────────────────────────── */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 14px;
+  color: var(--color-violet);
+  border: 1px solid var(--color-violet-line);
+  background: var(--color-violet-soft);
+  transition: box-shadow 0.4s ease;
+}
+
+.avatarBusy {
+  box-shadow: 0 0 0 4px var(--color-violet-haze);
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.identity strong {
+  font-size: 0.95rem;
+  color: var(--color-foreground);
+}
+
+.identity small {
+  font-size: 0.72rem;
+  color: var(--color-muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex: none;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--color-line);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground);
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-status-acquired);
+  box-shadow: 0 0 8px var(--color-status-acquired);
+  animation: botPulse 2.4s ease-in-out infinite;
+}
+
+/* ── thread ───────────────────────────────────────────────────────────────── */
+
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid var(--color-line);
+  padding-top: 14px;
+}
+
+/* Every row animates in the same way, so `.in` is the only state the component sets. */
+.row {
+  display: flex;
+  gap: 9px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+.row.in {
+  opacity: 1;
+  transform: none;
+}
+
+.rowUser {
+  justify-content: flex-end;
+}
+
+.botMark {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  margin-top: 2px;
+  border-radius: 9px;
+  color: var(--color-violet);
+  background: var(--color-violet-soft);
+}
+
+.replyCol {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  flex: 1;
+}
+
+.bubble {
+  margin: 0;
+  padding: 9px 13px;
+  border-radius: 14px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  /* Long words in a swapped-in idea must break rather than widen the card. */
+  overflow-wrap: anywhere;
+}
+
+.bubbleUser {
+  max-width: 85%;
+  color: var(--color-foreground);
+  border: 1px solid var(--color-line);
+  background: var(--color-glass);
+  border-bottom-right-radius: 5px;
+}
+
+.bubbleBot {
+  color: var(--color-foreground);
+  border: 1px solid var(--color-violet-line);
+  background: var(--color-violet-soft);
+  border-top-left-radius: 5px;
+}
+
+/* ── tool chips ───────────────────────────────────────────────────────────── */
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-line);
+  background: var(--color-glass);
+  font-size: 0.68rem;
+  color: var(--color-muted-foreground);
+  opacity: 0;
+  transform: translateY(4px) scale(0.96);
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+.tool.in {
+  opacity: 1;
+  transform: none;
+}
+
+.tool code {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  color: var(--color-foreground);
+}
+
+.toolIcon {
+  width: 11px;
+  height: 11px;
+  color: var(--color-violet);
+}
+
+/* ── typing, caret, note ──────────────────────────────────────────────────── */
+
+.typingBubble {
+  width: fit-content;
+  padding: 11px 14px;
+}
+
+.dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.dots i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-violet);
+  animation: botBounce 1.3s ease-in-out infinite;
+}
+
+.dots i:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.dots i:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 0.95em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--color-violet);
+  animation: botBlink 1s steps(1) infinite;
+}
+
+.note {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--color-muted-foreground);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.note.in {
+  opacity: 1;
+}
+
+.noteIcon {
+  width: 12px;
+  height: 12px;
+  color: var(--color-status-acquired);
+}
+
+/* ── motion ───────────────────────────────────────────────────────────────── */
+
+@keyframes botPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes botBounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+@keyframes botBlink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* The component already renders its final frame when reduced motion is set; this covers
+   the CSS-only loops, which React never touches. */
+@media (prefers-reduced-motion: reduce) {
+  .statusDot,
+  .dots i,
+  .caret {
+    animation: none;
+  }
+
+  .row,
+  .tool,
+  .note {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Mobile: the hero stacks, so the card sits under the copy rather than beside it and is
+   given a little less padding to keep it off the edges at 390px. */
+@media (max-width: 900px) {
+  .card {
+    width: min(100%, 380px);
+    padding: 15px;
+    gap: 12px;
+  }
+
+  .glow {
+    inset: 14%;
+  }
+}

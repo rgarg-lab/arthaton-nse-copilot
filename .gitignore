@@ -1,0 +1,71 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# playwright (test-results/ is what the configured reporters write; playwright-report/
+# appears as soon as anyone runs the html reporter)
+/test-results/
+/playwright-report/
+
+# next.js
+/.next/
+/.next-e2e/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# server logs, when running detached (npm start > server-out.log)
+/server-*.log
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# embedded database (PGlite); delete the directory to start from a clean schema
+/.pglite/
+/.pglite-test/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+!.env.example
+
+# python ML service (ml/)
+ml/.venv/
+ml/build/
+ml/.ruff_cache/
+ml/.pytest_cache/
+ml/src/*.egg-info/
+__pycache__/
+*.py[cod]
+
+# yfinance / news disk cache — regenerable by `make -C ml data`.
+# ml/data/processed/panel.parquet and ml/artifacts/** ARE committed on purpose
+# (§6.1 / §4.3: a fresh clone must run without yfinance cooperating).
+ml/data/raw/
+
