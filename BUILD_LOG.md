@@ -430,3 +430,95 @@ overflow at 390px on four pages. Written to pass whether or not the ML service i
 "either real data or an honest error, never a fabricated figure" is the invariant worth
 asserting, and a test that required the service would be skipped in the configuration most
 likely to expose the bug. Decision: mine.
+
+**Acceptance check — step 7**
+
+| Check | Command | Result |
+|---|---|---|
+| `npm run demo-check` green with no API keys | `npm run demo-check` | ✅ preflight ready · eval 7/7 · Playwright 7/7 |
+| Rules block an unapproved action | `npx vitest run tests/rules.finance.test.ts` | ✅ 18 rule tests |
+| Disclaimer on every signal surface | `tests/honesty.test.ts` + Playwright | ✅ asserted on 5 components and 3 rendered pages |
+
+---
+
+## Step 8 — Ship-ready (local)
+
+**2026-11-12 — the fresh-clone check, which is what §9 caps Functionality on.** Cloned the
+committed tree into a temp directory and followed the README literally. Nothing untracked
+came along, and the clone had no `.env.local` — which is the configuration being claimed,
+so the migration printing "`.env.local` not found. Continuing without it." is the check
+passing, not a warning. Decision: spec.
+
+**2026-11-12 — `ml/tests/test_readme_numbers.py`.** The README is the other surface a judge
+reads and the one most likely to drift: written once by hand, from a model that then gets
+retrained. All 22 figures it quotes are now checked against `metrics.json`, along with the
+library credits (an explicit Arthaton rule), the limitations, an oversell check, and a test
+that *requires* the README to disclose the universe gap whenever the panel is short of 18.
+Decision: mine.
+
+**2026-11-12 — the visual pass found a documentation gap, via a banner doing its job.**
+After the authoritative eval the model card still showed "Not an authoritative
+measurement". The cause is correct behaviour — artifacts load once at startup and are never
+re-read on the request path (§4.3) — but neither `SETUP.md` nor `HUMAN_TASKS.md` said to
+restart the service after a refresh. Both now do, and point at `/health`'s `loaded_at`.
+Decision: mine.
+
+**Acceptance check — step 8**
+
+| Check | Command | Result |
+|---|---|---|
+| Fresh clone → 3 commands → running | `git clone` + `npm ci` + `pip install -e ./ml` + `npm run db:migrate` | ✅ pass |
+| …and the ML service serves real artifacts | `/health` in the clone | ✅ `status: ok`, 49,776 panel rows, `trains_on_request: false` |
+| …and its tests pass | `npm test` · `pytest ml` in the clone | ✅ 197/197 · 32 passed, 1 xfailed |
+| `npm run build` passes | — | ✅ 22 routes |
+| `npm run demo-check` green on mock | — | ✅ |
+| Demo script written | `DEMO_SCRIPT.md` | ✅ 3-minute script + 6 anticipated questions |
+
+---
+
+## Step 9 — Scoring rounds
+
+Scored against §2, then looped per §9.1: one change per round, from the whitelist, with
+`npm test`, `npm run build` and the fresh-clone check re-run after each.
+
+**Round 0 — initial score: 84/100.**
+
+| Criterion | Target | Scored | Why not full marks |
+|---|---|---|---|
+| Problem & Design | 17 | 17 | the risk-profile input (§7.1) has a schema and a table but no UI |
+| Functionality | 21 | 20 | three nav entries lead to generic template pages; three DB tables unused; 17 of 18 tickers |
+| AI/ML | 18 | 18 | — |
+| Innovation | 12 | 13 | all three cheap adds, plus the holdout ledger |
+| UX | 9 | 8 | crowded chart axis; no visible keyboard focus ring on the controls I added |
+| Code Quality | 8 | 8 | an orphaned component cluster left by the retirement |
+
+**Round 1 — Code Quality, "delete dead code".** An import audit found a cluster orphaned by
+the §7.1 retirement: `DashboardTab`, `BadgeMedal`, `Dashboard`, `AppShell`, `Rail`,
+`EmptyPath`, `WowSlot`, `NovaStage` and `nova/machine.ts` — nothing imported any of them.
+Deleted.
+
+I also deleted `profileCard.ts` and `ProfileCardView.tsx` and then **put them back**. They
+are unreachable (nothing emits a `ui_card` event), but removing them means editing
+`ChatPanel.tsx` in fifteen places — a live, demo-critical component — for a notional gain.
+§9.1 rule 3 is exactly about that trade, so the self-contained feature stays. Code Quality
+8 → 8 (the cluster was already discounted); no score change, a cleaner tree.
+
+**Round 2 — UX, "add keyboard focus states" and readability.** Two items from the same
+§9.1 line, done together and logged as such:
+- the coverage chart labelled all 21 of its half-point thresholds, producing a solid band
+  of text along the bottom. Now every third tick — the exact value of any point is in the
+  tooltip and the table view.
+- visible focus rings on the nav and on the evidence page's eighteen ticker links. A
+  `focus-visible:text-ink-1` alone moves text from 60% to 100% white, which is easy to lose
+  among eighteen near-identical pills.
+
+Also checked and **not** a defect: a circular element overlapping text at the bottom-left of
+every page. `document.elementFromPoint` identified it as `NEXTJS-PORTAL`, the dev-mode
+indicator. It does not exist in a production build, which is what Playwright runs against.
+UX 8 → 9.
+
+**Round 2 guards:** `npm run build` ✅ · `npm test` 197/197 ✅ · `npm run lint` 0 errors ✅
+
+**Final: 85/100.** Stopping per §9 — the score cleared the bar and the remaining gaps are
+named rather than fixable inside the whitelist (the 18th ticker is a Yahoo rate limit, and
+the risk-profile UI is new scope rather than an allowed move).

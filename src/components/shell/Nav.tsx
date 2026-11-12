@@ -39,6 +39,10 @@ export function Nav({ ideaName }: { ideaName: string }) {
                     aria-current={active ? "page" : undefined}
                     className={cn(
                       "inline-block rounded-pill px-2.5 py-1 text-[13px] whitespace-nowrap transition-colors",
+                      // A visible ring on keyboard focus. The nav is the first thing Tab
+                      // reaches on every page, and a hover-only affordance leaves a
+                      // keyboard user with no indication of where they are.
+                      "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-1",
                       active ? "bg-glass-strong text-ink-1" : "text-ink-3 hover:text-ink-1",
                     )}
                   >

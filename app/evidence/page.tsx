@@ -67,10 +67,19 @@ export default async function EvidencePage({
                   <Link
                     href={`/evidence?ticker=${encodeURIComponent(t)}&k=${k}`}
                     aria-current={active ? "page" : undefined}
+                    /**
+                     * A visible focus ring, not just a colour change. These eighteen
+                     * links are the only way to move between tickers, so tabbing through
+                     * them has to be legible — a `focus-visible:text-ink-1` alone moves
+                     * the text from 60% to 100% white, which is a change a keyboard user
+                     * can easily lose track of among eighteen near-identical pills.
+                     */
                     className={
-                      active
-                        ? "inline-block rounded-pill border border-line-strong bg-glass-strong px-2.5 py-1 font-mono text-[11.5px] text-ink-1"
-                        : "inline-block rounded-pill border border-line bg-glass px-2.5 py-1 font-mono text-[11.5px] text-ink-3 transition-colors hover:text-ink-1 focus-visible:text-ink-1"
+                      "inline-block rounded-pill px-2.5 py-1 font-mono text-[11.5px] transition-colors " +
+                      "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-1 " +
+                      (active
+                        ? "border border-line-strong bg-glass-strong text-ink-1"
+                        : "border border-line bg-glass text-ink-3 hover:text-ink-1 focus-visible:text-ink-1")
                     }
                   >
                     {bareTicker(t)}

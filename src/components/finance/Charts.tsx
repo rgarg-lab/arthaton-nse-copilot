@@ -349,6 +349,15 @@ export function CoveragePlot({
             tick={AXIS_TICK}
             tickFormatter={(v: number) => pct(v, 1)}
             stroke="rgb(255 255 255 / 11%)"
+            /**
+             * Every third tick. The threshold grid is 21 points half a percentage point
+             * apart, and labelling all of them produced a solid band of text along the
+             * bottom that was slower to read than no labels at all. Four or five anchors
+             * is what an axis is for; the exact value of any point is in the tooltip and
+             * in the table view.
+             */
+            interval={2}
+            minTickGap={16}
             label={{
               value: "conviction threshold",
               position: "insideBottom",
