@@ -522,3 +522,34 @@ UX 8 → 9.
 **Final: 85/100.** Stopping per §9 — the score cleared the bar and the remaining gaps are
 named rather than fixable inside the whitelist (the 18th ticker is a Yahoo rate limit, and
 the risk-profile UI is new scope rather than an allowed move).
+
+**Round 3 — a §4.1 inconsistency, not a score-chasing change.** The final audit found
+`.env.example` still advertising the template's multi-provider setup: `ANTHROPIC_API_KEY`,
+`GROQ_API_KEY`, `LLM_PRIMARY=claude-sonnet-5`, a four-model fallback chain, Voyage/OpenAI
+embeddings, a Tavily key, and `ML_ENDPOINT` documented as the generic `ml_predict` slot. A
+judge copying it to `.env.local` — the first instruction in the file — would have built a
+configuration this project forbids, and one directly contradicted by `SETUP.md` and
+`HUMAN_TASKS.md`.
+
+Rewritten: the six variables this build actually uses are listed up front, the forbidden
+ones are marked as forbidden with the reason, `ML_ENDPOINT` documents the real service and
+its unreachable-is-supported behaviour, and the `LLM_FALLBACKS` present-versus-absent trap
+is spelled out where someone editing the file will see it. Same class as the
+`fallbackModels()` fix in step 7: a correctness fix for a hard constraint, found by
+auditing rather than by a failing test. Guards: `npm test` 197/197 ✅ · `npm run build` ✅.
+
+### Submission checklist
+
+| | Status |
+|---|---|
+| Fresh `git clone` into a temp dir runs in three commands | ✅ verified twice, end to end |
+| Production build passes; deploy runbook complete | ✅ 22 routes · `HUMAN_TASKS.md` task 6 (two services, Neon, CORS) |
+| Every UI number traces to `ml/artifacts/*.json` | ✅ enforced by `tests/honesty.test.ts` |
+| `metrics.json` reports an honest headline against four baselines | ✅ 51.37% vs 48.91 / 48.54 / 48.58 / buy-and-hold |
+| Final holdout evaluated exactly once | ✅ 1 authoritative read; ledger committed; identical content hash to the smoke read |
+| Disclaimer on every signal surface; historical/paper-only stated | ✅ 5 components, 3 pages, every API payload |
+| README credits every library and AI API | ✅ asserted by `test_readme_credits_the_libraries` |
+| `npm run demo-check` green with no API keys | ✅ preflight ready · eval 7/7 · Playwright 7/7 |
+| Data refreshed to within two sessions | ✅ last session 2026-11-11, 1 behind — re-run on submission day (`HUMAN_TASKS.md` task 4) |
+| No fabricated metric, no hardcoded confidence, no dead button | ✅ — the footer's `#` "Source" placeholder was removed rather than left linking nowhere |
+| Full 18-ticker universe | ❌ **17 of 18** — Yahoo rate limit, documented in four places and carried as an xfail |
