@@ -231,7 +231,15 @@ project's own artifact would have contradicted. Decision: mine.
 | Four baselines present | — | ✅ always-up, prev-day sign, 3-feature logistic, buy-and-hold |
 | Artifacts committed and frozen | `git ls-files ml/artifacts` | ✅ 8 artifacts committed |
 | Headline ≤ 60% (§4.7) | — | ✅ 51.37% |
-| Holdout read once | `ml/artifacts/holdout_ledger.json` | ⚠ **0 authoritative, 1 smoke** — see step 9 |
+| Holdout read once | `ml/artifacts/holdout_ledger.json` | ✅ **1 authoritative**, 1 smoke — see below |
+
+**2026-11-12 — the authoritative holdout read, after the panel was final.** Deferred until
+the TATAMOTORS retry loop was abandoned, so that the one authoritative read would be against
+the panel that actually ships. The ledger now records two entries with an **identical
+holdout content hash** (`3d37877d64dfbb4b`), which is the evidence that matters: the smoke
+run and the authoritative run saw exactly the same rows, and nothing between them could have
+tuned anything. The numbers are byte-identical, which is the expected consequence of a fixed
+`random_state` and a frozen artifact. Decision: mine.
 
 ---
 

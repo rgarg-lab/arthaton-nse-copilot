@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-11-12T20:17:00",
+  "generated_at": "2026-11-12T23:09:50",
   "generated_by": "ml/src/copilot/evaluate.py \u2014 the only producer of model metrics",
-  "headline_authoritative": false,
-  "headline_note": "Smoke run (COPILOT_HOLDOUT_SMOKE=1): this file exists to prove the evaluation pipeline runs end to end. Do not quote its numbers as the headline.",
+  "headline_authoritative": true,
+  "headline_note": "Authoritative run against the final holdout. See evaluation_design.",
   "disclaimer": "Historical and paper-trading analysis only. Not investment advice. Past measured accuracy does not predict future results.",
   "provenance": {
     "note": "Every model-quality number rendered anywhere in the UI is read from this file. No statistic is written by hand in the application code (\u00a74.2).",
@@ -168,12 +168,12 @@
       "2026-11-09"
     ],
     "holdout_ledger": {
-      "total_reads": 1,
-      "authoritative_reads": 0,
+      "total_reads": 2,
+      "authoritative_reads": 1,
       "smoke_reads": 1,
       "this_read": {
-        "read_at": "2026-11-12T20:16:59",
-        "kind": "smoke",
+        "read_at": "2026-11-12T23:09:50",
+        "kind": "authoritative",
         "holdout_start": "2025-07-01",
         "holdout_rows": 5729,
         "holdout_last_session": "2026-11-09",

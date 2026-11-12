@@ -1,11 +1,20 @@
 {
   "what": "Append-only record of every evaluation against the final holdout window. Committed on purpose: it is what makes 'the holdout was read exactly once' auditable rather than merely asserted. A 'smoke' read was a run of the evaluation code itself (COPILOT_HOLDOUT_SMOKE=1), made against an already-frozen model and incapable of informing a hyperparameter or the abstention threshold. Only 'authoritative' reads produce a headline number.",
-  "authoritative_reads": 0,
+  "authoritative_reads": 1,
   "smoke_reads": 1,
   "reads": [
     {
       "read_at": "2026-11-12T20:16:59",
       "kind": "smoke",
+      "holdout_start": "2025-07-01",
+      "holdout_rows": 5729,
+      "holdout_last_session": "2026-11-09",
+      "holdout_content_hash": "3d37877d64dfbb4b",
+      "model_fingerprint": "06ac4f817614aa67"
+    },
+    {
+      "read_at": "2026-11-12T23:09:50",
+      "kind": "authoritative",
       "holdout_start": "2025-07-01",
       "holdout_rows": 5729,
       "holdout_last_session": "2026-11-09",
