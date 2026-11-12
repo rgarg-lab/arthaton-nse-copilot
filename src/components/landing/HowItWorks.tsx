@@ -17,14 +17,12 @@ export function HowItWorks({ idea }: { idea: IdeaConfig }) {
           ))}
         </ol>
 
+        {/* The partner-tool row is gone: Arthaton has no partner track, and the config
+            field only exists because the template's schema requires it. A labelled
+            "Partner tool: Not applicable" is a dead row. */}
         <div className="mt-10 rounded-panel border border-line bg-surface-2 p-5">
-          <h3 className="label-caps text-ink-3">Target user</h3>
+          <h3 className="label-caps text-ink-3">Who it is for</h3>
           <p className="mt-1.5 text-[14px] text-ink-1">{idea.targetUser}</p>
-          <h3 className="label-caps mt-4 text-ink-3">Partner tool</h3>
-          <p className="mt-1.5 text-[14px] text-ink-1">
-            {idea.partnerTool.name}{" "}
-            <span className="text-ink-3">({idea.partnerTool.type})</span>
-          </p>
         </div>
       </div>
     </section>

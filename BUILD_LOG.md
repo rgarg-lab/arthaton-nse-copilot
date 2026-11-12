@@ -538,6 +538,31 @@ is spelled out where someone editing the file will see it. Same class as the
 `fallbackModels()` fix in step 7: a correctness fix for a hard constraint, found by
 auditing rather than by a failing test. Guards: `npm test` 197/197 ✅ · `npm run build` ✅.
 
+**Round 4 — a §4.1 violation the honesty test was not looking at.** The final audit grepped
+the *whole* tree for metric-shaped literals rather than just the directory
+`tests/honesty.test.ts` scans, and found one: `ArcDeck.tsx`, the landing page's
+"how it works" explainer, hard-coded a six-row scoring breakdown — `Coverage 0.04`,
+`Similarity 0.31`, `Learners' next 0.24`, `Total 0.43` — along with a "Cloud Engineer"
+goal and a skill DAG of Python/Linux/Git/SQL. Invented numbers under a heading a visitor
+reads as "how this works", on the first surface a judge sees.
+
+It survived three scoring rounds because the test only scanned
+`src/components/finance`. Fixed in three parts:
+
+1. `ArcDeck` deleted. `HowItWorks` replaces it — a component the template already shipped,
+   rendering `idea.config.landing.howItWorks`, which already held this project's three
+   steps and was being rendered nowhere.
+2. The partner-tool row dropped from `HowItWorks`: Arthaton has no partner track and a
+   labelled "Partner tool: Not applicable" is a dead row.
+3. **The test now scans `components/landing` as well**, which is the actual fix — the
+   first version depended on my remembering to grep by hand. Its presentation allowlist
+   (SVG geometry, easing curves, spring constants, colour functions) is written as five
+   structurally-identifiable patterns rather than a general escape hatch, because a loose
+   allowlist here readmits exactly what the test exists to catch.
+
+Guards: `npm run build` ✅ · `npm test` 197/197 ✅ · `npm run lint` 0 errors ✅ · landing
+page verified in the browser.
+
 ### Submission checklist
 
 | | Status |
