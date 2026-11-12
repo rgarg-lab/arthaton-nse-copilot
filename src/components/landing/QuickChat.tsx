@@ -27,17 +27,50 @@ export function useQuickChat(): QuickChatApi {
 
 const ENTER = { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const };
 
+/**
+ * The one frame between opening the drawer and the session id existing.
+ *
+ * Copy lives in `idea.config.ts` as a rule, and this is the exception that proves it: the
+ * string is a *loading* state for a component that renders for one frame, not product
+ * copy, and threading a config value through for it would put a schema field in front of
+ * something nobody will read. Named here so it is still in one place.
+ */
+const QUICK_CHAT_LEAD = "Opening a session…";
+
 type Learner = { id: string; displayName: string };
 
-/** What the landing page knows about the visitor: signed out, or signed in with their latest learner (if any). */
+/**
+ * What the landing page knows about the visitor.
+ *
+ * `learner` is retained in the type but is always `null` in this build: the learner
+ * concept is retired (§7.1) and the quick chat now opens a plain agent session instead.
+ * Kept rather than removed because `app/page.tsx` still distinguishes signed-in from
+ * signed-out, and auth is a supported-but-unconfigured path here.
+ */
 export type QuickChatVisitor = { signedIn: false } | { signedIn: true; learner: Learner | null };
 
 /**
- * `Talk to ${ASSISTANT_NAME}` on the landing: a glass drawer with the real chat inside. Signed-out
- * visitors are offered sign-in (and return to the app afterwards); signed-in visitors
- * continue with their most recent learner, or name a new one on their first message.
+ * `Talk to ${ASSISTANT_NAME}` on the landing: a glass drawer with the real chat inside.
+ *
+ * **Rewired, not redesigned.** The drawer, its motion, its scrim and its CSS module are
+ * untouched; what changed is what gates the chat. The template gated it on a signed-in
+ * visitor with a named "learner", and offered a sign-in button otherwise — which in this
+ * build meant the drawer rendered a form asking for the visitor's name before it would
+ * talk about stocks, and with auth unconfigured it rendered nothing useful at all.
+ *
+ * Now it opens immediately, signed in or not, on a fresh agent session. That matches the
+ * rest of the app: there is no login wall, and a visitor asking "what are today's signals"
+ * should not be asked their first name first.
  */
-export function QuickChatProvider({ visitor, children }: { visitor: QuickChatVisitor; children: ReactNode }) {
+export function QuickChatProvider({
+  // Accepted and unused: the drawer no longer gates on it, but `app/page.tsx` computes it
+  // and the prop keeps the signature stable for whenever auth is configured.
+  visitor: _visitor,
+  children,
+}: {
+  visitor: QuickChatVisitor;
+  children: ReactNode;
+}) {
   const [isOpen, setOpen] = useState(false);
   const api = useMemo<QuickChatApi>(
     () => ({ open: () => setOpen(true), close: () => setOpen(false), isOpen }),
@@ -46,18 +79,31 @@ export function QuickChatProvider({ visitor, children }: { visitor: QuickChatVis
   return (
     <QuickChatContext.Provider value={api}>
       {children}
-      <QuickChatDrawer open={isOpen} onClose={api.close} visitor={visitor} />
+      <QuickChatDrawer open={isOpen} onClose={api.close} />
     </QuickChatContext.Provider>
   );
 }
 
-function QuickChatDrawer({ open, onClose, visitor }: { open: boolean; onClose: () => void; visitor: QuickChatVisitor }) {
+function QuickChatDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const reduce = useReducedMotion() ?? false;
-  const [learner, setLearner] = useState<Learner | null>(visitor.signedIn ? visitor.learner : null);
-  const [name, setName] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [nova, setNova] = useState<NovaState>("idle");
+
+  /**
+   * One session id per drawer opening, generated on the client.
+   *
+   * `/api/chat` treats an id it has never seen as a new conversation and inserts the row
+   * on the first message, so nothing has to be created up front — the drawer opens with no
+   * network call at all, which is what lets the landing page stay instant.
+   *
+   * A fresh id each time it is opened, deliberately: a session carries a per-session tool
+   * budget, and reusing one across a whole demo eventually exhausts it, after which every
+   * turn silently takes the fallback path with no tool calls and nothing visibly wrong.
+   */
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  useEffect(() => {
+    if (open && !sessionId) setSessionId(crypto.randomUUID());
+    if (!open) setSessionId(null);
+  }, [open, sessionId]);
 
   useEffect(() => {
     if (!open) return;
@@ -67,31 +113,6 @@ function QuickChatDrawer({ open, onClose, visitor }: { open: boolean; onClose: (
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
-
-  const start = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      const displayName = name.trim();
-      if (!displayName || busy) return;
-      setBusy(true);
-      setError(null);
-      try {
-        const res = await fetch("/api/learners", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ displayName }),
-        });
-        if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? "Could not start");
-        const created = (await res.json()) as Learner;
-        setLearner({ id: created.id, displayName: created.displayName });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not start");
-      } finally {
-        setBusy(false);
-      }
-    },
-    [name, busy],
-  );
 
   return (
     <AnimatePresence>
@@ -126,40 +147,22 @@ function QuickChatDrawer({ open, onClose, visitor }: { open: boolean; onClose: (
                 </div>
               </div>
               <div className={styles.headerActions}>
-                {learner && (
-                  <Button asChild variant="secondary" size="sm" className="ring-orbit">
-                    <Link href={`/learn/${learner.id}`}>
-                      Open workspace <ArrowRight data-icon="inline-end" />
-                    </Link>
-                  </Button>
-                )}
+                <Button asChild variant="secondary" size="sm" className="ring-orbit">
+                  <Link href="/workspace">
+                    Full workspace <ArrowRight data-icon="inline-end" />
+                  </Link>
+                </Button>
                 <button type="button" className={styles.close} onClick={onClose} aria-label="Close">
                   <X />
                 </button>
               </div>
             </header>
 
-            {!visitor.signedIn ? (
-              <div className={styles.start}>
-                <Orb state="breathing" size={64} label={`${ASSISTANT_NAME}`} paused={reduce} />
-                <h2 className={styles.startTitle}>
-                  Hi, I&apos;m <span className="text-gradient-violet">{ASSISTANT_NAME}</span>.
-                </h2>
-                <p className={styles.startLead}>
-                  Sign in with Google and I&apos;ll keep your goal, your skills and every version of your path under your
-                  account.
-                </p>
-                <Button size="lg" asChild className={styles.startButton}>
-                  <Link href={signInUrl("/learn")}>
-                    <LogIn data-icon="inline-start" /> Sign in to start
-                  </Link>
-                </Button>
-              </div>
-            ) : learner ? (
+            {sessionId ? (
               <div className={styles.body}>
                 <ChatPanel
-                  key={learner.id}
-                  learnerId={learner.id}
+                  key={sessionId}
+                  learnerId={sessionId}
                   initialMessages={[]}
                   onProfileUpdated={() => undefined}
                   onPathUpdated={() => undefined}
@@ -168,45 +171,13 @@ function QuickChatDrawer({ open, onClose, visitor }: { open: boolean; onClose: (
                 />
               </div>
             ) : (
-              <form className={styles.start} onSubmit={start}>
+              <div className={styles.start}>
                 <Orb state="breathing" size={64} label={`${ASSISTANT_NAME}`} paused={reduce} />
                 <h2 className={styles.startTitle}>
                   Hi, I&apos;m <span className="text-gradient-violet">{ASSISTANT_NAME}</span>.
                 </h2>
-                <p className={styles.startLead}>
-                  Tell me a name to keep your conversation under, then describe where you want to be. I&apos;ll build the first
-                  path right here.
-                </p>
-                <label className={styles.startField}>
-                  <span className="label-caps">Your name</span>
-                  <Input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Priya"
-                    maxLength={60}
-                    autoFocus
-                    required
-                    name="displayName"
-                    autoComplete="name"
-                  />
-                </label>
-                <Button type="submit" size="lg" disabled={busy || !name.trim()} className={styles.startButton}>
-                  {busy ? (
-                    <>
-                      <Orb state="working" size={20} label="Starting" /> Starting
-                    </>
-                  ) : (
-                    <>
-                      Start talking <ArrowRight data-icon="inline-end" />
-                    </>
-                  )}
-                </Button>
-                {error && (
-                  <p className={styles.startError} role="alert">
-                    {error}
-                  </p>
-                )}
-              </form>
+                <p className={styles.startLead}>{QUICK_CHAT_LEAD}</p>
+              </div>
             )}
           </motion.aside>
         </>

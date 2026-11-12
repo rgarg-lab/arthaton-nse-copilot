@@ -7,10 +7,16 @@ import styles from "./footer.module.css";
 import { useInView } from "./useInView";
 import { ASSISTANT_NAME, CONTACT_EMAIL, CREDIT, IDEA_NAME, TEAM } from "@/lib/config/client";
 
+/**
+ * `/learn` is retired (§7.1), so the footer points at the real surfaces. "Source" was a
+ * `#` placeholder — a link that goes nowhere is a dead button, so it is gone until the
+ * repository is public (HUMAN_TASKS.md task 5).
+ */
 const NAV = [
+  { label: "Today's signals", href: "/signals" },
+  { label: "Model card", href: "/dashboard" },
   { label: "How it works", href: "#how-it-works" },
-  { label: `Open ${ASSISTANT_NAME}`, href: "/learn" },
-  { label: "Source", href: "#" },
+  { label: `Ask ${ASSISTANT_NAME}`, href: "/workspace" },
 ];
 
 

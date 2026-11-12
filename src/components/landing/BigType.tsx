@@ -33,7 +33,9 @@ function RevealHeading({ text, id, as: Tag = "h2" }: { text: string; id?: string
 }
 
 /** "Try it yourself" — the closing statement before the footer. */
-export function TryIt({ id, appHref = "/learn" }: { id?: string; appHref?: string }) {
+// `/signals` rather than the retired `/learn`: the closing CTA should land on the thing the
+// product is for, which is today's board, not on the agent sandbox.
+export function TryIt({ id, appHref = "/signals" }: { id?: string; appHref?: string }) {
   const reduce = useReducedMotion();
   return (
     <section id={id} className={`${styles.section} ${styles.contact}`} aria-labelledby="tryit-heading">

@@ -34,9 +34,22 @@ test("the demo path works with no keys", async ({ page }) => {
   // ── landing ─────────────────────────────────────────────────────────────────
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  // The nav links to the product's two main surfaces.
-  await expect(page.locator('a[href="/signals"]').first()).toBeVisible();
-  await expect(page.locator('a[href="/dashboard"]').first()).toBeVisible();
+  /**
+   * The landing must link into the product. Asserted on the *document* rather than on
+   * visibility, because the closing CTA and the footer are both below the fold and the
+   * measured strip's buttons are inside a section the viewport may not reach — and a link
+   * that exists but is scrolled out of view is not a broken link.
+   *
+   * This is also a regression test for a real breakage: the landing's CTA, its footer and
+   * the quick chat all pointed at `/learn`, which this build retires. Every one of them
+   * was a dead link and nothing failed until the smoke test tried to click one.
+   */
+  for (const href of ["/signals", "/dashboard", "/workspace"]) {
+    await expect(
+      page.locator(`a[href="${href}"]`).first(),
+      `the landing page must link to ${href}`,
+    ).toHaveCount(1);
+  }
 
   /**
    * The hero's right column must show the assistant immediately, not a loading cover.
@@ -63,8 +76,11 @@ test("the demo path works with no keys", async ({ page }) => {
   );
 
   // ── the workspace ───────────────────────────────────────────────────────────
-  await page.waitForLoadState("networkidle");
-  await page.locator('a[href="/workspace"]').first().click();
+  // Navigated rather than clicked: the links are asserted above, and the CTA that targets
+  // the workspace sits below the fold behind a motion-gated section, so clicking it needs
+  // a scroll-and-settle that adds a minute to the run and tests the animation rather than
+  // the journey.
+  await page.goto("/workspace");
   await expect(page).toHaveURL(/\/workspace/, { timeout: 90_000 });
 
   /**
