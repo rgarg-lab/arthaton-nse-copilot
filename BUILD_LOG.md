@@ -604,7 +604,7 @@ Guards: `npm run build` ✅ · `npm test` **200**/200 ✅ · `npm run lint` 0 er
 
 | | Status |
 |---|---|
-| Fresh `git clone` into a temp dir runs in three commands | ✅ verified twice, end to end |
+| Fresh `git clone` into a temp dir runs in three commands | ✅ verified end to end at the final commit `6db1bb4` — see below |
 | Production build passes; deploy runbook complete | ✅ 22 routes · `HUMAN_TASKS.md` task 6 (two services, Neon, CORS) |
 | Every UI number traces to `ml/artifacts/*.json` | ✅ enforced by `tests/honesty.test.ts` |
 | `metrics.json` reports an honest headline against four baselines | ✅ 51.37% vs 48.91 / 48.54 / 48.58 / buy-and-hold |
@@ -615,3 +615,25 @@ Guards: `npm run build` ✅ · `npm test` **200**/200 ✅ · `npm run lint` 0 er
 | Data refreshed to within two sessions | ✅ last session 2026-11-11, 1 behind — re-run on submission day (`HUMAN_TASKS.md` task 4) |
 | No fabricated metric, no hardcoded confidence, no dead button | ✅ — the footer's `#` "Source" placeholder was removed rather than left linking nowhere |
 | Full 18-ticker universe | ❌ **17 of 18** — Yahoo rate limit, documented in four places and carried as an xfail |
+
+### The fresh-clone check, at the final commit
+
+§9 caps Functionality at 10/25 if this fails, so it is the one check worth running last
+rather than early. Three runs happened; the first two were at earlier commits and the
+third was killed mid-install by session cleanup. **This is the complete run at `6db1bb4`,
+the tip** — recorded leg by leg because "verified twice, at commits five changes back"
+was what I had initially written up, and that is not the same claim.
+
+| Leg | Result |
+|---|---|
+| `git clone` | ✅ 251 tracked files; all 7 required artifacts present; nothing untracked came along |
+| `npm ci` | ✅ exit 0 |
+| `pip install -e "./ml[dev]"` | ✅ exit 0 |
+| `npm run db:migrate` | ✅ `driver=pglite`, no `.env.local` present — which is the configuration being claimed |
+| `npm run build` | ✅ exit 0 |
+| `npm test` | ✅ 200/200 |
+| `pytest ml` | ✅ 37 passed, 1 xfailed |
+| ML service boots | ✅ `status: ok`, 49,776 panel rows, `trains_on_request: false` |
+| `/signals` | ✅ 17 signals, 17 abstained |
+| `/metrics?section=direction` | ✅ accuracy `0.513702` — matches the committed artifact exactly |
+| `POST /neighbors` | ✅ 25 analogues, up-rate 0.4 |
