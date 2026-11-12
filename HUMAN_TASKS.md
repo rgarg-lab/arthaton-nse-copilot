@@ -109,6 +109,11 @@ python ml/tasks.py data      # re-ingest and rebuild the panel
 python ml/tasks.py signals   # rescore today's calls from the frozen model
 ```
 
+**Then restart the ML service.** It loads artifacts once at startup and never re-reads them
+on the request path (§4.3), so a running service keeps serving what it booted with. If the
+pages still show yesterday's session after a refresh, that is why. `/health` reports
+`loaded_at` if you want to confirm.
+
 **Do not run `train` or `eval` again.** The model, the calibrator and the abstention
 threshold are frozen (§6.5) and the final holdout has been read exactly once
 (`ml/artifacts/holdout_ledger.json` records it). Re-running `eval` would read the holdout

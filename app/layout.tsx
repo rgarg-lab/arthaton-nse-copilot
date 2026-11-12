@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { env } from "@/lib/env";
-import { IDEA_TAGLINE } from "@/lib/config/client";
-import { ASSISTANT_NAME, IDEA_NAME } from "@/lib/config/client";
+import { IDEA_NAME, IDEA_TAGLINE } from "@/lib/config/client";
 
 const inter = Inter({
   variable: "--font-inter",

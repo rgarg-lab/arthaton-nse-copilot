@@ -1,15 +1,13 @@
 "use client";
 
-import { ArrowRight, LogIn, X } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { ChatPanel } from "@/components/chat/ChatPanel";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Orb } from "@/components/ui/orb";
-import { signInUrl } from "@/lib/signInUrl";
 import { NOVA_LABEL, NOVA_ORB } from "@/nova/stage";
 import type { NovaState } from "@/schemas";
 
@@ -71,39 +69,51 @@ export function QuickChatProvider({
   visitor: QuickChatVisitor;
   children: ReactNode;
 }) {
-  const [isOpen, setOpen] = useState(false);
-  const api = useMemo<QuickChatApi>(
-    () => ({ open: () => setOpen(true), close: () => setOpen(false), isOpen }),
-    [isOpen],
-  );
-  return (
-    <QuickChatContext.Provider value={api}>
-      {children}
-      <QuickChatDrawer open={isOpen} onClose={api.close} />
-    </QuickChatContext.Provider>
-  );
-}
-
-function QuickChatDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const reduce = useReducedMotion() ?? false;
-  const [nova, setNova] = useState<NovaState>("idle");
-
   /**
-   * One session id per drawer opening, generated on the client.
+   * The session id is minted in `open()`, an event handler — not in an effect in the
+   * drawer, and not during render.
    *
-   * `/api/chat` treats an id it has never seen as a new conversation and inserts the row
-   * on the first message, so nothing has to be created up front — the drawer opens with no
-   * network call at all, which is what lets the landing page stay instant.
+   * Not during render because `crypto.randomUUID()` would differ between the server pass
+   * and the hydration pass and trip the hydration check. Not in an effect because setting
+   * state from an effect body causes a cascading re-render, and React's own guidance (and
+   * `react-hooks/set-state-in-effect`) is that an event is where this belongs. Opening the
+   * drawer *is* the event.
    *
-   * A fresh id each time it is opened, deliberately: a session carries a per-session tool
+   * A fresh id each time it opens, deliberately: a session carries a per-session tool
    * budget, and reusing one across a whole demo eventually exhausts it, after which every
    * turn silently takes the fallback path with no tool calls and nothing visibly wrong.
    */
   const [sessionId, setSessionId] = useState<string | null>(null);
-  useEffect(() => {
-    if (open && !sessionId) setSessionId(crypto.randomUUID());
-    if (!open) setSessionId(null);
-  }, [open, sessionId]);
+  const isOpen = sessionId !== null;
+
+  const api = useMemo<QuickChatApi>(
+    () => ({
+      open: () => setSessionId(crypto.randomUUID()),
+      close: () => setSessionId(null),
+      isOpen,
+    }),
+    [isOpen],
+  );
+
+  return (
+    <QuickChatContext.Provider value={api}>
+      {children}
+      <QuickChatDrawer sessionId={sessionId} onClose={api.close} />
+    </QuickChatContext.Provider>
+  );
+}
+
+/**
+ * `sessionId` doubles as the open flag: non-null means open.
+ *
+ * `/api/chat` treats an id it has never seen as a new conversation and inserts the row on
+ * the first message, so nothing has to be created up front — the drawer opens with no
+ * network call at all, which is what lets the landing page stay instant.
+ */
+function QuickChatDrawer({ sessionId, onClose }: { sessionId: string | null; onClose: () => void }) {
+  const reduce = useReducedMotion() ?? false;
+  const [nova, setNova] = useState<NovaState>("idle");
+  const open = sessionId !== null;
 
   useEffect(() => {
     if (!open) return;

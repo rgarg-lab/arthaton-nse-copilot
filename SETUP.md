@@ -138,6 +138,12 @@ python ml/tasks.py signals      # today's calls                          ~5 s
 python ml/tasks.py refresh      # all four, in order
 ```
 
+**Restart the ML service after any of these.** Artifacts are loaded once at startup and
+never re-read on the request path (§4.3) — which is the property that keeps a request from
+doing any fitting, and the cost of it is that a running service keeps serving the artifact
+it booted with. If a page still shows the old numbers after a refresh, the service is the
+reason, not a cache in the browser. `/health` reports `loaded_at`, so you can check.
+
 ### Before you run `train` or `eval`
 
 The model, the calibrator and the abstention threshold are **frozen** (§6.5 of the build
