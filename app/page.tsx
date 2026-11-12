@@ -1,47 +1,52 @@
 import { currentUserOrDemo } from "@/auth";
 import { ArcDeck } from "@/components/landing/ArcDeck";
 import { BeamNetwork } from "@/components/landing/BeamNetwork";
-import { EvidencePlates } from "@/components/landing/EvidencePlates";
 import { TryIt } from "@/components/landing/BigType";
+import { Features } from "@/components/landing/Features";
 import { Footer } from "@/components/landing/Footer";
 import { Hero } from "@/components/landing/Hero";
-import { MotionWall } from "@/components/landing/MotionWall";
-import { ProofStrip } from "@/components/landing/ProofStrip";
 import { QuickChatProvider, type QuickChatVisitor } from "@/components/landing/QuickChat";
-import { SkillStream, type StreamCard } from "@/components/landing/SkillStream";
-import { demoNumbers } from "@/lib/demoStory";
-import { loadEngineData } from "@/lib/engineData";
-import { loadEvidencePlates } from "@/lib/evidencePlates";
-import { loadTrustNumbers } from "@/lib/trust";
-import { listLearners } from "@/db/queries";
+import { MeasuredStrip } from "@/components/finance/MeasuredStrip";
+import { getMetrics } from "@/lib/ml/client";
+import { config } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * The landing page.
+ *
+ * Three of the inherited sections are gone: the course stream, the proof strip and the
+ * evidence plates. Each was a well-built section whose only content was counts from the
+ * demo seed's PRNG — a corpus size, a confirmed-edge ratio, a learner population. In a
+ * domain-agnostic template that is a documented placeholder; in a finance submission it is
+ * precisely the fabricated-statistics pattern §4.1 forbids, and the earlier version of
+ * this project lost its credibility to exactly that. `MeasuredStrip` replaces them with
+ * four figures read from the evaluation artifact, and shows nothing at all when the
+ * service is down.
+ *
+ * What stays is the part of the shell that was always copy-driven and is now true: the
+ * hero, the feature cards, the how-it-works deck, the beam network and the quick chat.
+ * Their text comes from `idea.config.ts`.
+ */
 async function visitorState(): Promise<QuickChatVisitor> {
   const user = await currentUserOrDemo();
-  if (!user) return { signedIn: false };
-  const [latest] = await listLearners(user.id);
-  return { signedIn: true, learner: latest ? { id: latest.id, displayName: latest.displayName } : null };
+  // The learner concept is retired, so there is no per-learner deep link to resolve: the
+  // quick chat only needs to know whether anyone is signed in, and the app runs signed out.
+  return user ? { signedIn: true, learner: null } : { signedIn: false };
 }
 
-/** The landing stays public; only the quick chat needs to know who is here (§19). */
 export default async function Home() {
-  const visitor = await visitorState();
-  const trust = loadTrustNumbers();
-  const demo = demoNumbers();
-  const plates = loadEvidencePlates();
-  // Only what a stream card shows; the client does not bundle the catalog for this.
-  const streamCards: StreamCard[] = loadEngineData().catalog.map((c) => ({ id: c.id, title: c.title, provider: c.provider, difficulty: c.difficulty }));
+  const idea = config();
+  const [visitor, metrics] = await Promise.all([visitorState(), getMetrics()]);
+
   return (
     <QuickChatProvider visitor={visitor}>
       <main className="flex flex-1 flex-col">
-        <Hero numbers={trust} storyHref="#how-it-works" />
-        <SkillStream id="skills" cards={streamCards} />
+        <Hero storyHref="#how-it-works" />
+        <Features idea={idea} />
         <ArcDeck id="how-it-works" />
-        <ProofStrip id="proof" numbers={trust} />
-        <MotionWall id="different" numbers={trust} demo={demo} />
+        <MeasuredStrip id="measured" result={metrics} />
         <BeamNetwork id="engine" />
-        <EvidencePlates id="evidence" numbers={trust} plates={plates} />
         <TryIt id="try" />
         <Footer />
       </main>

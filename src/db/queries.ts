@@ -1,24 +1,23 @@
 import { desc, eq } from "drizzle-orm";
 import { agentSessions, db, messages } from "@/db";
-import { demoSeed } from "@/data/demo-seed";
-import type { Path, Profile } from "@/schemas";
 
 /**
- * What the restored pages read.
+ * What the pages read from the database.
  *
- * Two sources, in this order: the live database built in phases 2–9 (agent sessions, their
- * messages, memory, approvals), and the demo seed for everything the original engine used to
- * compute. The fallback is the point — a page must never render empty during a demo, so a
- * cold database shows seeded content rather than a blank state.
+ * The template's version had a second half: a demo-seed fallback supplying a learner
+ * profile and a generated path so a page never rendered empty. Both the learner and the
+ * path concepts are retired (§7.1), and the fallback itself is the wrong pattern for this
+ * project — `getLatestPath` returned seeded content unconditionally, ignoring its own
+ * argument, which is the kind of "always has an answer" behaviour the product is arguing
+ * against. Model-backed surfaces here read the ML service and show an explicit
+ * `ErrorState` when it is down.
  *
- * As an idea grows its own tables, the seeded half of this file is what it replaces.
+ * What survives is the part that was always real: agent sessions and their messages.
  */
 
-export type LearnerRow = {
+export type SessionRow = {
   id: string;
-  displayName: string;
-  avatarSeed: string;
-  userId: string | null;
+  title: string;
   createdAt: Date;
 };
 
@@ -36,56 +35,37 @@ export type ChatMessageRow = {
 };
 
 /**
- * The profiles shown on the picker. Agent sessions are the real rows; the seed supplies
- * a pair so the page has something to show on a cold start.
+ * Recent agent sessions, newest first.
+ *
+ * Returns an empty array when there are none, rather than inventing two. An empty list is
+ * the truth about a fresh clone, and every caller renders an `EmptyState` for it.
  */
-export async function listLearners(userId?: string): Promise<LearnerRow[]> {
-  const seeded = demoSeed().learners.map((l) => ({
-    ...l,
-    userId: userId ?? null,
-    createdAt: new Date("2026-11-01T09:00:00Z"),
-  }));
+export async function listSessions(limit = 10): Promise<SessionRow[]> {
   try {
     const handle = await db();
     const rows = await handle
-      .select({ id: agentSessions.id, title: agentSessions.title, createdAt: agentSessions.createdAt })
+      .select({
+        id: agentSessions.id,
+        title: agentSessions.title,
+        createdAt: agentSessions.createdAt,
+      })
       .from(agentSessions)
       .orderBy(desc(agentSessions.createdAt))
-      .limit(10);
-    const live = rows.map((row, i) => ({
+      .limit(limit);
+    return rows.map((row, i) => ({
       id: row.id,
-      displayName: row.title ?? `Session ${i + 1}`,
-      avatarSeed: row.id.slice(0, 8),
-      userId: userId ?? null,
+      title: row.title ?? `Session ${i + 1}`,
       createdAt: row.createdAt,
     }));
-    return live.length > 0 ? live : seeded;
   } catch {
-    // No database yet: the picker still works off the seed.
-    return seeded;
+    // No database yet is survivable; the caller shows an empty state.
+    return [];
   }
 }
 
-/** One profile, by id. Ownership is not enforced on seeded rows — they belong to nobody. */
-export async function getOwnedLearner(userId: string, learnerId: string): Promise<LearnerRow | null> {
-  const all = await listLearners(userId);
-  return all.find((l) => l.id === learnerId) ?? null;
-}
-
-/** The current plan. Seeded until an idea writes its own. */
-export async function getLatestPath(learnerId: string): Promise<{ version: number; data: Path; diff: null } | null> {
-  void learnerId;
-  return { version: 1, data: demoSeed().path, diff: null };
-}
-
-export async function getProfile(learnerId: string): Promise<Profile> {
-  void learnerId;
-  return demoSeed().profile;
-}
-
 /**
- * The conversation so far, from the new `messages` table. Empty is correct here: an unused
- * session genuinely has no history, and the chat panel has a first-run state for it.
+ * The conversation so far. Empty is correct for an unused session, and the chat panel has
+ * a first-run state for it.
  */
 export async function listChatMessages(sessionId: string): Promise<ChatMessageRow[]> {
   try {

@@ -9,7 +9,6 @@ import { jsonError, parseBody } from "@/lib/api";
 import { llmMode } from "@/lib/llm/router";
 import { agentLimit } from "@/lib/rateLimit";
 import { SSE_HEADERS, sseStream } from "@/lib/sse";
-import { demoSeed } from "@/data/demo-seed";
 import { isUuid } from "@/schemas";
 
 export const runtime = "nodejs";
@@ -103,10 +102,10 @@ export async function POST(request: Request) {
         emit({ type: "text", delta: chunk });
       }
 
-      // The plan and profile the UI renders come from the seed until an idea writes its
-      // own; re-emitting them keeps the panel and the path view in step.
-      const seed = demoSeed();
-      emit({ type: "path_updated", version: 1, path: seed.path, diff: null });
+      // The template emitted a `path_updated` event here, carrying a generated plan from
+      // the demo seed so the panel and the path view stayed in step. There is no generated
+      // plan in this project — the path surface became the evidence timeline, which reads
+      // the ML service — so the event is gone rather than emitted with empty content.
       emit({ type: "nova_state", state: "speaking" });
       emit({ type: "done", text: result.answer });
     } catch (err) {

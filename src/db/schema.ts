@@ -239,6 +239,100 @@ export const llmCache = pgTable("llm_cache", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+// ─────────────────────── NSE Copilot tables ───────────────────────
+//
+// The template's application tables above are domain-agnostic and are kept unchanged
+// (§7.1 asked for learner/skill/course tables to be replaced; the template's schema turned
+// out to carry none — it is already generic, so this is purely additive).
+//
+// Three tables, and one rule that shapes all of them: **nothing the model predicts is
+// stored here.** Signals, probabilities and metrics live in `ml/artifacts/` and are read
+// through the service. A copy of a probability in Postgres would be a second source of
+// truth that can go stale, and a stale probability presented as today's is the exact class
+// of failure this build exists to avoid. `signals_snapshot` is the one deliberate
+// exception and it is an *audit log*, not a cache — see its comment.
+//
+// `user_id` is nullable everywhere and written through `persistableUserId()` in
+// `src/auth.ts`. With auth unconfigured the app hands out a fixed anonymous identity that
+// has no `users` row, so writing it directly makes the foreign key reject the insert — and
+// that failure surfaces inside the assistant's own answer, which is a confusing place to
+// debug it.
+
+/** Names the user is tracking. */
+export const watchlist = pgTable(
+  "watchlist",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sessionId: uuid("session_id").references(() => agentSessions.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+    ticker: text("ticker").notNull(),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("watchlist_session").on(table.sessionId, table.createdAt),
+    // One entry per ticker per session: adding the same name twice is a no-op, not a
+    // duplicate row the UI then has to de-duplicate on read.
+    uniqueIndex("watchlist_session_ticker").on(table.sessionId, table.ticker),
+  ],
+);
+
+/**
+ * An audit trail of what the user was actually shown, and when.
+ *
+ * This is not a cache and must never be read as one. The point is accountability: if a
+ * signal is acted on, there has to be a record of exactly what the model said at that
+ * moment, because the model is retrained and the artifact is regenerated. `probability_up`
+ * here is the value *as displayed on `shown_at`* — reading it later and presenting it as
+ * current would be the staleness bug this table's existence otherwise invites, so every
+ * read path in the app treats it as history.
+ */
+export const signalsSnapshot = pgTable(
+  "signals_snapshot",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sessionId: uuid("session_id").references(() => agentSessions.id, { onDelete: "cascade" }),
+    ticker: text("ticker").notNull(),
+    /** The session the signal was *about*, not the moment it was rendered. */
+    asOfSession: text("as_of_session").notNull(),
+    abstain: integer("abstain").notNull().default(0),
+    /** Calibrated. Null when the model abstained — there is no direction to attach. */
+    probabilityUp: real("probability_up"),
+    direction: text("direction"),
+    threshold: real("threshold").notNull(),
+    volatilityRegime: text("volatility_regime"),
+    /** The whole payload, so the record is complete even if the schema grows. */
+    payload: jsonb("payload").$type<Record<string, unknown>>().notNull().default({}),
+    shownAt: timestamp("shown_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index("signals_snapshot_ticker").on(table.ticker, table.shownAt)],
+);
+
+/**
+ * The user's own risk settings.
+ *
+ * `min_probability` is a **display** filter and is constrained at the application edge to
+ * be at or above the model's frozen threshold. It can only ever show the user *fewer*
+ * signals. §6.5 freezes the model's threshold precisely so it cannot become a dial for
+ * making the coverage-accuracy curve look better, and a user-editable setting that could
+ * lower it would reopen that dial from the other side.
+ */
+export const riskProfile = pgTable(
+  "risk_profile",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sessionId: uuid("session_id")
+      .references(() => agentSessions.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+    horizonSessions: integer("horizon_sessions").notNull().default(1),
+    riskTolerance: text("risk_tolerance").notNull().default("balanced"),
+    minProbability: real("min_probability").notNull().default(0.5),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [uniqueIndex("risk_profile_session").on(table.sessionId)],
+);
+
 /** One row per eval run; the number that goes in the README's "Measured accuracy". */
 export const evalRuns = pgTable("eval_runs", {
   id: uuid("id").primaryKey().defaultRandom(),

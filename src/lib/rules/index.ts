@@ -1,6 +1,7 @@
 import type { ToolCall } from "@/lib/llm/types";
 import type { IdeaConfig } from "@/lib/config";
 import { toolByName } from "@/lib/tools";
+import { FINANCE_RULES } from "./finance";
 
 /**
  * The deterministic layer that outranks the model.
@@ -114,8 +115,15 @@ export const flagLowConfidence: Rule = {
   },
 };
 
-/** The ordered list. Earlier rules win: the first non-allow outcome is the answer. */
-export const RULES: Rule[] = [neverActWithoutApproval, flagLowConfidence];
+/**
+ * The ordered list. Earlier rules win: the first non-allow outcome is the answer.
+ *
+ * The two template rules come first because they are the ones that must never be
+ * overtaken: `never-act-without-approval` is the invariant the whole approvals design
+ * rests on. The finance rules (`./finance.ts`) follow — blocking ones before annotating
+ * ones, which `FINANCE_RULES` already orders.
+ */
+export const RULES: Rule[] = [neverActWithoutApproval, flagLowConfidence, ...FINANCE_RULES];
 
 export type FiredRule = { id: string; outcome: RuleOutcome };
 

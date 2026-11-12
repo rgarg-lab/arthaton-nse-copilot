@@ -1,0 +1,296 @@
+{
+  "source": "LightGBM booster feature_importance(gain) from the shipped classifier",
+  "trained_at": "2026-11-12T20:13:56",
+  "features": [
+    {
+      "feature": "mac_spx_ret_1",
+      "gain": 6358.2529,
+      "share": 0.146403
+    },
+    {
+      "feature": "cal_month",
+      "gain": 3699.516,
+      "share": 0.085184
+    },
+    {
+      "feature": "mac_ndx_ret_1",
+      "gain": 3520.584,
+      "share": 0.081064
+    },
+    {
+      "feature": "mac_spx_ret_3",
+      "gain": 2067.9397,
+      "share": 0.047616
+    },
+    {
+      "feature": "mac_nifty_ret_1",
+      "gain": 2030.4308,
+      "share": 0.046752
+    },
+    {
+      "feature": "mac_niftyenergy_ret_1",
+      "gain": 1976.5042,
+      "share": 0.04551
+    },
+    {
+      "feature": "mac_nifty_ret_7",
+      "gain": 1570.9285,
+      "share": 0.036172
+    },
+    {
+      "feature": "mac_vix_ret_1",
+      "gain": 1529.344,
+      "share": 0.035214
+    },
+    {
+      "feature": "mac_usdinr_ret_1",
+      "gain": 1516.2801,
+      "share": 0.034913
+    },
+    {
+      "feature": "mac_brent_ret_1",
+      "gain": 1448.123,
+      "share": 0.033344
+    },
+    {
+      "feature": "mac_gold_ret_1",
+      "gain": 1441.5348,
+      "share": 0.033192
+    },
+    {
+      "feature": "mac_spx_ret_7",
+      "gain": 1362.0015,
+      "share": 0.031361
+    },
+    {
+      "feature": "cal_dow",
+      "gain": 1229.4895,
+      "share": 0.02831
+    },
+    {
+      "feature": "mac_usdinr_ret_3",
+      "gain": 1207.6477,
+      "share": 0.027807
+    },
+    {
+      "feature": "mac_nifty_ret_3",
+      "gain": 1179.8037,
+      "share": 0.027166
+    },
+    {
+      "feature": "mac_vix_rv_7",
+      "gain": 1098.6482,
+      "share": 0.025297
+    },
+    {
+      "feature": "mac_vix_ret_3",
+      "gain": 1089.0381,
+      "share": 0.025076
+    },
+    {
+      "feature": "mac_usdinr_rv_7",
+      "gain": 1066.0997,
+      "share": 0.024548
+    },
+    {
+      "feature": "mac_spx_rv_7",
+      "gain": 1044.9188,
+      "share": 0.02406
+    },
+    {
+      "feature": "mac_usdinr_ret_7",
+      "gain": 1043.4438,
+      "share": 0.024026
+    },
+    {
+      "feature": "mac_nifty_rv_7",
+      "gain": 997.4925,
+      "share": 0.022968
+    },
+    {
+      "feature": "mac_vix_ret_7",
+      "gain": 795.3003,
+      "share": 0.018312
+    },
+    {
+      "feature": "oc_spread",
+      "gain": 625.9564,
+      "share": 0.014413
+    },
+    {
+      "feature": "vol_chg",
+      "gain": 405.6542,
+      "share": 0.00934
+    },
+    {
+      "feature": "sma_dev_10",
+      "gain": 395.5184,
+      "share": 0.009107
+    },
+    {
+      "feature": "cal_expiry_week",
+      "gain": 367.0704,
+      "share": 0.008452
+    },
+    {
+      "feature": "sma_dev_20",
+      "gain": 281.542,
+      "share": 0.006483
+    },
+    {
+      "feature": "ret_60",
+      "gain": 227.226,
+      "share": 0.005232
+    },
+    {
+      "feature": "macd_norm",
+      "gain": 204.087,
+      "share": 0.004699
+    },
+    {
+      "feature": "hl_spread",
+      "gain": 198.7584,
+      "share": 0.004577
+    },
+    {
+      "feature": "rv_60",
+      "gain": 190.7697,
+      "share": 0.004393
+    },
+    {
+      "feature": "ret_3",
+      "gain": 168.2861,
+      "share": 0.003875
+    },
+    {
+      "feature": "ret_20",
+      "gain": 110.0359,
+      "share": 0.002534
+    },
+    {
+      "feature": "vix_regime",
+      "gain": 101.4903,
+      "share": 0.002337
+    },
+    {
+      "feature": "rs_sector_5",
+      "gain": 96.0665,
+      "share": 0.002212
+    },
+    {
+      "feature": "rs_market_5",
+      "gain": 93.2213,
+      "share": 0.002146
+    },
+    {
+      "feature": "rv_10",
+      "gain": 72.0595,
+      "share": 0.001659
+    },
+    {
+      "feature": "vol_z_20",
+      "gain": 70.6052,
+      "share": 0.001626
+    },
+    {
+      "feature": "rv_5",
+      "gain": 67.3329,
+      "share": 0.00155
+    },
+    {
+      "feature": "rv_20",
+      "gain": 65.9959,
+      "share": 0.00152
+    },
+    {
+      "feature": "sma_dev_50",
+      "gain": 65.4561,
+      "share": 0.001507
+    },
+    {
+      "feature": "ret_1",
+      "gain": 63.9171,
+      "share": 0.001472
+    },
+    {
+      "feature": "rsi_14",
+      "gain": 53.6475,
+      "share": 0.001235
+    },
+    {
+      "feature": "sma_dev_200",
+      "gain": 38.3568,
+      "share": 0.000883
+    },
+    {
+      "feature": "rs_sector_20",
+      "gain": 37.0281,
+      "share": 0.000853
+    },
+    {
+      "feature": "ret_10",
+      "gain": 35.7446,
+      "share": 0.000823
+    },
+    {
+      "feature": "ret_5",
+      "gain": 34.8914,
+      "share": 0.000803
+    },
+    {
+      "feature": "xs_rank_ret_1",
+      "gain": 33.925,
+      "share": 0.000781
+    },
+    {
+      "feature": "rs_market_20",
+      "gain": 15.3457,
+      "share": 0.000353
+    },
+    {
+      "feature": "xs_rank_ret_20",
+      "gain": 15.1929,
+      "share": 0.00035
+    },
+    {
+      "feature": "ret_skew_20",
+      "gain": 11.9023,
+      "share": 0.000274
+    },
+    {
+      "feature": "xs_rank_ret_5",
+      "gain": 9.3158,
+      "share": 0.000215
+    },
+    {
+      "feature": "bb_pctb_20",
+      "gain": 0.0,
+      "share": 0.0
+    },
+    {
+      "feature": "vol_of_vol",
+      "gain": 0.0,
+      "share": 0.0
+    },
+    {
+      "feature": "xs_rank_rv_20",
+      "gain": 0.0,
+      "share": 0.0
+    },
+    {
+      "feature": "sent_score",
+      "gain": 0.0,
+      "share": 0.0
+    },
+    {
+      "feature": "sent_decay",
+      "gain": 0.0,
+      "share": 0.0
+    },
+    {
+      "feature": "news_available",
+      "gain": 0.0,
+      "share": 0.0
+    }
+  ]
+}

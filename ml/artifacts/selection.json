@@ -1,0 +1,216 @@
+{
+  "selected_params": {
+    "num_leaves": 7,
+    "learning_rate": 0.03,
+    "min_child_samples": 200,
+    "n_estimators": 300
+  },
+  "scoreboard": [
+    {
+      "candidate": 1,
+      "params": {
+        "num_leaves": 7,
+        "learning_rate": 0.03,
+        "min_child_samples": 200,
+        "n_estimators": 300
+      },
+      "mean_fold_log_loss": 0.687272,
+      "per_fold_log_loss": [
+        0.681008,
+        0.68493,
+        0.691373,
+        0.691776
+      ],
+      "pooled_oof_accuracy": 0.544425,
+      "selected": true
+    },
+    {
+      "candidate": 2,
+      "params": {
+        "num_leaves": 15,
+        "learning_rate": 0.03,
+        "min_child_samples": 300,
+        "n_estimators": 400
+      },
+      "mean_fold_log_loss": 0.689847,
+      "per_fold_log_loss": [
+        0.684446,
+        0.686199,
+        0.693065,
+        0.695679
+      ],
+      "pooled_oof_accuracy": 0.547018,
+      "selected": false
+    },
+    {
+      "candidate": 3,
+      "params": {
+        "num_leaves": 31,
+        "learning_rate": 0.02,
+        "min_child_samples": 500,
+        "n_estimators": 500
+      },
+      "mean_fold_log_loss": 0.691385,
+      "per_fold_log_loss": [
+        0.686868,
+        0.686312,
+        0.69889,
+        0.69347
+      ],
+      "pooled_oof_accuracy": 0.541559,
+      "selected": false
+    }
+  ],
+  "threshold": 0.6,
+  "threshold_rationale": "chosen on validation out-of-fold predictions: highest accuracy (0.6306) among thresholds keeping coverage above 10%; this one covers 16.2% of rows (2,369 signals). Frozen per \u00a76.5.",
+  "coverage_accuracy_curve_validation": [
+    {
+      "threshold": 0.5,
+      "coverage": 1.0,
+      "signals": 14654,
+      "accuracy": 0.550635,
+      "up_share": 0.648082
+    },
+    {
+      "threshold": 0.505,
+      "coverage": 1.0,
+      "signals": 14654,
+      "accuracy": 0.550635,
+      "up_share": 0.648082
+    },
+    {
+      "threshold": 0.51,
+      "coverage": 1.0,
+      "signals": 14654,
+      "accuracy": 0.550635,
+      "up_share": 0.648082
+    },
+    {
+      "threshold": 0.515,
+      "coverage": 0.893203,
+      "signals": 13089,
+      "accuracy": 0.555046,
+      "up_share": 0.725571
+    },
+    {
+      "threshold": 0.52,
+      "coverage": 0.61328,
+      "signals": 8987,
+      "accuracy": 0.571826,
+      "up_share": 0.600312
+    },
+    {
+      "threshold": 0.525,
+      "coverage": 0.484305,
+      "signals": 7097,
+      "accuracy": 0.585177,
+      "up_share": 0.600817
+    },
+    {
+      "threshold": 0.53,
+      "coverage": 0.484305,
+      "signals": 7097,
+      "accuracy": 0.585177,
+      "up_share": 0.600817
+    },
+    {
+      "threshold": 0.535,
+      "coverage": 0.484305,
+      "signals": 7097,
+      "accuracy": 0.585177,
+      "up_share": 0.600817
+    },
+    {
+      "threshold": 0.54,
+      "coverage": 0.484305,
+      "signals": 7097,
+      "accuracy": 0.585177,
+      "up_share": 0.600817
+    },
+    {
+      "threshold": 0.545,
+      "coverage": 0.315682,
+      "signals": 4626,
+      "accuracy": 0.607652,
+      "up_share": 0.706442
+    },
+    {
+      "threshold": 0.55,
+      "coverage": 0.295892,
+      "signals": 4336,
+      "accuracy": 0.611624,
+      "up_share": 0.710793
+    },
+    {
+      "threshold": 0.555,
+      "coverage": 0.295892,
+      "signals": 4336,
+      "accuracy": 0.611624,
+      "up_share": 0.710793
+    },
+    {
+      "threshold": 0.56,
+      "coverage": 0.26143,
+      "signals": 3831,
+      "accuracy": 0.618898,
+      "up_share": 0.67267
+    },
+    {
+      "threshold": 0.565,
+      "coverage": 0.26143,
+      "signals": 3831,
+      "accuracy": 0.618898,
+      "up_share": 0.67267
+    },
+    {
+      "threshold": 0.57,
+      "coverage": 0.26143,
+      "signals": 3831,
+      "accuracy": 0.618898,
+      "up_share": 0.67267
+    },
+    {
+      "threshold": 0.575,
+      "coverage": 0.26143,
+      "signals": 3831,
+      "accuracy": 0.618898,
+      "up_share": 0.67267
+    },
+    {
+      "threshold": 0.58,
+      "coverage": 0.26143,
+      "signals": 3831,
+      "accuracy": 0.618898,
+      "up_share": 0.67267
+    },
+    {
+      "threshold": 0.585,
+      "coverage": 0.26143,
+      "signals": 3831,
+      "accuracy": 0.618898,
+      "up_share": 0.67267
+    },
+    {
+      "threshold": 0.59,
+      "coverage": 0.26143,
+      "signals": 3831,
+      "accuracy": 0.618898,
+      "up_share": 0.67267
+    },
+    {
+      "threshold": 0.595,
+      "coverage": 0.26143,
+      "signals": 3831,
+      "accuracy": 0.618898,
+      "up_share": 0.67267
+    },
+    {
+      "threshold": 0.6,
+      "coverage": 0.161662,
+      "signals": 2369,
+      "accuracy": 0.630646,
+      "up_share": 0.470663
+    }
+  ],
+  "note": "Everything in this file was chosen on purged walk-forward validation folds. The final holdout is not read by train.py."
+}

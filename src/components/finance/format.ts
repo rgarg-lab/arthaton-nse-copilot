@@ -1,0 +1,83 @@
+/**
+ * Display formatting — the **only** place a fraction becomes a percent.
+ *
+ * `y_ret` and every probability are fractions throughout the Python pipeline and the API
+ * (§6.3: one canonical unit). Percent exists at the display edge and nowhere else, which
+ * is this file. My earlier project multiplied and divided by 100 across `models.py` and
+ * `fusion.py`; it was self-consistent and completely unreadable, and unreadable unit
+ * handling is how a sign error survives review.
+ *
+ * Nothing here computes a statistic. These are presentation functions over numbers that
+ * arrived from `ml/artifacts/*.json` — if a function in this file ever needs to *derive* a
+ * figure, that derivation belongs in Python.
+ */
+
+/** A fraction as a signed percent: 0.0123 -> "+1.23%". */
+export function signedPercent(fraction: number | null | undefined, places = 2): string {
+  if (fraction === null || fraction === undefined || !Number.isFinite(fraction)) return "—";
+  const pct = fraction * 100;
+  const sign = pct > 0 ? "+" : pct < 0 ? "" : "";
+  return `${sign}${pct.toFixed(places)}%`;
+}
+
+/** A fraction as an unsigned percent: 0.6306 -> "63.1%". */
+export function percent(fraction: number | null | undefined, places = 1): string {
+  if (fraction === null || fraction === undefined || !Number.isFinite(fraction)) return "—";
+  return `${(fraction * 100).toFixed(places)}%`;
+}
+
+/**
+ * A probability as a whole percent: 0.6234 -> "62%".
+ *
+ * Whole percents on purpose. "62.34%" implies the model resolves a third of a percentage
+ * point of probability, and it does not — the calibration curve has ten bins across
+ * roughly 50,000 rows, so the honest resolution is a couple of points at best. Rendering
+ * the extra digits would be a precision claim the evaluation does not support.
+ */
+export function probability(p: number | null | undefined): string {
+  if (p === null || p === undefined || !Number.isFinite(p)) return "—";
+  return `${Math.round(p * 100)}%`;
+}
+
+/** A plain number with thousands separators. */
+export function count(n: number | null | undefined): string {
+  if (n === null || n === undefined || !Number.isFinite(n)) return "—";
+  return new Intl.NumberFormat("en-IN").format(n);
+}
+
+/** A metric to a fixed number of places, or an em dash when absent. Never a zero. */
+export function fixed(n: number | null | undefined, places = 3): string {
+  if (n === null || n === undefined || !Number.isFinite(n)) return "—";
+  return n.toFixed(places);
+}
+
+/** Rupees, Indian digit grouping. */
+export function rupees(n: number | null | undefined): string {
+  if (n === null || n === undefined || !Number.isFinite(n)) return "—";
+  return `₹${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 }).format(n)}`;
+}
+
+/** "2026-11-11" -> "11 Nov 2026". */
+export function sessionDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return iso;
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(d);
+}
+
+/** Ticker without its exchange suffix, for a headline: "RELIANCE.NS" -> "RELIANCE". */
+export function bareTicker(ticker: string): string {
+  return ticker.replace(/\.(NS|BO)$/i, "");
+}
+
+export const REGIME_COPY: Record<string, { label: string; hint: string }> = {
+  calm: { label: "Calm", hint: "India VIX in the lowest third of its training range" },
+  normal: { label: "Normal", hint: "India VIX in the middle third of its training range" },
+  stressed: { label: "Stressed", hint: "India VIX in the highest third of its training range" },
+  unknown: { label: "Unknown", hint: "No India VIX reading for this session" },
+};

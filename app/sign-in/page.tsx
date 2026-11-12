@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { authConfigured, currentUser, signIn } from "@/auth";
-import { CenteredPage } from "@/components/learn/CenteredPage";
+import { CenteredPage } from "@/components/common/CenteredPage";
 import { Button } from "@/components/ui/button";
 import { Orb } from "@/components/ui/orb";
 import { safeCallbackUrl } from "@/lib/authz";

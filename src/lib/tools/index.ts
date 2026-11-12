@@ -5,17 +5,30 @@ import { cleanInputTool } from "./clean_input";
 import { extractStructuredTool } from "./extract_structured";
 import { verifyTool } from "./verify";
 import { compareWithMemoryTool, saveMemoryTool, searchMemoryTool } from "./memory";
-import { fetchUrlTool, mlPredictTool, ragLookupTool, webSearchTool } from "./retrieval";
+import { fetchUrlTool, ragLookupTool, webSearchTool } from "./retrieval";
 import { createTaskTool, scheduleReminderTool, sendMessageTool } from "./actions";
+import { findSimilarDaysTool, getModelMetricsTool, getSignalTool } from "./finance";
 
 export type { Tool };
 
 /**
- * Every tool the template ships with. All domain-agnostic: each one is a *capability*
- * ("verify a claim", "remember this") rather than a step in anyone's workflow.
+ * Every tool in the registry.
  *
- * Adding one for an idea means a new file here plus an entry in this list plus a name in
- * `idea.config.ts`. `/add-tool` does all three.
+ * The first block is the template's domain-agnostic set — each one a *capability*
+ * ("verify a claim", "remember this") rather than a step in anyone's workflow. The second
+ * is this project's finance tools, which are thin typed clients over the ML service and
+ * compute nothing themselves.
+ *
+ * Adding one means a new file here plus an entry in this list plus a name in
+ * `idea.config.ts`.
+ *
+ * The template's generic `ml_predict` tool was **removed** rather than left unregistered.
+ * It was a placeholder that POSTed an arbitrary feature record to `ML_ENDPOINT` and, with
+ * no endpoint set, returned a deterministic fake label and score from the length of its own
+ * input. The three finance tools below replace it with typed, purpose-built calls, so
+ * keeping it would have left a second path to the model — one that invents a plausible
+ * number when it cannot reach the service. That is precisely the pattern §4.1 exists to
+ * eliminate.
  */
 export const ALL_TOOLS: Tool[] = [
   cleanInputTool,
@@ -28,10 +41,13 @@ export const ALL_TOOLS: Tool[] = [
   ragLookupTool,
   webSearchTool,
   fetchUrlTool,
-  mlPredictTool,
   createTaskTool,
   sendMessageTool,
   scheduleReminderTool,
+  // ── finance (this project) ──
+  getSignalTool,
+  getModelMetricsTool,
+  findSimilarDaysTool,
 ];
 
 const BY_NAME = new Map(ALL_TOOLS.map((t) => [t.name, t]));

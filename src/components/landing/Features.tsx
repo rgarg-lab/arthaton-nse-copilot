@@ -1,9 +1,13 @@
 import {
   Activity,
   Calculator,
+  Hand,
+  History,
   Plug,
+  Scale,
   ShieldCheck,
   Sparkles,
+  Target,
   type LucideIcon,
 } from "lucide-react";
 import type { Feature, IdeaConfig } from "@/lib/config";
@@ -21,6 +25,12 @@ const ICONS: Record<string, LucideIcon> = {
   "shield-check": ShieldCheck,
   plug: Plug,
   sparkles: Sparkles,
+  // Added for this idea's four feature cards. The set stays fixed and explicit for the
+  // reason above — these are four more named entries, not a dynamic import.
+  target: Target,
+  hand: Hand,
+  history: History,
+  scale: Scale,
 };
 
 function Card({ feature }: { feature: Feature }) {

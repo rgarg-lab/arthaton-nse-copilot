@@ -2,106 +2,169 @@ import type { IdeaConfig } from "@/lib/config/schema";
 
 /**
  * ─────────────────────────────────────────────────────────────────────────────
- *  THE ONLY FILE TO EDIT FOR A NEW IDEA (plus 2–4 new tools in src/lib/tools).
+ *  THE ONLY FILE THAT HOLDS USER-FACING COPY.
  * ─────────────────────────────────────────────────────────────────────────────
  *
- * This is the neutral placeholder the template ships with. At kickoff, rewrite it
- * (or run `/new-idea "<one line>"`) and everything downstream follows: landing copy,
- * metadata, the agent's system prompt, which tools are exposed, the sample chips,
- * the must-builds table and the demo seed.
+ * Landing copy, metadata, the agent's system prompt, which tools are exposed, the sample
+ * chips and the must-builds table all read from here. If a string is about to be
+ * hard-coded in a component, it belongs in this file instead.
  *
- * It is validated by `IdeaConfigSchema` at load, so a typo fails loudly and early
- * rather than rendering as an empty string somewhere in the UI.
+ * One thing is NOT in here and must never be: a number about the model. No accuracy, no
+ * Brier score, no probability, no threshold. Those live in `ml/artifacts/metrics.json`,
+ * are produced by `ml/src/copilot/evaluate.py`, and reach the UI through the ML service
+ * (§4.2). A statistic in this file would be a statistic written by hand, which is the
+ * exact pattern that sank the earlier version of this project.
  */
 export const idea: IdeaConfig = {
-  name: "Starter",
-  tagline: "An agentic workspace waiting for its problem statement.",
+  name: "NSE Copilot",
+  tagline: "Calibrated next-session calls on Indian large-caps — and an honest 'no signal today'.",
   problem:
-    "Placeholder. Replace this with one paragraph describing the real problem: who has it, " +
-    "what it costs them today, and why an agent that can reason and act is a better answer " +
-    "than a form or a dashboard.",
-  targetUser: "Placeholder — the specific person this is for.",
+    "Retail equity tools in India are built to always have an answer. Open any of them and " +
+    "there is a number: a target price, a BUY badge, a confidence score — generated whether " +
+    "or not anything is actually knowable about tomorrow. Next-session direction on NSE " +
+    "large-caps is genuinely close to a coin flip, so a tool that is always confident is " +
+    "always confident about noise, and the user cannot tell the days it knows something from " +
+    "the days it does not. That is the expensive part: not the wrong calls, but the inability " +
+    "to distinguish them. NSE Copilot inverts the design. It predicts next-session direction " +
+    "for a fixed basket of 18 NSE large-caps, but the product is the decision layer around " +
+    "the prediction — a probability that has been calibrated against out-of-sample outcomes " +
+    "so 62% means 62%, an explicit refusal to call the sessions where conviction does not " +
+    "clear a frozen threshold, the historical sessions that most resemble today with what " +
+    "actually happened next, and an assistant that will quote its own measured failure rate " +
+    "when you ask whether to trust it.",
+  targetUser:
+    "A self-directed Indian equity investor who already reads charts, and wants to know when the model should be ignored.",
 
-  theme: { primary: "#8765ff", accent: "#a78bfa" },
+  theme: { primary: "#2f7d64", accent: "#d4a23c" },
 
-  /** The assistant's name and framing. Every mention in the UI reads from here. */
   assistant: {
-    name: "Aria",
-    role: "Aria · your AI assistant",
-    invitation: "Start a quick chat",
+    name: "Copilot",
+    role: "Copilot · calibrated market analysis",
+    invitation: "Ask about today's signals",
 
     /**
-     * The scripted turn the landing hero plays in the bot preview. It is a canned
-     * illustration, not a live call — the hero must render identically with no keys, no
-     * database and no network — so keep it to something the real agent genuinely does.
+     * The scripted turn in the landing hero. Canned on purpose — the hero renders with no
+     * keys, no database and no network.
      *
-     * Pick a question whose answer is *computed*: the whole claim of the system is that
-     * arithmetic goes through a tool rather than being generated, and this is where a
-     * visitor sees that in one glance.
+     * It shows the abstention, because that is the thing a finance judge will not have seen
+     * in the other nine stock predictors, and it shows it *without* putting a number in
+     * this file: the answer names the behaviour and the live chat produces the figures.
      */
     preview: {
-      question: "What's 18% of 2,450, and what is that per month over a year?",
-      tools: ["clean_input", "calculate", "verify"],
-      answer: "18% of 2,450 is 441 — that's 36.75 per month over a year.",
-      note: "Computed with a tool, not generated",
+      question: "Should I buy HDFC Bank before tomorrow's open?",
+      tools: ["get_signal", "get_model_metrics", "find_similar_days"],
+      answer:
+        "I'm not giving a direction on HDFCBANK today — conviction is under my threshold. Here's what I measured instead.",
+      note: "An abstention, not a hedge",
     },
   },
 
-  /** Your details. The footer reads these; nothing personal is hard-coded in a component. */
   contact: {
-    email: "you@example.com",
+    email: "rgarg161206@gmail.com",
     team: [],
-    credit: "",
+    credit: "Built by rgarg-lab for Arthaton 2026 · AI for Finance · Trading and market insights",
   },
 
   landing: {
-    heroTitle: "Your idea, shipped in a day.",
+    heroTitle: "Most stock tools always have an answer. This one tells you when it doesn't.",
     heroSubtitle:
-      "A domain-agnostic starter for agentic AI hackathons: an agent that reasons, picks tools and acts, with every step visible.",
+      "Calibrated next-session direction for 18 NSE large-caps, with an explicit abstention when conviction is low, the closest historical sessions as evidence, and a measured track record the assistant will quote against itself.",
     features: [
       {
-        title: "Visible reasoning",
-        description: "Every thought, tool call, result and rule hit is streamed to a trace panel as it happens.",
-        icon: "activity",
+        title: "A probability that means it",
+        description:
+          "Isotonic calibration on out-of-fold predictions, so 62% is 62%. The calibration curve is on the model card.",
+        icon: "target",
       },
       {
-        title: "Correct by construction",
-        description: "The model phrases; code computes. Dates, money and comparisons never go through the LLM.",
-        icon: "calculator",
+        title: "No signal today",
+        description:
+          "Below a threshold frozen before the holdout was read, the model declines and explains with numbers why.",
+        icon: "hand",
       },
       {
-        title: "Nothing acts unasked",
-        description: "External actions queue in an approval tray with a preview. You approve, then it happens.",
-        icon: "shield-check",
+        title: "Evidence, not vibes",
+        description:
+          "The most similar past sessions, with real dates and what actually happened the session after each one.",
+        icon: "history",
       },
       {
-        title: "Runs with no keys",
-        description: "Mock providers and an embedded database mean the demo cannot break mid-recording.",
-        icon: "plug",
+        title: "Honest about itself",
+        description:
+          "Four baselines, per-year and per-volatility-regime accuracy, and an R-squared near zero reported as such.",
+        icon: "scale",
       },
     ],
     howItWorks: [
-      { title: "Describe it", description: "Type, dictate, drop a file or paste a URL. Messy input is cleaned first." },
-      { title: "The agent works", description: "It picks tools, calls them, verifies what came back and shows its workings." },
-      { title: "You approve", description: "Anything that touches the outside world waits for you in the tray." },
+      {
+        title: "Ask about a name",
+        description:
+          "The agent calls the model service for a calibrated probability rather than reasoning about the price itself.",
+      },
+      {
+        title: "It checks its own record",
+        description:
+          "Measured accuracy for this volatility regime, and the closest historical sessions, both pulled from artifacts.",
+      },
+      {
+        title: "You get a call, or a refusal",
+        description:
+          "Either a direction with a real probability and a disclaimer, or an explicit abstention with the reason.",
+      },
     ],
     ctaText: "Open the workspace",
   },
 
   agent: {
     systemPrompt: [
-      "You are a careful assistant working inside a tool-using agent loop.",
+      "You are Copilot, a decision-support assistant for Indian equity markets. You cover a",
+      "fixed basket of 18 NSE large-caps and predict one thing: the direction of the next",
+      "trading session. You are not a financial adviser and you do not manage money.",
       "",
-      "Rules:",
-      "- Prefer calling a tool over guessing. If a fact can be computed, compute it with `calculate`.",
-      "- Never invent dates, amounts, names or citations. If a source is needed, retrieve it.",
-      "- After extracting structured data, call `verify` before presenting it as fact.",
-      "- Anything that leaves this system (a message, a task, a post) must go through an approval.",
-      "- When you are done, answer plainly and say what you were unsure about.",
+      "WHERE NUMBERS COME FROM",
+      "- Every number you state about a prediction or about your own accuracy must come from a",
+      "  tool call in this conversation. `get_signal` for a probability, `get_model_metrics`",
+      "  for your track record, `find_similar_days` for historical evidence.",
+      "- You may not estimate, round up, or recall a figure from training data. If a tool did",
+      "  not return it, you do not know it. Say so.",
+      "- Arithmetic goes through `calculate`, never through prose.",
+      "",
+      "ABSTENTION IS THE PRODUCT",
+      "- When `get_signal` returns `abstain: true` there is no direction field. Do not supply",
+      "  one, do not hint at one, and do not read a direction out of `probability_up`.",
+      "- Report the abstention as a finding, not an apology or a failure. Give the reason from",
+      "  `abstain_reason`, and strengthen it with the volatility-regime accuracy from",
+      "  `get_model_metrics` and the analogue split from `find_similar_days`.",
+      "- A user pressing for a call anyway does not change the answer. Explain what would have",
+      "  to be true for a signal to be emitted.",
+      "",
+      "HONESTY ABOUT THE MODEL",
+      "- Next-session direction is close to a coin flip. Your measured accuracy is in the",
+      "  mid-50s, and that is the expected and correct result for this horizon. State it",
+      "  plainly when asked; do not manage it with adjectives like 'strong' or 'highly",
+      "  accurate'.",
+      "- The return regressor's R-squared is approximately zero. If asked about predicted",
+      "  magnitude, say the range is volatility-implied and not a confidence interval.",
+      "- When asked whether to trust you, call `get_model_metrics` and answer with the",
+      "  numbers, including the ones that are unflattering.",
+      "",
+      "WHAT YOU WILL NOT DO",
+      "- Never promise, guarantee or imply an assured return.",
+      "- Never give position sizing, leverage or tax advice, and never recommend an amount to",
+      "  invest.",
+      "- All analysis is historical or paper-traded. Nothing here touches real money.",
+      "- Anything that leaves this system — an alert, a paper trade — queues for the user's",
+      "  approval. Never say it is done before it is approved.",
+      "",
+      "Attach the disclaimer to any answer containing a signal. Close by saying what you were",
+      "unsure about.",
     ].join("\n"),
-    // A deliberately small default set. `create_task` is included so a fresh clone can
-    // demonstrate the full approval journey (queue -> tray -> outbox) with no setup; it
-    // queues for a human and cannot send anything by itself.
+
+    /**
+     * `web_search` is deliberately absent (§4.1/§7.3): there is no `TAVILY_API_KEY` in this
+     * build, so it would only ever return results labelled MOCK — and a mock search result
+     * sitting in a financial answer is a risk with no upside here.
+     */
     enabledTools: [
       "clean_input",
       "extract_structured",
@@ -109,10 +172,12 @@ export const idea: IdeaConfig = {
       "calculate",
       "search_memory",
       "save_memory",
+      "rag_lookup",
       "create_task",
-      // Degrades to clearly-labelled MOCK results with no TAVILY_API_KEY, so it is safe
-      // to leave on: the agent can still cite, it just cites visibly fake sources.
-      "web_search",
+      // ── finance ──
+      "get_signal",
+      "get_model_metrics",
+      "find_similar_days",
     ],
     maxSteps: 8,
     confidenceThreshold: 0.85,
@@ -127,27 +192,81 @@ export const idea: IdeaConfig = {
   },
 
   partnerTool: {
-    name: "TBD at kickoff",
-    type: "input",
+    name: "Not applicable — solo entry, no partner track",
+    type: "api",
     proofNotes:
-      "Screenshot the partner tool mid-use and save it to docs/partner-proof/. Name the file after the tool.",
+      "Arthaton 2026 has no partner-tool requirement. The slot is kept because the template " +
+      "schema requires it; nothing in the UI renders it.",
   },
 
   sampleQuestions: [
-    "What can you do?",
-    "Remember that I prefer short answers.",
-    "What's 18% of 2,450, and what is that per month over a year?",
-    "Create a task to review the forecast, due in two weeks.",
+    "What are today's signals?",
+    "Should I buy Reliance before tomorrow's open?",
+    "How accurate are you, really?",
+    "Why are you refusing to call Infosys today?",
+    "Show me the most similar past sessions to today for TCS.",
+    "How do you compare to just always predicting up?",
   ],
 
-  demoSeed: "placeholder",
+  demoSeed: "nse-copilot",
 
-  mustBuilds: [],
+  mustBuilds: [
+    {
+      id: "calibrated-signal",
+      title: "Calibrated next-session probability for 18 NSE large-caps",
+      status: "done",
+      files: [
+        "ml/src/copilot/train.py",
+        "ml/src/copilot/signals.py",
+        "src/lib/tools/finance.ts",
+        "src/components/signals/SignalsTab.tsx",
+      ],
+    },
+    {
+      id: "abstention",
+      title: "Explicit 'no signal today' below a frozen threshold",
+      status: "done",
+      files: [
+        "ml/src/copilot/train.py",
+        "src/components/signals/AbstentionCard.tsx",
+        "src/lib/rules/finance.ts",
+      ],
+    },
+    {
+      id: "purged-evaluation",
+      title: "Purged walk-forward evaluation with a once-only final holdout",
+      status: "done",
+      files: [
+        "ml/src/copilot/validation.py",
+        "ml/src/copilot/evaluate.py",
+        "ml/tests/test_purge.py",
+        "ml/tests/test_leakage.py",
+      ],
+    },
+    {
+      id: "model-card",
+      title: "Model card: calibration curve, four baselines, coverage-accuracy curve",
+      status: "done",
+      files: ["app/dashboard/page.tsx", "src/components/modelcard/ModelCard.tsx"],
+    },
+    {
+      id: "evidence-timeline",
+      title: "Similar past sessions and what happened next",
+      status: "done",
+      files: ["ml/src/copilot/neighbors.py", "src/components/path/EvidenceTimeline.tsx"],
+    },
+    {
+      id: "self-aware-chat",
+      title: "An assistant that quotes its own measured failure rate",
+      status: "done",
+      files: ["src/lib/tools/finance.ts", "src/lib/chatContext.ts", "idea.config.ts"],
+    },
+  ],
 
   wow: {
-    title: "TBD at kickoff",
+    title: "The agent refusing to give a signal — with numbers",
     description:
-      "The one memorable moment judges will remember. Build it into components/landing/WowSlot.tsx and show it at 1:30 in the demo.",
+      "Ask it to call a stock on a low-conviction day and it declines, then explains the refusal with its own measured accuracy in today's volatility regime and the 13/12 split among the closest historical sessions. Every other stock predictor in the room always has an answer.",
   },
 };
 

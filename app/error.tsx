@@ -3,7 +3,7 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
-import { CenteredPage } from "@/components/learn/CenteredPage";
+import { CenteredPage } from "@/components/common/CenteredPage";
 import { Button } from "@/components/ui/button";
 
 /** Route-level error boundary: a page that failed to render gets a way back instead of a blank screen. */

@@ -8,8 +8,16 @@ import { cn } from "@/lib/utils";
 
 import styles from "./chat.module.css";
 
-/** The goal titles the demo seed ships with; the rotating placeholder cycles through them. */
-export const ROLE_TITLES: string[] = demoSeed().goals.map((g) => g.title);
+/**
+ * What the rotating placeholder cycles through when it is given nothing else.
+ *
+ * The template cycled the demo seed's role titles ("Backend Engineer", …). Those are gone
+ * with the learner concept; the natural replacement is the configured sample questions,
+ * which are the real things this assistant can answer and already live in
+ * `idea.config.ts`. Deterministically ordered by the seed, so a rehearsal and a recording
+ * show the same prompt first.
+ */
+export const ROLE_TITLES: string[] = demoSeed().prompts;
 
 const ENTER = { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const };
 const EVERY_MS = 2200;

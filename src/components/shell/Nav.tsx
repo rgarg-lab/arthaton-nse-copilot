@@ -4,11 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
+/**
+ * Signals first, because it is the thing the product is for; the model card second,
+ * because the honest second question after "what do you think" is "why should I believe
+ * you". `/learn` and the learner routes are gone — see `app/README-retired.md`.
+ */
 const LINKS = [
-  { href: "/workspace", label: "Workspace" },
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/outbox", label: "Outbox" },
-  { href: "/memory", label: "Memory" },
+  { href: "/signals", label: "Signals" },
+  { href: "/dashboard", label: "Model card" },
+  { href: "/evidence", label: "Evidence" },
+  { href: "/workspace", label: "Copilot" },
+  { href: "/memory", label: "Watchlist" },
+  { href: "/outbox", label: "Alerts" },
   { href: "/preflight", label: "Preflight" },
 ];
 

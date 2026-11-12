@@ -66,6 +66,31 @@ UNIVERSE: tuple[str, ...] = (
     "NTPC.NS",
 )
 
+# ─── symbol aliases ───────────────────────────────────────────────────────────
+# The universe above is the canonical list and does not change (§6.1: "use
+# exactly this list, do not substitute"). This maps a canonical ticker to the
+# symbol Yahoo actually serves it under, for the case where a listing has been
+# *renamed*.
+#
+# TATAMOTORS.NS stopped resolving after the Tata Motors demerger: Yahoo returns
+# YFTzMissingError ("possibly delisted") for it, and serves the continuing
+# passenger-vehicles entity as TMPV.NS — with the full price history back to
+# 2015 attached, which is what identifies it as the renamed series rather than a
+# new listing (TMPV itself only began trading in late 2025).
+#
+# This is deliberately an alias and not a substitution: the row is still labelled
+# TATAMOTORS.NS throughout the panel, the artifacts and the UI, and the universe
+# is still the specified 18 names. Noted as a data caveat in the README, because
+# a demerged entity's pre-demerger history is not a perfectly continuous series.
+SYMBOL_ALIASES: dict[str, str] = {
+    "TATAMOTORS.NS": "TMPV.NS",
+}
+
+
+def download_symbol(ticker: str) -> str:
+    return SYMBOL_ALIASES.get(ticker, ticker)
+
+
 # Human-readable names, so the UI never has to carry a ticker→name map of its own.
 TICKER_NAMES: dict[str, str] = {
     "RELIANCE.NS": "Reliance Industries",

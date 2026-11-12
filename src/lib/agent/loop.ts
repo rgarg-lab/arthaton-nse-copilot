@@ -5,6 +5,7 @@ import { generate, llmMode } from "@/lib/llm/router";
 import type { Message, ToolCall } from "@/lib/llm/types";
 import { runRules, type FiredRule } from "@/lib/rules";
 import { assertToolsExist, enabledTools, toToolSpecs, toolByName } from "@/lib/tools";
+import { systemPromptWithMetrics } from "@/lib/chatContext";
 import { createTrace, summarise, type TraceEvent } from "./trace";
 import type { ToolContext, ToolResult } from "./types";
 
@@ -76,6 +77,18 @@ export async function runAgent(options: AgentRunOptions): Promise<AgentRunResult
 
   const ctx: ToolContext = { sessionId, userId, db: options.db, config, emit, mock };
 
+  /**
+   * The system prompt is the configured one plus the model's own measured track record
+   * (`src/lib/chatContext.ts`). Fetched once per run and reused on every path — including
+   * both fallback paths below, which is deliberate: a degraded answer is exactly where an
+   * assistant is most likely to drift into unearned confidence, so the honest numbers have
+   * to be present there too.
+   *
+   * It never blocks the run. If the ML service is unreachable, the block says so and tells
+   * the model to decline rather than estimate.
+   */
+  const system = await systemPromptWithMetrics(config.agent.systemPrompt);
+
   const conversation: Message[] = [{ role: "user", content: options.question }];
   const toolResults: ToolResult[] = [];
   const firedRules: FiredRule[] = [];
@@ -94,7 +107,7 @@ export async function runAgent(options: AgentRunOptions): Promise<AgentRunResult
     for (steps = 0; steps < config.agent.maxSteps; steps += 1) {
       const result = await generate({
         sessionId,
-        system: config.agent.systemPrompt,
+        system,
         messages: conversation,
         tools: specs,
         maxTokens: 2048,
@@ -167,7 +180,7 @@ export async function runAgent(options: AgentRunOptions): Promise<AgentRunResult
     usedFallback = true;
     const wrapUp = await generate({
       sessionId,
-      system: config.agent.systemPrompt,
+      system,
       messages: [
         ...conversation,
         {
@@ -199,7 +212,7 @@ export async function runAgent(options: AgentRunOptions): Promise<AgentRunResult
     usedFallback = true;
     try {
       const plain = await generate({
-        system: config.agent.systemPrompt,
+        system,
         messages: [{ role: "user", content: options.question }],
         maxTokens: 1024,
       });

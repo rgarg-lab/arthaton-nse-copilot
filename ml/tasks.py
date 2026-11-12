@@ -111,6 +111,9 @@ def run_one(name: str) -> int:
     env = dict(os.environ)
     existing = env.get("PYTHONPATH", "")
     env["PYTHONPATH"] = env_src + (os.pathsep + existing if existing else "")
+    # The long targets (`data`, `train`) print progress as they go, and a block-
+    # buffered child makes a 10-minute run look like a hang.
+    env.setdefault("PYTHONUNBUFFERED", "1")
     return subprocess.call(cmd, cwd=ML_DIR, env=env)
 
 

@@ -12,7 +12,8 @@ import { BotPreview } from "@/components/landing/BotPreview";
 import { NOVA_SCENE_TIMEOUT_MS, NOVA_SCENE_URL, NovaScene } from "@/components/landing/NovaScene";
 import { useQuickChat } from "@/components/landing/QuickChat";
 import { useHydrated } from "@/lib/hydrated";
-import type { TrustNumbers } from "@/lib/trustFormat";
+// The `numbers` prop is gone: the headline comes from idea.config.ts, and the counts it
+// used to be assembled from were demo-seed placeholders that §4.1 does not allow here.
 
 import styles from "./hero.module.css";
 import { useInView } from "./useInView";
@@ -36,15 +37,7 @@ function prefersSaveData() {
   return (navigator as Navigator & { connection?: SaveDataConnection }).connection?.saveData === true;
 }
 
-export function Hero({
-  storyHref = "#how-it-works",
-  numbers: _numbers,
-}: {
-  storyHref?: string;
-  /** Kept on the props so the landing page composition is unchanged; the headline now
-   *  comes from idea.config.ts instead of being assembled from these counts. */
-  numbers: TrustNumbers;
-}) {
+export function Hero({ storyHref = "#how-it-works" }: { storyHref?: string }) {
   const containerRef = useRef<HTMLElement>(null);
   const appRef = useRef<Application | null>(null);
   const [sceneLoaded, setSceneLoaded] = useState(false);

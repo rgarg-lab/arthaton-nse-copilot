@@ -254,51 +254,17 @@ export const fetchUrlTool: Tool<typeof FetchUrlInput> = {
   },
 };
 
-const MlPredictInput = z.object({
-  /** Free-form: whatever the configured endpoint expects. */
-  features: z.record(z.string(), z.unknown()).describe("The input record to score."),
-  task: z.string().min(1).max(100).describe("What is being predicted, e.g. 'churn_risk'."),
-});
-
-/**
- * The slot for a real model: a local endpoint, a Hugging Face Inference call, anything
- * that speaks JSON over HTTP. Mocked by default with an explicitly-labelled result, so an
- * idea that wants "and we also trained a model" has somewhere to put it.
+/*
+ * The template's generic `ml_predict` tool lived here and has been removed.
+ *
+ * It POSTed an arbitrary feature record to `ML_ENDPOINT` and, with no endpoint set,
+ * returned a label and a score derived from the length of its own JSON input — a
+ * deterministic fake, clearly labelled, and perfectly reasonable as a placeholder in a
+ * domain-agnostic template.
+ *
+ * It is wrong for this project. `src/lib/tools/finance.ts` provides `get_signal`,
+ * `get_model_metrics` and `find_similar_days` as typed clients over the real service, and
+ * leaving the placeholder registered alongside them would leave a second path to "the
+ * model" that fabricates a plausible number when the service is unreachable. §4.1 and
+ * §4.2 exist because the earlier version of this project shipped exactly that.
  */
-export const mlPredictTool: Tool<typeof MlPredictInput> = {
-  name: "ml_predict",
-  description:
-    "Score a record with the configured prediction endpoint. Returns a label and a score. " +
-    "Say the prediction is a model output, not a certainty.",
-  inputSchema: MlPredictInput,
-
-  async run(input) {
-    const endpoint = env("ML_ENDPOINT");
-    if (!endpoint) {
-      // Deterministic from the input so a demo is reproducible, and loudly labelled.
-      const digest = JSON.stringify(input.features).length;
-      return {
-        mock: true,
-        task: input.task,
-        label: digest % 2 === 0 ? "low" : "high",
-        score: Number(((digest % 100) / 100).toFixed(2)),
-        note: "MOCK PREDICTION — no ML_ENDPOINT configured. Do not present as a real model output.",
-      };
-    }
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          ...(process.env.ML_API_KEY ? { authorization: `Bearer ${process.env.ML_API_KEY}` } : {}),
-        },
-        body: JSON.stringify({ task: input.task, features: input.features }),
-        signal: AbortSignal.timeout(20_000),
-      });
-      if (!res.ok) throw new Error(`endpoint ${res.status}`);
-      return { mock: false, task: input.task, ...(await res.json()) };
-    } catch (err) {
-      return { mock: true, task: input.task, error: (err as Error).message, note: "prediction endpoint failed" };
-    }
-  },
-};
