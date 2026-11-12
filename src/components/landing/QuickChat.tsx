@@ -35,17 +35,15 @@ const ENTER = { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const };
  */
 const QUICK_CHAT_LEAD = "Opening a session…";
 
-type Learner = { id: string; displayName: string };
-
 /**
- * What the landing page knows about the visitor.
+ * What the landing page knows about the visitor: whether anyone is signed in.
  *
- * `learner` is retained in the type but is always `null` in this build: the learner
- * concept is retired (§7.1) and the quick chat now opens a plain agent session instead.
- * Kept rather than removed because `app/page.tsx` still distinguishes signed-in from
- * signed-out, and auth is a supported-but-unconfigured path here.
+ * It used to carry the visitor's most recent "learner" too. That concept is retired
+ * (§7.1) and the quick chat opens a plain agent session regardless, so the field is gone
+ * rather than kept as a permanently-null vestige — `tests/honesty.test.ts` scans for
+ * exactly this kind of leftover.
  */
-export type QuickChatVisitor = { signedIn: false } | { signedIn: true; learner: Learner | null };
+export type QuickChatVisitor = { signedIn: boolean };
 
 /**
  * `Talk to ${ASSISTANT_NAME}` on the landing: a glass drawer with the real chat inside.

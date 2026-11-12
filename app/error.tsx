@@ -16,8 +16,9 @@ export default function AppError({ error, reset }: { error: Error & { digest?: s
       <h1 className="mt-6 text-[clamp(2.2rem,4vw,3rem)] font-[420] leading-[1.06] tracking-[-0.047em]">
         Something <span className="text-gradient-violet">broke</span>.
       </h1>
-      <p className="mt-4 max-w-[38ch] text-lead text-ink-2">
-        This page hit an error on our side. Nothing about your profile or path is lost — try again, or go back to your learners.
+      <p className="mt-4 max-w-[42ch] text-lead text-ink-2">
+        This page hit an error on our side. No signal, model artifact or queued action is
+        affected — try again, or go back to today&rsquo;s board.
       </p>
       {error.digest && (
         <p className="mt-3 font-mono text-[12px] text-ink-3" data-testid="error-digest">
@@ -29,7 +30,9 @@ export default function AppError({ error, reset }: { error: Error & { digest?: s
           Try again <ArrowRight data-icon="inline-end" />
         </Button>
         <Button size="lg" variant="ghost" asChild>
-          <Link href="/learn">Your learners</Link>
+          {/* `/learn` is retired (§7.1); this was a dead link on the error page, which is
+              the worst possible place for one. */}
+          <Link href="/signals">Today&rsquo;s signals</Link>
         </Button>
       </div>
     </CenteredPage>

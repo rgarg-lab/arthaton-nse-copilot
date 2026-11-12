@@ -37,10 +37,9 @@ export const dynamic = "force-dynamic";
  * hero, the feature cards, the beam network and the quick chat.
  */
 async function visitorState(): Promise<QuickChatVisitor> {
-  const user = await currentUserOrDemo();
-  // The learner concept is retired, so there is no per-learner deep link to resolve: the
-  // quick chat only needs to know whether anyone is signed in, and the app runs signed out.
-  return user ? { signedIn: true, learner: null } : { signedIn: false };
+  // The quick chat only needs to know whether anyone is signed in; it opens a fresh agent
+  // session either way, because the app has no login wall.
+  return { signedIn: Boolean(await currentUserOrDemo()) };
 }
 
 export default async function Home() {

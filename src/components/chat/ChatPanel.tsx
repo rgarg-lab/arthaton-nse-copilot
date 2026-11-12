@@ -8,14 +8,11 @@ import type { ChatEvent } from "@/lib/agent/chatEvents";
 import type { Degradation, DegradationReason } from "@/schemas";
 import type { NovaState } from "@/schemas";
 import type { Path, Profile, ProfileOp, PathDiff } from "@/schemas";
-import type { ProfileCard, ProfileCardAnswer } from "@/schemas/profileCard";
-import { profileCardAnswerToOps, profileCardFollowUp } from "@/lib/profileCard";
 import { readSse } from "@/lib/sseClient";
 import type { TraceEvent } from "@/lib/agent/trace";
 import { Orb } from "@/components/ui/orb";
 import { cn } from "@/lib/utils";
 
-import { ProfileCardView } from "./ProfileCardView";
 import { RotatingPrompt } from "./RotatingPrompt";
 import styles from "./chat.module.css";
 import { ASSISTANT_NAME, SAMPLE_QUESTIONS } from "@/lib/config/client";
@@ -27,8 +24,6 @@ export type ChatMessageView = {
   toolCalls?: string[];
   degraded?: boolean;
   streaming?: boolean;
-  /** Structured intake card (D-13) shown inside this assistant message. */
-  card?: ProfileCard;
 };
 
 type Props = {
@@ -58,16 +53,28 @@ type Props = {
   prompts?: string[] | null;
 };
 
+/**
+ * Human labels for the tool chips that appear while the agent works.
+ *
+ * Keyed by tool name; anything unlisted falls back to the raw name, so this does not have
+ * to be exhaustive. The template's entries named a different product's tools
+ * ("Generating your path", "Searching the catalog") and would have been shown to a judge
+ * the moment the chat ran.
+ */
 export const TOOL_LABEL: Record<string, string> = {
-  get_profile: "Reading your profile",
-  apply_profile_ops: "Updating your profile",
-  map_custom_goal: "Mapping your goal onto skills",
-  generate_path: "Generating your path",
-  replan_path: "Replanning your path",
-  explain_item: "Looking up the evidence",
-  search_catalog: "Searching the catalog",
-  get_dashboard_summary: "Checking your progress",
-  propose_profile_card: "Preparing your check-in",
+  // finance
+  get_signal: "Reading today's signal",
+  get_model_metrics: "Checking its own track record",
+  find_similar_days: "Finding similar past sessions",
+  // template
+  clean_input: "Cleaning up the question",
+  extract_structured: "Pulling out the details",
+  verify: "Verifying before asserting",
+  calculate: "Computing it in code",
+  search_memory: "Checking what it remembers",
+  save_memory: "Remembering that",
+  rag_lookup: "Searching the documents",
+  create_task: "Queuing for your approval",
 };
 
 /**
@@ -75,6 +82,27 @@ export const TOOL_LABEL: Record<string, string> = {
  * place an idea's chat still spoke about somebody else's domain.
  */
 const SUGGESTIONS = SAMPLE_QUESTIONS;
+
+/**
+ * The chat's opening line, and the two resting states.
+ *
+ * All three described a different product — "I'll map the gap, build a path from real
+ * courses", "Your path, feedback, graph and dashboard still work". Named constants here
+ * rather than in `idea.config.ts` because they are this component's own states rather
+ * than idea copy, and a schema field for each would be three fields nobody edits. The
+ * assistant's name still comes from the config.
+ */
+const GREETING_LEAD =
+  "Ask me about any name in the basket and I'll give you the model's calibrated " +
+  "probability — or tell you it's declining to call that one today, and why.";
+
+const RESTING_BUDGET_SPENT =
+  "today's conversation budget is spent. The signals, the model card and the evidence " +
+  "pages still work — they read the model service directly. Chat opens again tomorrow.";
+
+const RESTING_UNAVAILABLE =
+  "the model is unavailable right now. The signals, the model card and the evidence " +
+  "pages still work — they read the model service directly.";
 
 const ENTER = { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const };
 
@@ -105,8 +133,6 @@ export function ChatPanel({
   const seq = useRef(initialMessages.length);
   const reduce = useReducedMotion() ?? false;
   // Cards answered this session (by card id); older cards count as answered once anything follows them.
-  const [answeredCards, setAnsweredCards] = useState<Record<string, { skipped: boolean; stated: number | null }>>({});
-  const [cardBusy, setCardBusy] = useState<string | null>(null);
   const [focused, setFocused] = useState(false);
 
   useEffect(() => {
@@ -165,7 +191,9 @@ export function ChatPanel({
             onPathUpdated(event.version, event.path, event.diff);
             break;
           case "ui_card":
-            patch((m) => ({ ...m, card: event.card }));
+            // Nothing in this project emits one; the structured intake card it rendered
+            // is gone with the learner concept (§7.1). Ignored rather than crashing the
+            // stream, because `ChatEvent` is a shared union the chat route still maps.
             break;
           case "degraded":
             patch((m) => ({ ...m, degraded: true, text: m.text || event.degradation.message }));
@@ -194,33 +222,15 @@ export function ChatPanel({
     }
   }
 
-  async function answerCard(card: ProfileCard, answer: ProfileCardAnswer, skipped: boolean) {
-    if (busy || cardBusy) return;
-    setCardBusy(card.id);
-    setError(null);
-    try {
-      const ops = skipped ? [] : profileCardAnswerToOps(answer, card);
-      if (ops.length > 0) {
-        const res = await fetch(`/api/learners/${learnerId}/profile`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ ops }),
-        });
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error(body.error ?? `Could not save your answers (${res.status})`);
-        }
-        onProfileUpdated((await res.json()) as Profile, ops);
-      }
-      const stated = Object.values(answer.skills).filter((l) => l > 0).length;
-      setAnsweredCards((prev) => ({ ...prev, [card.id]: { skipped, stated } }));
-      setCardBusy(null);
-      await send(profileCardFollowUp(answer, card, skipped));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-      setCardBusy(null);
-    }
-  }
+  /*
+   * `answerCard` and the structured intake card it served have been removed.
+   *
+   * It was already unreachable — nothing in this project emits a `ui_card` event — and
+   * its save path POSTed to `/api/learners/:id/profile`, a route §7.1 retires. So it was
+   * not a dormant feature but broken dead code pointing at a 404, which is why it is gone
+   * rather than kept: `tests/honesty.test.ts` now fails the build on any reference to a
+   * retired route, and an inert one is still a reference.
+   */
 
   const canSend = input.trim().length > 0 && !busy && !budgetSpent;
 
@@ -238,10 +248,7 @@ export function ChatPanel({
             <h2 className={styles.greetingTitle}>
               Hi, I&apos;m <span className="text-gradient-violet">{ASSISTANT_NAME}</span>.
             </h2>
-            <p className={styles.greetingLead}>
-              Tell me what you want to become and what you already know. I&apos;ll map the gap, build a path from
-              real courses, and change it when you push back.
-            </p>
+            <p className={styles.greetingLead}>{GREETING_LEAD}</p>
             <ul className={styles.suggestions} aria-label="Try one of these">
               {SUGGESTIONS.map((s, i) => (
                 <motion.li
@@ -260,7 +267,7 @@ export function ChatPanel({
         )}
 
         <AnimatePresence initial={false}>
-          {messages.map((m, index) => (
+          {messages.map((m) => (
             <motion.div
               key={m.id}
               className={cn(styles.row, m.role === "user" ? styles.rowUser : styles.rowNova)}
@@ -276,10 +283,6 @@ export function ChatPanel({
                   message={m}
                   activity={m.streaming ? activity : null}
                   reduce={reduce}
-                  cardAnswered={m.card ? (answeredCards[m.card.id] ?? (index < messages.length - 1 ? { skipped: false, stated: null } : null)) : null}
-                  cardBusy={m.card ? cardBusy === m.card.id : false}
-                  onCardSubmit={(answer) => m.card && answerCard(m.card, answer, false)}
-                  onCardSkip={(answer) => m.card && answerCard(m.card, answer, true)}
                 />
               )}
             </motion.div>
@@ -300,9 +303,7 @@ export function ChatPanel({
               transition={ENTER}
             >
               <span className={styles.noticeDot} aria-hidden />
-              {budgetSpent
-                ? `${ASSISTANT_NAME} is resting — today's conversation budget is spent. Your path, feedback, graph and dashboard still work; chat opens again tomorrow.`
-                : `${ASSISTANT_NAME} is resting — the model is unavailable right now. Your path, graph and dashboard still work.`}
+              {`${ASSISTANT_NAME} is resting — ${budgetSpent ? RESTING_BUDGET_SPENT : RESTING_UNAVAILABLE}`}
             </motion.p>
           )}
         </AnimatePresence>
@@ -319,7 +320,10 @@ export function ChatPanel({
               className={styles.rotating}
               paused={reduce}
               phrases={prompts}
-              intro={messages.length === 0 ? "I want to become a" : "Ask about your path, or say: I want to become a"}
+              // The rotating phrases are the configured sample questions, so the intro
+              // just has to hand off to them. The template's version ("I want to become
+              // a…") belonged to a career-planning product.
+              intro={messages.length === 0 ? "Try:" : "Ask another, or try:"}
               onPick={(text) => {
                 setInput(text);
                 textareaRef.current?.focus();
@@ -376,18 +380,10 @@ function NovaMessage({
   message,
   activity,
   reduce,
-  cardAnswered,
-  cardBusy,
-  onCardSubmit,
-  onCardSkip,
 }: {
   message: ChatMessageView;
   activity: string | null;
   reduce: boolean;
-  cardAnswered: { skipped: boolean; stated: number | null } | null;
-  cardBusy: boolean;
-  onCardSubmit: (answer: ProfileCardAnswer) => void;
-  onCardSkip: (answer: ProfileCardAnswer) => void;
 }) {
   const done = message.toolCalls ?? [];
   const showChecklist = done.length > 0 || activity;
@@ -433,8 +429,6 @@ function NovaMessage({
             {message.streaming && <span className={styles.caret} aria-hidden />}
           </p>
         )}
-
-        {message.card && <ProfileCardView card={message.card} answered={cardAnswered} busy={cardBusy} onSubmit={onCardSubmit} onSkip={onCardSkip} />}
 
         {message.degraded && !message.streaming && (
           <span className={styles.degradedTag}>answered without the model</span>

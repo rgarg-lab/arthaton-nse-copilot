@@ -7,7 +7,10 @@ import { Orb } from "@/components/ui/orb";
 import { safeCallbackUrl } from "@/lib/authz";
 import { ASSISTANT_NAME } from "@/lib/config/client";
 
-export const metadata: Metadata = { title: "Sign in", description: `Sign in with Google to talk to ${ASSISTANT_NAME} and keep your learning path.` };
+export const metadata: Metadata = {
+  title: "Sign in",
+  description: `Sign in with Google to keep your watchlist and conversations with ${ASSISTANT_NAME}. Everything else works signed out.`,
+};
 export const dynamic = "force-dynamic";
 
 const ERRORS: Record<string, string> = {
@@ -47,8 +50,10 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
       <h1 className="mt-6 text-[clamp(2.2rem,4vw,3rem)] font-[420] leading-[1.06] tracking-[-0.047em]">
         Sign in to meet <span className="text-gradient-violet">{ASSISTANT_NAME}</span>.
       </h1>
-      <p className="mt-4 max-w-[38ch] text-lead text-ink-2">
-        Your learners, paths and conversations stay with your Google account, so you can pick up on any device.
+      <p className="mt-4 max-w-[42ch] text-lead text-ink-2">
+        Signing in keeps your watchlist, your saved notes and your conversations under your
+        Google account. Everything else — the signals, the model card and the evidence — works
+        signed out.
       </p>
       {/* No providers configured means the button could not do anything, and a dead button
           is worse than an explanation. The app works signed out either way. */}

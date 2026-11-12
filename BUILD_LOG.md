@@ -563,6 +563,43 @@ It survived three scoring rounds because the test only scanned
 Guards: `npm run build` ✅ · `npm test` 197/197 ✅ · `npm run lint` 0 errors ✅ · landing
 page verified in the browser.
 
+**Round 5 — the words, not just the routes.** Having widened the honesty test once, I
+widened it again to assert on *rendered text*, and it immediately found that the §7.1
+retirement had removed the learner **routes** long before it removed the learner **copy**:
+
+| Where | What it said |
+|---|---|
+| `app/opengraph-image.tsx` | the social card — what renders when the submission link is pasted anywhere — described "your AI learning mentor" and "a learning path you can verify", over "a hand-built skill map checked against millions of real learners" |
+| `app/error.tsx` | a button to `/learn`: **a dead link on the error page**, reached by someone already stuck |
+| `app/sign-in/page.tsx` | promised to keep "your learners, paths and conversations" |
+| `src/components/landing/BeamNetwork.tsx` | an architecture diagram of Profile → Skill graph → Catalog → Engine → Path/Feedback/Dashboard |
+| `src/components/chat/ChatPanel.tsx` | tool chips reading "Generating your path", a greeting offering to "build a path from real courses", a composer placeholder of "I want to become a…", and resting states naming "your path, feedback, graph and dashboard" |
+
+None of it broke a build or failed a test. All of it would have been read by a judge.
+
+`BeamNetwork` was relabelled rather than deleted — its structure (three committed inputs,
+one service, three outputs) is exactly this project's, so the nodes became Price panel /
+Calibrator / Metrics → Model service → Signal / Abstention / Evidence. Layout, beams and
+timings untouched.
+
+This also settled the profile-card question from round 1 the other way. I had kept it as a
+"coherent working feature"; the retired-route scan showed its save path POSTs to
+`/api/learners/:id/profile`, a route that no longer exists. It was not dormant, it was
+broken — unreachable code pointing at a 404 — so it is gone, and `ChatPanel` ignores the
+`ui_card` event rather than rendering it.
+
+Two tests added and both fail the build on recurrence: one scans every rendered file for
+the inherited vocabulary, one forbids any reference to a retired route in `app/` or `src/`.
+The second is the more valuable: it is how the dead error-page link would have been caught
+on the day it was created.
+
+One self-inflicted break along the way: the rewritten social card put two child nodes in a
+`<div>` without an explicit `display`, which Satori rejects at prerender — a red production
+build from a copy edit. Fixed, and worth recording as the reason the OG route is worth
+building rather than eyeballing.
+
+Guards: `npm run build` ✅ · `npm test` **200**/200 ✅ · `npm run lint` 0 errors ✅
+
 ### Submission checklist
 
 | | Status |

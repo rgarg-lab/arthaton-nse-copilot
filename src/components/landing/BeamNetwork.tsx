@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, BookOpen, Calculator, GitBranch, MessageSquare, Route, UserRound } from "lucide-react";
+import { BarChart3, Calculator, ClipboardCheck, Database, GitBranch, Hand, Route } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { forwardRef, useEffect, useId, useRef, useState, type ReactNode, type RefObject } from "react";
 
@@ -151,29 +151,39 @@ export function BeamNetwork({ id }: { id?: string }) {
         <Badge variant="eyebrow" dot>
           Under the hood
         </Badge>
+        {/**
+         * The same diagram, relabelled to this project's actual architecture.
+         *
+         * It described the template's original engine — Profile, Skill graph and Catalog
+         * feeding a scorer that emits a Path, Feedback and a Dashboard. The structure
+         * happens to be exactly right for this build (three committed inputs, one
+         * service, three outputs), so the nodes are renamed rather than the component
+         * rebuilt. The layout, the beams and their timings are untouched.
+         */}
         <h2 id="beams-title" className={styles.title}>
-          The engine decides. <span className="text-gradient-violet">{ASSISTANT_NAME} only explains.</span>
+          The model decides. <span className="text-gradient-violet">{ASSISTANT_NAME} only explains.</span>
         </h2>
         <p className={styles.description}>
-          The path is arithmetic over your profile, the skill map and the catalog. {ASSISTANT_NAME} reads the
-          result and tells you why.
+          Every probability is computed in Python from committed artifacts and served over
+          one endpoint. {ASSISTANT_NAME} reads the result and tells you what it means — it
+          never does the arithmetic itself.
         </p>
       </header>
 
       <div ref={containerRef} className={styles.network}>
         <div className={`${styles.column} ${styles.left}`}>
-          <Node ref={profileRef} name="Profile" icon={<UserRound strokeWidth={stroke} />} />
-          <Node ref={graphRef} name="Skill graph" icon={<GitBranch strokeWidth={stroke} />} />
-          <Node ref={catalogRef} name="Catalog" icon={<BookOpen strokeWidth={stroke} />} />
+          <Node ref={profileRef} name="Price panel" icon={<Database strokeWidth={stroke} />} />
+          <Node ref={graphRef} name="Calibrator" icon={<GitBranch strokeWidth={stroke} />} />
+          <Node ref={catalogRef} name="Metrics" icon={<ClipboardCheck strokeWidth={stroke} />} />
         </div>
         <div className={styles.center}>
-          <Node ref={centerRef} name="Engine" large icon={<Calculator strokeWidth={stroke} />} />
+          <Node ref={centerRef} name="Model service" large icon={<Calculator strokeWidth={stroke} />} />
           <Node ref={novaRef} name={`${ASSISTANT_NAME}`} icon={<Orb state="breathing" size={64} label={`${ASSISTANT_NAME}`} paused={!beamsActive} className={styles.novaOrb} />} />
         </div>
         <div className={`${styles.column} ${styles.right}`}>
-          <Node ref={pathRef} name="Path" icon={<Route strokeWidth={stroke} />} />
-          <Node ref={feedbackRef} name="Feedback" icon={<MessageSquare strokeWidth={stroke} />} />
-          <Node ref={dashboardRef} name="Dashboard" icon={<BarChart3 strokeWidth={stroke} />} />
+          <Node ref={pathRef} name="Signal" icon={<Route strokeWidth={stroke} />} />
+          <Node ref={feedbackRef} name="Abstention" icon={<Hand strokeWidth={stroke} />} />
+          <Node ref={dashboardRef} name="Evidence" icon={<BarChart3 strokeWidth={stroke} />} />
         </div>
 
         <AnimatedBeam active={beamsActive} containerRef={containerRef} fromRef={profileRef} toRef={centerRef} curvature={-88} endYOffset={-8} duration={4.8} />
