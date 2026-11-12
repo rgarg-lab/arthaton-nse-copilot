@@ -39,7 +39,7 @@ with a committed append-only ledger.
 
 **Evidence** · `ml/src/copilot/validation.py` · `ml/src/copilot/evaluate.py` ·
 `ml/tests/test_purge.py` · `ml/tests/test_leakage.py` · `ml/artifacts/holdout_ledger.json`
-**Verify** · `python ml/tasks.py test` — 30 tests, including a test that perturbs the last
+**Verify** · `python ml/tasks.py test` — 38 tests, including a test that perturbs the last
 30 sessions' prices and asserts no earlier feature row moves
 
 ### 4. Model card: calibration curve, four baselines, coverage-accuracy curve

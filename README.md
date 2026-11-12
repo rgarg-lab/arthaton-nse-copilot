@@ -103,7 +103,7 @@ Four surfaces, each backed by a real endpoint.
 
 | Surface | What it shows |
 |---|---|
-| **`/signals`** | Today's call for each of the 18 names — or an abstention card with the reason. Calibrated probability, conviction against the threshold, volatility-implied range. |
+| **`/signals`** | Today's call for each name in the panel (17 — see the universe note below) — or an abstention card with the reason. Calibrated probability, conviction against the threshold, volatility-implied range. |
 | **`/dashboard`** | The model card: calibration curve, four baselines, coverage-vs-accuracy curve, per-year and per-regime breakdowns, known limitations. |
 | **`/evidence`** | The historical sessions most like today, with real dates and the real return that followed each one, plus the empirical up-rate among them. |
 | **`/workspace`** | The Copilot. Asks the model service for figures rather than reasoning about prices itself; the trace shows every tool call and every rule that fired. |
@@ -152,7 +152,7 @@ approvals, with locally-generated prose that says it is not a real model call. S
 npm run build          # production build; types checked here too
 npm test               # 197 tests, mock mode, no keys needed
 npm run demo-check     # preflight + eval suite + browser smoke test
-python ml/tasks.py test # 30 tests, including the leakage and purge tests
+python ml/tasks.py test # 38 tests, including the leakage and purge tests
 ```
 
 ### Rebuild the model from scratch
@@ -314,7 +314,7 @@ ml/
   artifacts/      COMMITTED: model.pkl, calibrator.pkl, metrics.json,
                   latest_signals.json, feature_importance.json, holdout_ledger.json
   data/processed/ COMMITTED: panel.parquet
-  tests/          30 tests, including leakage and purge
+  tests/          38 tests, including leakage and purge
 ```
 
 **Python owns all modelling, evaluation and finance maths. TypeScript owns the UI, the

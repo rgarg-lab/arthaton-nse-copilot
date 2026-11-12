@@ -115,7 +115,7 @@ npm run build            # production build; types are checked here too
 npm test                 # 197 tests, mock mode, no keys
 npm run preflight        # readiness, with a fix for every warning
 npm run demo-check       # preflight + eval suite + browser smoke test
-python ml/tasks.py test  # 30 tests, including leakage and purge
+python ml/tasks.py test  # 38 tests, including leakage and purge
 ```
 
 `npm run preflight` is the one to read before recording anything. Warnings are expected
