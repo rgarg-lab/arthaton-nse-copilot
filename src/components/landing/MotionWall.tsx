@@ -145,7 +145,13 @@ function PanelArt({ index, data }: ArtProps) {
             className={styles.bar}
             style={{ "--w": pct(data.abstention.whenCalling) } as React.CSSProperties}
           >
-            <span>when it calls</span>
+            {/*
+              Short labels on purpose. Panel 5's grid gives the label column 5.4em
+              (`wall.module.css`), narrower than the default 9.6em, and anything longer
+              than about eight characters runs under the bar fill. The caption below
+              carries the detail these two words leave out.
+            */}
+            <span>calling</span>
             <i />
             <b>{pct(data.abstention.whenCalling)}</b>
           </div>
@@ -153,12 +159,13 @@ function PanelArt({ index, data }: ArtProps) {
             className={styles.bar}
             style={{ "--w": pct(data.abstention.onEverything) } as React.CSSProperties}
           >
-            <span>if it called all</span>
+            <span>all</span>
             <i />
             <b>{pct(data.abstention.onEverything)}</b>
           </div>
           <p className={styles.count}>
-            it calls {pct(data.abstention.coverage)} of sessions
+            accuracy on the {pct(data.abstention.coverage)} of sessions it calls, against
+            calling every one
           </p>
         </div>
       );

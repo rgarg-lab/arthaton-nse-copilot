@@ -46,7 +46,13 @@ yarn-error.log*
 .vercel
 
 # embedded database (PGlite); delete the directory to start from a clean schema
+# One per server, so a production run and a Playwright run never share a schema:
+# .pglite (dev) · .pglite-prod (npm start) · .pglite-test (port 3100).
+# All three are regenerated on first connect and must stay untracked — they are binary
+# heap pages that rewrite themselves on every boot, so tracking one turns `git status`
+# into a thousand-file diff after merely starting the app.
 /.pglite/
+/.pglite-prod/
 /.pglite-test/
 
 # typescript

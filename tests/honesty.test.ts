@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -18,7 +19,15 @@ const ROOT = join(__dirname, "..");
 function walk(dir: string, match: (path: string) => boolean): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(dir)) {
-    if (["node_modules", ".next", ".git", ".pglite", "ml"].includes(entry)) continue;
+    // All three PGlite data directories, not just the dev one: each holds a thousand-odd
+    // binary heap pages, and walking them to find `.tsx` files is pure cost.
+    if (
+      ["node_modules", ".next", ".git", ".pglite", ".pglite-prod", ".pglite-test", "ml"].includes(
+        entry,
+      )
+    ) {
+      continue;
+    }
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) out.push(...walk(full, match));
     else if (match(full)) out.push(full);
@@ -435,5 +444,44 @@ describe("the configured copy is about this product", () => {
         expect(() => statSync(join(ROOT, file)), `${mb.id} claims ${file}`).not.toThrow();
       }
     }
+  });
+});
+
+describe("generated runtime state stays out of the repository", () => {
+  /**
+   * Each server gets its own embedded database — `.pglite` for `next dev`, `.pglite-prod`
+   * for `npm start`, `.pglite-test` for the Playwright run on port 3100 — and all three are
+   * recreated on first connect.
+   *
+   * `.pglite-prod` was committed by accident: it was added after the other two, and the
+   * `.gitignore` entry that covers them names each directory literally. The result was
+   * 1,065 binary heap pages under version control, rewritten by the act of starting the
+   * app, so every `git status` opened with a thousand-file diff and the real change was
+   * somewhere below it. Found by reading `git status` before a commit, which is exactly the
+   * step that stops working once it prints a thousand lines.
+   */
+  it("tracks no PGlite data directory", () => {
+    const tracked = execFileSync("git", ["ls-files", "-z"], { cwd: ROOT, encoding: "utf8" })
+      .split("\0")
+      .filter(Boolean)
+      .filter((p) => /^\.pglite/.test(p));
+    expect(
+      tracked.slice(0, 5),
+      `${tracked.length} PGlite file(s) are tracked; add the directory to .gitignore and ` +
+        "`git rm -r --cached` it",
+    ).toEqual([]);
+  });
+
+  /**
+   * The ledger is the opposite case: it is generated, and it must be committed, because the
+   * claim "the holdout was read exactly once" is only checkable if its record travels with
+   * the repository.
+   */
+  it("still tracks the holdout ledger", () => {
+    const tracked = execFileSync("git", ["ls-files", "ml/artifacts/holdout_ledger.json"], {
+      cwd: ROOT,
+      encoding: "utf8",
+    }).trim();
+    expect(tracked, "the holdout ledger must stay committed").not.toEqual("");
   });
 });

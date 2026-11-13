@@ -36,23 +36,44 @@ export type LandingData = {
   stream: StreamCard[];
 };
 
-/** Feature names are machine-shaped; these are what a person should read. */
+/**
+ * Feature names are machine-shaped; these are what a person should read.
+ *
+ * **Kept to about twelve characters.** These labels land in a monospace grid column of
+ * 9.6em (`wall.module.css`, `arcdeck.module.css`) and anything longer runs under the bar
+ * fill. "S&P 500, previous close" is the honest name for `mac_spx_ret_1`, but it does not
+ * fit, and a label that overlaps its own bar communicates less than a short one.
+ */
 const FEATURE_LABELS: Record<string, string> = {
-  mac_spx_ret_1: "S&P 500, prev close",
-  mac_ndx_ret_1: "Nasdaq, prev close",
-  mac_nifty_ret_1: "Nifty 50, 1d",
-  mac_nifty_ret_7: "Nifty 50, 7d",
-  mac_niftyenergy_ret_1: "Nifty Energy, 1d",
-  mac_vix_ret_1: "India VIX, 1d",
-  mac_usdinr_ret_1: "USD/INR, 1d",
-  mac_brent_ret_1: "Brent, 1d",
-  mac_spx_ret_3: "S&P 500, 3d",
-  mac_gold_ret_1: "Gold, 1d",
-  cal_month: "month of year",
+  mac_spx_ret_1: "S&P 500 1d",
+  mac_ndx_ret_1: "Nasdaq 1d",
+  mac_nifty_ret_1: "Nifty 1d",
+  mac_nifty_ret_7: "Nifty 7d",
+  mac_niftyenergy_ret_1: "NiftyEnrg 1d",
+  mac_vix_ret_1: "India VIX 1d",
+  mac_usdinr_ret_1: "USD/INR 1d",
+  mac_brent_ret_1: "Brent 1d",
+  mac_spx_ret_3: "S&P 500 3d",
+  mac_gold_ret_1: "Gold 1d",
+  mac_spx_rv_7: "S&P 500 vol",
+  mac_vix_rv_7: "VIX vol",
+  cal_month: "month",
   cal_dow: "day of week",
-  rsi_14: "RSI (14)",
-  rv_20: "20d volatility",
-  ret_1: "1-session return",
+  cal_expiry_week: "expiry week",
+  vix_regime: "vol regime",
+  rsi_14: "RSI 14",
+  rv_20: "vol 20d",
+  rv_60: "vol 60d",
+  ret_1: "return 1d",
+  ret_5: "return 5d",
+  ret_20: "return 20d",
+  sma_dev_20: "vs 20d avg",
+  sma_dev_50: "vs 50d avg",
+  bb_pctb_20: "Bollinger %B",
+  vol_z_20: "volume z",
+  hl_spread: "high-low",
+  oc_spread: "open-close",
+  sent_decay: "news decay",
 };
 
 const humanFeature = (name: string) => FEATURE_LABELS[name] ?? name.replace(/_/g, " ");
