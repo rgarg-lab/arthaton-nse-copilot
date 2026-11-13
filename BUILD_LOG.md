@@ -722,3 +722,19 @@ was what I had initially written up, and that is not the same claim.
 | `/signals` | ✅ 17 signals, 17 abstained |
 | `/metrics?section=direction` | ✅ accuracy `0.513702` — matches the committed artifact exactly |
 | `POST /neighbors` | ✅ 25 analogues, up-rate 0.4 |
+
+Re-run in full at `9211387`, the tip after the 90-point rounds — including migration
+`0002`, which is the leg a hand-written migration most needs checked:
+
+| Leg | Result |
+|---|---|
+| `git clone` | ✅ 259 tracked files; all three migrations present |
+| `npm ci` | ✅ exit 0 |
+| `pip install -e "./ml[dev]"` | ✅ exit 0 |
+| `npm run db:migrate` | ✅ all three migrations apply from scratch, `driver=pglite` |
+| `npm run build` | ✅ exit 0, `/watchlist` among the routes |
+| `npm test` | ✅ 219/219 |
+| `pytest ml` | ✅ 37 passed, 1 xfailed |
+| ML service | ✅ `status: ok`, 49,776 rows, `trains_on_request: false` |
+| `/metrics` | ✅ accuracy `0.513702`, `headline_authoritative: true`, **1 authoritative holdout read** |
+| paper trading | ✅ realistic scenario `0.100756` over 337 sessions |
