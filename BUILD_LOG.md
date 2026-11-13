@@ -616,6 +616,91 @@ Guards: `npm run build` ✅ · `npm test` **200**/200 ✅ · `npm run lint` 0 er
 | No fabricated metric, no hardcoded confidence, no dead button | ✅ — the footer's `#` "Source" placeholder was removed rather than left linking nowhere |
 | Full 18-ticker universe | ❌ **17 of 18** — Yahoo rate limit, documented in four places and carried as an xfail |
 
+---
+
+## Rounds 6–10 — raising the target to 90
+
+**The target was raised from 85 to 90 after the first report, at the user's direction.**
+That takes this past §9.1's "maximum 3 improvement rounds", which is recorded here rather
+than glossed: the cap exists to stop a loop churning, and the decision to keep going was
+made by a person with the score in front of them, not by the loop deciding it was close.
+
+The forbidden list still applied in full, and nothing in these rounds touched it. **AI/ML
+is frozen**: no change to the model, the features, the universe, the hyperparameters or
+the abstention threshold, and the final holdout was not re-read. Every point came from
+surfaces and tests built over artifacts that already existed.
+
+**Round 6 — Functionality: the paper-trading panel.** The `paper_trading` block has been
+in `metrics.json` since the authoritative eval, fetched with the rest of the document and
+never rendered — a stubbed panel with a real endpoint already behind it, which is §9.1's
+named Functionality move and also stretch item 1. Now a cost table with buy-and-hold on
+the same axis and an equity curve with the buy-and-hold total marked.
+
+Two presentation decisions worth recording. The curve is flat for long stretches, and the
+caption says why (65 positions across 337 sessions) rather than letting it read as missing
+data. And "positive sessions" is labelled a share of *all* sessions, not of traded ones —
+9.5% otherwise reads as a dismal win rate rather than as mostly-flat.
+
+**Round 7 — Functionality: a real watchlist.** The nav entry said "Watchlist" and led to
+the agent's memory page: real data, but not what the label promised. `/watchlist` is the
+real thing, on the `watchlist` table that had been schema with no writer. Adds are
+validated against the universe — a tracked name the model has never seen would render a
+permanent "no data" that reads as a bug — and idempotent via `onConflictDoNothing`.
+
+**Round 8 — Problem & Design: the risk-profile input,** which §9.1 names explicitly. Its
+one real constraint: `minProbability` is clamped **up** to the model's frozen threshold on
+save, server-side, because a form's `min` attribute is a suggestion to the browser. A user
+can only ever see fewer calls. Calls between the user's gate and the model's are greyed
+rather than hidden, because hiding them would be indistinguishable from an abstention —
+and that is the one distinction this whole product exists to draw.
+
+**Round 9 — Code Quality: 19 tests.** Most assert the clamp as a property across the
+schema's whole range rather than at three points. `effectiveThreshold` moved into
+`src/lib/riskProfile.ts`, an I/O-free module, so it can be tested without standing up
+next-auth and the database: a rule nobody can unit-test is a rule that gets quietly broken.
+
+**Round 10 — a dead control I had just created.** Re-scoring caught it: the risk-profile
+form tells the user their horizon is "recorded so the assistant can tell you it is outside
+what has been measured", and nothing wired it into the agent. A stored setting that is
+never acted on is a dead control, and one whose label claims a behaviour it does not have
+is the same defect as a fabricated number, just in prose. Fixed by passing the profile
+into the agent loop from both routes and emitting an instruction block that forbids
+extrapolating the one-session probability across a longer horizon. Pinned by a test that
+asserts both routes actually pass it, not merely that the function exists.
+
+**Schema change.** `watchlist` and `risk_profile` are now scoped by owner rather than by
+agent session. A page reached from the nav has no session, so the old keying meant a list
+that silently emptied whenever a new conversation started — and the unique index could not
+stay on `(session_id, ticker)` because Postgres treats NULLs as distinct, so every add
+would have inserted another row. Migration `0002` is hand-written (`drizzle-kit generate`
+prompts interactively for renames and has no TTY here) and applies cleanly from scratch.
+
+**One test caught one of my own literals again.** `max={0.95}` on the slider. It was right:
+those are schema bounds, so `RISK_PROFILE_BOUNDS` now defines them once and both the zod
+schema and the control read it — a slider that offers a value the schema rejects is a form
+that fails on submit for no visible reason.
+
+**Guards after these rounds:** `npm run build` ✅ · `npm test` **219**/219 ✅ ·
+`npm run lint` 0 errors ✅ · `npm run demo-check` ✅ (preflight ready · eval 7/7 ·
+Playwright 7/7) · all three new surfaces verified in the browser, including a real
+add-to-watchlist round trip.
+
+### Re-score: 90/100
+
+| Criterion | Was | Now | What moved |
+|---|---|---|---|
+| Problem & Design | 17 | **18** | the risk-profile input exists and the horizon it records actually changes what the assistant says |
+| Functionality | 20 | **23** | stretch item 1 built; a fifth real surface; two of the three unused tables now have writers |
+| AI/ML | 18 | **18** | frozen, deliberately untouched |
+| Innovation | 13 | **13** | unchanged — paper trading is completeness, not novelty |
+| UX | 9 | **9** | unchanged |
+| Code Quality | 8 | **9** | 19 tests, the I/O-free split, bounds unified in one place |
+
+**Remaining gaps, unchanged:** the 18th ticker (a Yahoo rate limit, not a code problem);
+`signals_snapshot` still has no writer; the "Alerts" nav entry is the template's outbox,
+which is defensible — a queued action awaiting approval *is* the alert — but is not
+finance-specific.
+
 ### The fresh-clone check, at the final commit
 
 §9 caps Functionality at 10/25 if this fails, so it is the one check worth running last

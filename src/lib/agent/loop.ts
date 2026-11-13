@@ -30,6 +30,13 @@ export type AgentRunOptions = {
   userId?: string | null;
   db: Db | null;
   config?: IdeaConfig;
+  /**
+   * The user's display preferences, when the caller knows them.
+   *
+   * Optional so the eval runner and the unit tests — which have no user and no database —
+   * do not need a fake one. When absent the preferences block is simply omitted.
+   */
+  riskProfile?: { horizonSessions: number; riskTolerance: string; minProbability: number };
   /** Called for each trace event as it happens; the SSE route streams these. */
   onEvent?: (event: TraceEvent) => void;
 };
@@ -87,7 +94,7 @@ export async function runAgent(options: AgentRunOptions): Promise<AgentRunResult
    * It never blocks the run. If the ML service is unreachable, the block says so and tells
    * the model to decline rather than estimate.
    */
-  const system = await systemPromptWithMetrics(config.agent.systemPrompt);
+  const system = await systemPromptWithMetrics(config.agent.systemPrompt, options.riskProfile);
 
   const conversation: Message[] = [{ role: "user", content: options.question }];
   const toolResults: ToolResult[] = [];

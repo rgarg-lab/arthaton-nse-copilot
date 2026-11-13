@@ -94,6 +94,33 @@ making directional calls on a real listed company.
 **Verify** · `tests/honesty.test.ts` asserts the import on all five signal components, that
 the two copies match, and the Playwright suite asserts the rendered text on all three pages
 
+### 9. Cost-aware paper trading (stretch item 1)
+
+Long/short the names clearing the frozen threshold, equal-weighted, flat otherwise, across
+the holdout. Costs charged on every position change under three scenarios, with
+buy-and-hold on the same axis. The equity curve is flat for long stretches because the
+strategy inherits the abstention — 65 positions across 337 sessions — and the caption says
+so rather than letting it read as missing data.
+
+**Evidence** · `ml/src/copilot/evaluate.py` (`paper_trading_block`) ·
+`src/components/finance/Charts.tsx` (`EquityCurve`) · `src/components/finance/ModelCard.tsx`
+**Verify** · three cost scenarios and the curve on `/dashboard`; all figures from
+`metrics.json`
+
+### 10. Watchlist and risk profile
+
+The only state in this product that belongs to the user rather than the model. Adds are
+validated against the universe and are idempotent. The risk profile's minimum is clamped
+**up** to the model's frozen threshold on save, server-side — so it can only ever show
+fewer calls, never ones the model declined to make. Calls between the user's gate and the
+model's are greyed rather than hidden, because hiding them would be indistinguishable from
+an abstention.
+
+**Evidence** · `app/watchlist/page.tsx` · `src/lib/riskProfile.ts` ·
+`src/lib/actions/watchlist.ts` · `src/components/finance/WatchlistBoard.tsx` ·
+`tests/watchlist.test.ts`
+**Verify** · `npm test` — 19 tests, including the clamp across the schema's whole range
+
 ---
 
 ## Deliberately not built
@@ -106,10 +133,12 @@ more than the absence.
 The template ships a React Flow graph component and it looks good. Building an HHI,
 correlation matrix and factor-beta panel on top of it was the second stretch item.
 
-**Why not:** it would have been the fourth surface competing for the same two minutes of a
+**Why not:** it would have been another surface competing for the same two minutes of a
 judge's attention, and none of it needs the thing that makes this project different. The
 graph tab was retired rather than filled with a correlation matrix nobody asked about. A
-half-built panel scores worse than an absent one.
+half-built panel scores worse than an absent one. The first stretch item — cost-aware
+paper trading — was built instead, because its numbers were already measured and it speaks
+directly to "is the edge worth anything".
 
 ### Universe-wide news sentiment
 

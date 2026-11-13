@@ -8,6 +8,7 @@ import { config } from "@/lib/config";
 import { jsonError, parseBody } from "@/lib/api";
 import { llmMode } from "@/lib/llm/router";
 import { agentLimit } from "@/lib/rateLimit";
+import { currentScope, getRiskProfile } from "@/lib/watchlist";
 import { SSE_HEADERS, sseStream } from "@/lib/sse";
 import { isUuid } from "@/schemas";
 
@@ -78,6 +79,8 @@ export async function POST(request: Request) {
         sessionId: handle ? sessionId : undefined,
         userId: persistableUserId(user?.id),
         db: handle,
+        // See the agent route: lets the assistant honour the horizon set on /watchlist.
+        riskProfile: await getRiskProfile(await currentScope()),
         onEvent: (event) => {
           // The panel's vocabulary first…
           if (event.type === "tool_call") {

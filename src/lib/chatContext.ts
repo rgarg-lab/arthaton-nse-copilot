@@ -147,12 +147,63 @@ export async function metricsContext(): Promise<MetricsContext> {
 }
 
 /**
- * The system prompt for a turn: the configured prompt plus the measured record.
+ * The user's stated preferences, as an instruction block.
+ *
+ * The risk profile is a *display* setting — it cannot change what the model predicts (see
+ * `effectiveThreshold`). But the horizon field would be a dead control if the assistant
+ * never acted on it, and the form tells the user it is "recorded so the assistant can tell
+ * you it is outside what has been measured". That sentence has to be true, so this is what
+ * makes it true.
+ */
+export function riskProfileBlock(profile: {
+  horizonSessions: number;
+  riskTolerance: string;
+  minProbability: number;
+}): string {
+  const lines = [
+    "THIS USER'S STATED PREFERENCES",
+    `- Risk tolerance: ${profile.riskTolerance}.`,
+    `- They only want to see calls at or above ${percent(profile.minProbability, 0)} conviction.`,
+  ];
+
+  if (profile.horizonSessions > 1) {
+    lines.push(
+      `- They have set a horizon of ${profile.horizonSessions} sessions. **You predict one`,
+      "  session ahead and nothing else.** If they ask about that longer horizon, say plainly",
+      "  that it is outside what this model has been measured on — do not extrapolate the",
+      "  one-session probability across several sessions, and do not answer as though the",
+      "  measurement covered it. Nothing in metrics.json speaks to a multi-session horizon.",
+    );
+  } else {
+    lines.push("- Horizon: 1 session, which is exactly what you predict.");
+  }
+
+  lines.push(
+    "",
+    "These are display preferences. They do not change the model's output, and you must not",
+    "describe them as if they did.",
+  );
+  return lines.join("\n");
+}
+
+/**
+ * The system prompt for a turn: the configured prompt, the measured record, and the user's
+ * preferences when the caller knows them.
  *
  * Appended rather than prepended, so the behavioural rules in `idea.config.ts` stay at the
  * top where they are least likely to be lost in a long context.
+ *
+ * `profile` is optional, and that is deliberate: `runAgent` is called directly by the eval
+ * runner and the unit tests, which have no user and no database. Making it required would
+ * mean either a fake profile in every test or a second code path through the loop.
  */
-export async function systemPromptWithMetrics(basePrompt: string): Promise<string> {
+export async function systemPromptWithMetrics(
+  basePrompt: string,
+  profile?: { horizonSessions: number; riskTolerance: string; minProbability: number },
+): Promise<string> {
   const ctx = await metricsContext();
-  return `${basePrompt}\n\n${"─".repeat(60)}\n${ctx.block}`;
+  const rule = "─".repeat(60);
+  const parts = [basePrompt, rule, ctx.block];
+  if (profile) parts.push(rule, riskProfileBlock(profile));
+  return parts.join("\n\n");
 }

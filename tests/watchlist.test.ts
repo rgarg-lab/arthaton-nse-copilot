@@ -115,6 +115,60 @@ describe("the watchlist only accepts names the model has seen", () => {
   });
 });
 
+describe("the horizon setting is not a dead control", () => {
+  /**
+   * The risk-profile form tells the user their horizon is "recorded so the assistant can
+   * tell you it is outside what has been measured". That sentence has to be true.
+   *
+   * A setting that is stored and never acted on is a dead control, and one whose label
+   * claims a behaviour it does not have is worse — it is the same class of defect as a
+   * fabricated number, just in prose.
+   */
+  it("tells the model to refuse a horizon it was not measured on", async () => {
+    const { riskProfileBlock } = await import("@/lib/chatContext");
+    const block = riskProfileBlock({
+      horizonSessions: 20,
+      riskTolerance: "balanced",
+      minProbability: 0.6,
+    });
+    expect(block).toMatch(/outside what this model has been measured on/i);
+    expect(block).toMatch(/do not extrapolate/i);
+    expect(block).toMatch(/20 sessions/);
+  });
+
+  it("says nothing special when the horizon is the one it predicts", async () => {
+    const { riskProfileBlock } = await import("@/lib/chatContext");
+    const block = riskProfileBlock({
+      horizonSessions: 1,
+      riskTolerance: "balanced",
+      minProbability: 0.6,
+    });
+    expect(block).toMatch(/exactly what you predict/i);
+    expect(block).not.toMatch(/do not extrapolate/i);
+  });
+
+  it("always tells the model the preferences cannot change its output", async () => {
+    const { riskProfileBlock } = await import("@/lib/chatContext");
+    for (const horizon of [1, 5, 20]) {
+      const block = riskProfileBlock({
+        horizonSessions: horizon,
+        riskTolerance: "aggressive",
+        minProbability: 0.7,
+      });
+      expect(block).toMatch(/do not change the model's output/i);
+    }
+  });
+
+  it("is actually wired into both agent routes, not just available", () => {
+    for (const route of ["agent", "chat"]) {
+      const source = readFileSync(join(ROOT, "app", "api", route, "route.ts"), "utf8");
+      expect(source, `${route} route must pass the risk profile`).toMatch(
+        /riskProfile:\s*await getRiskProfile\(/,
+      );
+    }
+  });
+});
+
 describe("the watchlist surface cannot fabricate", () => {
   const board = readFileSync(
     join(ROOT, "src", "components", "finance", "WatchlistBoard.tsx"),

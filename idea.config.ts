@@ -285,6 +285,27 @@ export const idea: IdeaConfig = {
       status: "done",
       files: ["tests/honesty.test.ts", "src/lib/ml/client.ts", "src/data/demo-seed.ts"],
     },
+    {
+      id: "paper-trading",
+      title: "Cost-aware paper trading with an equity curve, charged at three cost levels",
+      status: "done",
+      files: [
+        "ml/src/copilot/evaluate.py",
+        "src/components/finance/Charts.tsx",
+        "src/components/finance/ModelCard.tsx",
+      ],
+    },
+    {
+      id: "watchlist-risk-profile",
+      title: "Watchlist and a risk profile that can only ever hide signals, never reveal them",
+      status: "done",
+      files: [
+        "app/watchlist/page.tsx",
+        "src/lib/riskProfile.ts",
+        "src/lib/actions/watchlist.ts",
+        "tests/watchlist.test.ts",
+      ],
+    },
   ],
 
   wow: {

@@ -95,11 +95,16 @@ biases any backtest return upward, and the short leg assumes borrow that a retai
 may not get. The directional edge is the measured claim; this table is an illustration of
 what it would be worth under stated assumptions.
 
+The equity curve is on the model card, and it is flat for long stretches on purpose: the
+strategy inherits the model's abstention and holds a position on **65 of 337 sessions**,
+sitting in cash for the rest. That is also why "positive sessions" reads 9.5% — it is a
+share of *all* sessions, not of the ones it traded.
+
 ---
 
 ## What it does
 
-Four surfaces, each backed by a real endpoint.
+Five surfaces, each backed by a real endpoint.
 
 | Surface | What it shows |
 |---|---|
@@ -107,6 +112,7 @@ Four surfaces, each backed by a real endpoint.
 | **`/dashboard`** | The model card: calibration curve, four baselines, coverage-vs-accuracy curve, per-year and per-regime breakdowns, known limitations. |
 | **`/evidence`** | The historical sessions most like today, with real dates and the real return that followed each one, plus the empirical up-rate among them. |
 | **`/workspace`** | The Copilot. Asks the model service for figures rather than reasoning about prices itself; the trace shows every tool call and every rule that fired. |
+| **`/watchlist`** | The names you track, each with its live call, plus the risk profile. The only state here that is the user's rather than the model's. |
 
 ### The abstention is the product
 

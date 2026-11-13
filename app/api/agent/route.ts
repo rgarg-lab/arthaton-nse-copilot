@@ -6,6 +6,7 @@ import { config } from "@/lib/config";
 import { jsonError, parseBody } from "@/lib/api";
 import { llmMode } from "@/lib/llm/router";
 import { agentLimit } from "@/lib/rateLimit";
+import { currentScope, getRiskProfile } from "@/lib/watchlist";
 import { SSE_HEADERS, sseStream } from "@/lib/sse";
 
 export const runtime = "nodejs";
@@ -63,6 +64,9 @@ export async function POST(request: Request) {
         sessionId: parsed.data.sessionId,
         userId: user?.id ?? null,
         db: handle,
+        // So the assistant can honour the horizon the user set on /watchlist — chiefly by
+        // saying a multi-session question is outside what the model was measured on.
+        riskProfile: await getRiskProfile(await currentScope()),
         onEvent: (event) => send("trace", event),
       });
 
