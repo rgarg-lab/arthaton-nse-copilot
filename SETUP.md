@@ -183,16 +183,23 @@ python ml/tasks.py sentiment
 
 ## Speed, and how to measure it honestly
 
-Warm page times on the production build, one server running, nothing else competing:
+Warm page times on the production build, one server running, nothing else competing —
+median of five requests each, after one request to warm the route:
 
 | | |
 |---|---|
-| `/watchlist` | ~190ms |
-| `/evidence` | ~380ms |
-| `/signals` · `/dashboard` | ~430–490ms |
-| `/workspace` | ~520ms |
+| `/watchlist` | ~200ms |
+| `/evidence` | ~330ms |
+| `/` (the landing) | ~440ms |
+| `/signals` · `/dashboard` | ~485ms |
+| `/workspace` | ~495ms |
 
-Three things to know before you conclude the app is slow:
+The landing is in that list deliberately: it is the heaviest page in the app — six
+animated client components — and it is the first one anyone opens, so it is the one worth
+knowing a real number for. A **cold** first request to it is ~1.8s, because the artifact
+cache below starts empty and both JSON reads happen before the first byte.
+
+Four things to know before you conclude the app is slow:
 
 1. **Use `npm run build && npm start` for anything you are judging, including a recording.**
    `next dev` recompiles a route on first hit and again after any edit, and the landing
@@ -201,7 +208,16 @@ Three things to know before you conclude the app is slow:
 2. **Do not leave two servers running.** A dev server on `:3000` and a production server on
    `:3200` at the same time, plus uvicorn, put every one of these pages at 15–40 seconds on
    this machine — I measured it. One Next server at a time.
-3. **Artifact reads are cached for five minutes** (`src/lib/ml/cached.ts`). Every page is
+3. **Do not measure the landing's smoothness with `requestAnimationFrame` in a window you
+   are not looking at.** Chrome throttles rAF to roughly 1fps when its window is
+   backgrounded or occluded, while `document.visibilityState` still reports `visible` — so
+   a frame-timing probe returns 1,000–5,000ms frames and the page looks frozen. It is not:
+   the tell is that the intervals are near-exact multiples of 1000ms, where real jank is
+   irregular. Check `setTimeout(…, 0)` cadence and a synchronous busy-loop instead; if
+   those are prompt (sub-20ms, and ~47ms for five million iterations here) the main thread
+   is idle and the compositor is simply parked. I lost a while to this, concluding the wall
+   had a hang when it had nothing of the kind.
+4. **Artifact reads are cached for five minutes** (`src/lib/ml/cached.ts`). Every page is
    still `force-dynamic` and rendered per request; what is cached is the HTTP read of a
    JSON file that changes once a day. After `python ml/tasks.py refresh`, restart the ML
    service — and if you do not want to wait out the window, `revalidateMlArtifacts()` in

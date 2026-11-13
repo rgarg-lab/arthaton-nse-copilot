@@ -24,7 +24,8 @@ npm run preflight
 ```
 
 **`npm start`, not `npm run dev`, and only one Next server at a time.** On the production
-build every page is under 550ms. In dev the landing's card deck and canvas strip recompile
+build every page lands around half a second warm — 200ms to 500ms, the slowest sample I
+measured being 559ms. In dev the landing's card deck and canvas strip recompile
 on first hit and the first paint is 20–30 seconds; with a second Next server also running,
 every page goes to 15–40 seconds. Both of those look like a broken app on camera and
 neither is one.
