@@ -13,6 +13,7 @@ Run with no arguments, or with `help`, to list the targets.
 
 from __future__ import annotations
 
+import importlib.util
 import subprocess
 import sys
 from pathlib import Path
@@ -102,6 +103,30 @@ def run_one(name: str) -> int:
     _, cmd = doc_cmd
     if cmd is None:
         return print_help()
+
+    # Every target runs as `<this python> -m <module>`, so a target fails with a bare
+    # "No module named pytest" whenever tasks.py was started by an interpreter that does
+    # not have the dev extra — most often the system Python rather than ml/.venv. The
+    # module name alone does not tell you that, so say which interpreter is in use and
+    # which command installs the missing piece.
+    if len(cmd) > 2 and cmd[1] == "-m":
+        module = cmd[2]
+        if importlib.util.find_spec(module) is None:
+            # pytest and ruff live in the [dev] extra; transformers/torch in [sentiment];
+            # everything else (uvicorn, lightgbm, yfinance) is a core dependency.
+            extras = {"pytest": "[dev]", "ruff": "[dev]", "transformers": "[sentiment]"}
+            target = f"./ml{extras.get(module, '')}"
+            print(
+                f"ml/tasks.py: {name!r} needs the {module!r} module, and the interpreter "
+                f"running this script does not have it.\n"
+                f"  interpreter: {sys.executable}\n"
+                f'  install it:  {sys.executable} -m pip install -e "{target}"\n'
+                f"  or use the virtualenv: ml/.venv/Scripts/python.exe ml/tasks.py {name}"
+                " (Windows)",
+                file=sys.stderr,
+            )
+            return 1
+
     print(f"==> {name}: {' '.join(cmd)}", flush=True)
     # cwd=ML_DIR so relative data/ and artifacts/ paths resolve the same way the
     # Makefile's `make -C ml` does.
