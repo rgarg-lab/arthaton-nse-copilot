@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { config } from "@/lib/config";
 import { currentDriver, driverFor } from "@/db";
-import { getSignals } from "@/lib/ml/client";
+import { cachedSignals } from "@/lib/ml/cached";
 import { llmMode } from "@/lib/llm/router";
 import { currentScope, getRiskProfile, listWatchlist } from "@/lib/watchlist";
 import { UNIVERSE } from "@/lib/universe";
@@ -35,7 +35,7 @@ export default async function WatchlistPage() {
   const [entries, profile, signals] = await Promise.all([
     listWatchlist(scope),
     getRiskProfile(scope),
-    getSignals(),
+    cachedSignals(),
   ]);
 
   // The slider's floor is the model's frozen threshold. With the service down there is no

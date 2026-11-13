@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { currentUserOrDemo } from "@/auth";
 import { config } from "@/lib/config";
 import { currentDriver, driverFor } from "@/db";
-import { findNeighbors, getMetrics, getSignals } from "@/lib/ml/client";
+import { cachedMetrics, cachedNeighbors, cachedSignals } from "@/lib/ml/cached";
 import { llmMode } from "@/lib/llm/router";
 import { UNIVERSE } from "@/lib/universe";
 import { DemoBanner } from "@/components/common/DemoBanner";
@@ -36,9 +36,9 @@ export default async function WorkspacePage({
 
   const [user, signals, metrics, evidence] = await Promise.all([
     currentUserOrDemo(),
-    getSignals(),
-    getMetrics(),
-    findNeighbors({ ticker: evidenceTicker, k: 25 }),
+    cachedSignals(),
+    cachedMetrics(),
+    cachedNeighbors(evidenceTicker, 25),
   ]);
 
   return (

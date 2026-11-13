@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getSignals } from "@/lib/ml/client";
+import { cachedSignals } from "@/lib/ml/cached";
 import { config } from "@/lib/config";
 import { currentDriver, driverFor } from "@/db";
 import { llmMode } from "@/lib/llm/router";
@@ -25,7 +25,7 @@ export const dynamic = "force-dynamic";
 
 export default async function SignalsPage() {
   const idea = config();
-  const result = await getSignals();
+  const result = await cachedSignals();
 
   return (
     <div className="flex min-h-dvh flex-col">

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { config } from "@/lib/config";
 import { currentDriver, driverFor } from "@/db";
-import { getMetrics } from "@/lib/ml/client";
+import { cachedMetrics } from "@/lib/ml/cached";
 import { llmMode } from "@/lib/llm/router";
 import { DemoBanner } from "@/components/common/DemoBanner";
 import { Nav } from "@/components/shell/Nav";
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
  */
 export default async function ModelCardPage() {
   const idea = config();
-  const result = await getMetrics();
+  const result = await cachedMetrics();
 
   return (
     <div className="flex min-h-dvh flex-col">

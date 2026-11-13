@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { config } from "@/lib/config";
 import { currentDriver, driverFor } from "@/db";
-import { findNeighbors } from "@/lib/ml/client";
+import { cachedNeighbors } from "@/lib/ml/cached";
 import { llmMode } from "@/lib/llm/router";
 import { DemoBanner } from "@/components/common/DemoBanner";
 import { Nav } from "@/components/shell/Nav";
@@ -38,7 +38,7 @@ export default async function EvidencePage({
   const parsedK = Number(params.k);
   const k = Number.isFinite(parsedK) ? Math.min(100, Math.max(3, Math.trunc(parsedK))) : 25;
 
-  const result = await findNeighbors({ ticker, k });
+  const result = await cachedNeighbors(ticker, k);
 
   return (
     <div className="flex min-h-dvh flex-col">

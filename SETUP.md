@@ -181,6 +181,32 @@ python ml/tasks.py sentiment
 
 ---
 
+## Speed, and how to measure it honestly
+
+Warm page times on the production build, one server running, nothing else competing:
+
+| | |
+|---|---|
+| `/watchlist` | ~190ms |
+| `/evidence` | ~380ms |
+| `/signals` · `/dashboard` | ~430–490ms |
+| `/workspace` | ~520ms |
+
+Three things to know before you conclude the app is slow:
+
+1. **Use `npm run build && npm start` for anything you are judging, including a recording.**
+   `next dev` recompiles a route on first hit and again after any edit, and the landing
+   carries six heavy client components (a scroll-driven card deck, a liquid-canvas counting
+   strip, an animated wall). A 20–30 second first paint in dev is compilation, not the page.
+2. **Do not leave two servers running.** A dev server on `:3000` and a production server on
+   `:3200` at the same time, plus uvicorn, put every one of these pages at 15–40 seconds on
+   this machine — I measured it. One Next server at a time.
+3. **Artifact reads are cached for five minutes** (`src/lib/ml/cached.ts`). Every page is
+   still `force-dynamic` and rendered per request; what is cached is the HTTP read of a
+   JSON file that changes once a day. After `python ml/tasks.py refresh`, restart the ML
+   service — and if you do not want to wait out the window, `revalidateMlArtifacts()` in
+   that module drops it.
+
 ## Things that will bite you
 
 - **A stale `.next` makes `next dev` return 404 for every route handler.** If every API

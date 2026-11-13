@@ -13,15 +13,21 @@ Do not try to show everything. Three beats, in this order, and the second one is
 # terminal 1 — the model service
 python ml/tasks.py serve
 
-# terminal 2 — data fresh to within two sessions
+# terminal 2 — data fresh to within two sessions, then restart terminal 1
 python ml/tasks.py data && python ml/tasks.py signals
 
-# terminal 3 — the app
-npm run dev
+# terminal 3 — the app. BUILD, don't `npm run dev`.
+npm run build && npm start
 
 # terminal 4 — everything green
 npm run preflight
 ```
+
+**`npm start`, not `npm run dev`, and only one Next server at a time.** On the production
+build every page is under 550ms. In dev the landing's card deck and canvas strip recompile
+on first hit and the first paint is 20–30 seconds; with a second Next server also running,
+every page goes to 15–40 seconds. Both of those look like a broken app on camera and
+neither is one.
 
 - `npm run preflight` must say **ready**, with "ML service  ok" and
   "no training on request  ok".
