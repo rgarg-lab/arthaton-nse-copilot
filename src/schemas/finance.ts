@@ -210,7 +210,29 @@ export const MetricsPayloadSchema = z.object({
       coverage_accuracy_curve: z.array(CoveragePointSchema),
     })
     .optional(),
-  paper_trading: z.record(z.string(), z.unknown()).optional(),
+  paper_trading: z
+    .object({
+      description: z.string(),
+      sessions: z.number(),
+      sessions_with_a_position: z.number(),
+      mean_names_held: z.number().nullable(),
+      scenarios: z.record(
+        z.string(),
+        z.object({
+          round_trip_bps: z.number(),
+          slippage_bps: z.number(),
+          total_bps_per_round_trip: z.number(),
+          total_return: z.number().nullable(),
+          annualised_return: z.number().nullable(),
+          sharpe: z.number().nullable(),
+          max_drawdown: z.number().nullable(),
+          win_rate: z.number().nullable(),
+          is_default: z.boolean(),
+        }),
+      ),
+      equity_curve: z.array(z.object({ date: z.string(), net_return: z.number().nullable() })),
+    })
+    .optional(),
   known_limitations: z.array(z.string()).optional(),
 });
 
@@ -273,10 +295,35 @@ export const WatchlistEntrySchema = z.object({
   note: z.string().max(500).optional(),
 });
 
+/**
+ * The risk profile's bounds, in one place.
+ *
+ * Both the zod schema below and the slider in `WatchlistControls` read these, so the
+ * validation range and the control's range cannot drift apart — a slider that offers a
+ * value the schema then rejects is a form that fails on submit for no visible reason.
+ *
+ * `minProbabilityFloor` is a coin flip, not the model's threshold: the model's own frozen
+ * gate is read at render time and clamps on top of this (see `effectiveThreshold`). This
+ * is only the outer bound of what is *storable*.
+ */
+export const RISK_PROFILE_BOUNDS = {
+  minProbabilityFloor: 0.5,
+  minProbabilityCeiling: 0.95,
+  /** Slider granularity. One percentage point; finer would imply precision the model has not got. */
+  minProbabilityStep: 0.01,
+  horizonFloor: 1,
+  horizonCeiling: 20,
+} as const;
+
 export const RiskProfileSchema = z.object({
   /** How far ahead the user cares about. The model only predicts one session; a longer
    *  horizon is recorded so the assistant can say the model does not cover it. */
-  horizonSessions: z.number().int().min(1).max(20).default(1),
+  horizonSessions: z
+    .number()
+    .int()
+    .min(RISK_PROFILE_BOUNDS.horizonFloor)
+    .max(RISK_PROFILE_BOUNDS.horizonCeiling)
+    .default(1),
   riskTolerance: z.enum(["conservative", "balanced", "aggressive"]).default("balanced"),
   /**
    * A *display* threshold, at or above the model's own frozen one. It can make the user
@@ -284,7 +331,11 @@ export const RiskProfileSchema = z.object({
    * threshold, and a user-editable value that could lower it would reopen exactly the
    * dial that freeze exists to close.
    */
-  minProbability: z.number().min(0.5).max(0.95).default(0.5),
+  minProbability: z
+    .number()
+    .min(RISK_PROFILE_BOUNDS.minProbabilityFloor)
+    .max(RISK_PROFILE_BOUNDS.minProbabilityCeiling)
+    .default(RISK_PROFILE_BOUNDS.minProbabilityFloor),
 });
 
 export type Signal = z.infer<typeof SignalSchema>;
@@ -295,5 +346,7 @@ export type NeighborsPayload = z.infer<typeof NeighborsPayloadSchema>;
 export type NeighborMatch = z.infer<typeof NeighborMatchSchema>;
 export type CalibrationBin = z.infer<typeof CalibrationBinSchema>;
 export type CoveragePoint = z.infer<typeof CoveragePointSchema>;
+export type PaperTrading = NonNullable<z.infer<typeof MetricsPayloadSchema>["paper_trading"]>;
+export type CostScenario = PaperTrading["scenarios"][string];
 export type RiskProfile = z.infer<typeof RiskProfileSchema>;
 export type WatchlistEntry = z.infer<typeof WatchlistEntrySchema>;

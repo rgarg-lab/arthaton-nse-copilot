@@ -2,7 +2,7 @@ import type { MlResult } from "@/lib/ml/client";
 import type { MetricsPayload } from "@/schemas/finance";
 import { ErrorState } from "@/components/common/EmptyState";
 import { Disclaimer } from "./Disclaimer";
-import { CalibrationPlot, CoveragePlot } from "./Charts";
+import { CalibrationPlot, CoveragePlot, EquityCurve } from "./Charts";
 import {
   SCALE_REFERENCE,
   count,
@@ -165,6 +165,18 @@ export function ModelCard({ result }: { result: MlResult<MetricsPayload> }) {
 
   const bh = base.buy_and_hold as Record<string, number | null | undefined>;
   const authoritative = m.headline_authoritative !== false;
+
+  /**
+   * The scenario the equity curve is drawn for, and the one the tiles quote.
+   *
+   * `is_default` is set in `ml/src/copilot/config.py`, so the choice of which cost
+   * assumption leads is made once, in Python, next to the basis-point figures themselves —
+   * not here, where it would be a UI decision about which number looks best.
+   */
+  const defaultScenario = m.paper_trading
+    ? (Object.entries(m.paper_trading.scenarios).find(([, s]) => s.is_default) ??
+      Object.entries(m.paper_trading.scenarios)[0])
+    : undefined;
 
   return (
     <div className="flex flex-col gap-8">
@@ -352,6 +364,95 @@ export function ModelCard({ result }: { result: MlResult<MetricsPayload> }) {
               hint="the thing being predicted"
             />
           </div>
+        </Section>
+      )}
+
+      {m.paper_trading && (
+        <Section
+          title="Paper trading — what the edge would have been worth"
+          lede={
+            `${m.paper_trading.description} Costs are charged on every position change under ` +
+            `three scenarios, because a single optimistic cost figure is how a strategy gets ` +
+            `to look profitable. Read all three, and read them against the survivorship ` +
+            `caveat in the limitations below.`
+          }
+        >
+          <Table
+            head={[
+              "Cost scenario",
+              "Round trip",
+              "Total return",
+              "Annualised",
+              "Sharpe",
+              "Max drawdown",
+            ]}
+            rows={[
+              ...Object.entries(m.paper_trading.scenarios).map(([name, s]) => [
+                `${name}${s.is_default ? " (default)" : ""}`,
+                `${s.total_bps_per_round_trip} bps`,
+                signedPercent(s.total_return),
+                signedPercent(s.annualised_return),
+                fixed(s.sharpe, 2),
+                signedPercent(s.max_drawdown),
+              ]),
+              // The economic baseline on the same axis, for the comparison that matters.
+              [
+                "buy & hold (no costs)",
+                "—",
+                signedPercent(bh.total_return),
+                signedPercent(bh.annualised_return),
+                fixed(bh.sharpe, 2),
+                signedPercent(bh.max_drawdown),
+              ],
+            ]}
+            caption="Holdout window only. Long/short the names clearing the frozen threshold, equal-weighted, flat otherwise."
+          />
+
+          {defaultScenario && (
+            <EquityCurve
+              curve={m.paper_trading.equity_curve}
+              buyAndHoldTotal={bh.total_return}
+              costLabel={defaultScenario[0]}
+            />
+          )}
+
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            <MetricTile
+              label="Sessions in the window"
+              value={count(m.paper_trading.sessions)}
+            />
+            <MetricTile
+              label="Sessions holding a position"
+              value={count(m.paper_trading.sessions_with_a_position)}
+              hint="the rest are abstentions — the strategy sits in cash"
+            />
+            <MetricTile
+              label="Mean names held"
+              value={fixed(m.paper_trading.mean_names_held, 2)}
+              hint="when it is in the market at all"
+            />
+            <MetricTile
+              label="Positive sessions"
+              value={percent(defaultScenario?.[1].win_rate, 1)}
+              hint={
+                `of all ${count(m.paper_trading.sessions)} sessions, not of the ` +
+                `${count(m.paper_trading.sessions_with_a_position)} it traded — most are flat`
+              }
+            />
+          </div>
+
+          <p
+            role="note"
+            className="max-w-[80ch] rounded-card border border-coral-line bg-coral-soft px-3 py-2 text-[12px] leading-relaxed text-ink-1"
+          >
+            <strong>This is a historical simulation, not a track record.</strong> It assumes a
+            fill at the close with a flat per-trade cost, and models no market impact, no
+            partial fills, no borrow cost or availability for the short leg, and no circuit
+            limits. The universe is today&rsquo;s large-caps, so survivorship bias pushes any
+            backtest return upward. The measured claim this project makes is the directional
+            edge above; this section is an illustration of what that edge would be worth under
+            assumptions that are stated rather than hidden.
+          </p>
         </Section>
       )}
 

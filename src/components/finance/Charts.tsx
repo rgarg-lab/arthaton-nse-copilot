@@ -13,7 +13,7 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
-import type { CalibrationBin, CoveragePoint } from "@/schemas/finance";
+import type { CalibrationBin, CoveragePoint, PaperTrading } from "@/schemas/finance";
 import { EmptyState } from "@/components/common/EmptyState";
 
 /**
@@ -256,6 +256,129 @@ export function CalibrationPlot({ curve }: { curve: CalibrationBin[] }) {
             strokeWidth={2}
           />
         </ScatterChart>
+      </ResponsiveContainer>
+    </Frame>
+  );
+}
+
+// ── paper-trading equity curve ─────────────────────────────────────────────────
+
+/**
+ * Cumulative net return over the holdout, after costs.
+ *
+ * One series, so no legend box — the title names it. The two dashed references are not
+ * data and are drawn recessive: zero (did this make or lose money at all) and the
+ * buy-and-hold total over the same window (did it beat simply holding the basket). Both
+ * are cumulative returns on the same 0-based scale as the series, which is why this is a
+ * single-axis chart and not the dual-axis one it would be tempting to draw.
+ *
+ * The curve is flat for long stretches on purpose: the strategy holds a position on only
+ * 65 of 337 sessions, because it inherits the model's abstention. A flat line here is the
+ * product working, and the caption says so rather than leaving it to look like missing
+ * data.
+ */
+export function EquityCurve({
+  curve,
+  buyAndHoldTotal,
+  costLabel,
+}: {
+  curve: PaperTrading["equity_curve"];
+  buyAndHoldTotal: number | null | undefined;
+  costLabel: string;
+}) {
+  const points = curve
+    .filter((p) => p.net_return !== null && Number.isFinite(p.net_return))
+    .map((p) => ({ date: p.date, net: p.net_return as number }));
+
+  if (points.length === 0) {
+    return (
+      <EmptyState
+        title="No equity curve yet"
+        description="Run `make -C ml eval` to produce it."
+      />
+    );
+  }
+
+  // Show roughly a dozen date labels regardless of how long the window is.
+  const tickEvery = Math.max(1, Math.floor(points.length / 10));
+
+  return (
+    <Frame
+      title={`Paper-trading equity curve — ${costLabel} costs`}
+      lede="Cumulative return after costs, over the holdout window only. Long flat stretches are the abstention: the strategy holds a position on 65 of 337 sessions and is in cash for the rest. Historical simulation — no real money, no broker, no live execution."
+      table={
+        <table className="w-full min-w-[22rem] border-collapse">
+          <thead>
+            <tr className="border-b border-line">
+              <th scope="col" className={HEAD}>
+                Session
+              </th>
+              <th scope="col" className={HEAD}>
+                Cumulative net return
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Every tenth row: 337 rows in a disclosure is not a table anyone reads, and
+                the full series is in ml/artifacts/metrics.json. */}
+            {points
+              .filter((_, i) => i % 10 === 0 || i === points.length - 1)
+              .map((p) => (
+                <tr key={p.date} className="border-b border-line last:border-0">
+                  <td className="px-2 py-1 text-left text-[11.5px] text-ink-2">{p.date}</td>
+                  <td className={CELL}>{pct(p.net, 2)}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      }
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={points} margin={{ top: 8, right: 16, bottom: 20, left: -4 }}>
+          <CartesianGrid stroke={GRID} vertical={false} />
+          <XAxis
+            dataKey="date"
+            tick={AXIS_TICK}
+            stroke="rgb(255 255 255 / 11%)"
+            interval={tickEvery}
+            minTickGap={24}
+            tickFormatter={(v: string) => v.slice(0, 7)}
+          />
+          <YAxis
+            tick={AXIS_TICK}
+            tickFormatter={(v: number) => pct(v, 0)}
+            stroke="rgb(255 255 255 / 11%)"
+          />
+          <Tooltip
+            contentStyle={TOOLTIP_STYLE}
+            cursor={{ stroke: "rgb(255 255 255 / 18%)" }}
+            formatter={tooltipFormatter}
+            labelFormatter={(label) => String(label)}
+          />
+          <ReferenceLine y={0} stroke={RECESSIVE} strokeDasharray="4 4" />
+          {buyAndHoldTotal !== null && buyAndHoldTotal !== undefined && (
+            <ReferenceLine
+              y={buyAndHoldTotal}
+              stroke={SERIES.secondary}
+              strokeDasharray="5 3"
+              label={{
+                value: `buy & hold ${pct(buyAndHoldTotal, 1)}`,
+                position: "insideTopLeft",
+                fill: "rgb(255 255 255 / 52%)",
+                fontSize: 10,
+              }}
+            />
+          )}
+          <Line
+            type="monotone"
+            dataKey="net"
+            name="cumulative net return"
+            stroke={SERIES.primary}
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 4, strokeWidth: 2, stroke: "#0c0c0e" }}
+          />
+        </LineChart>
       </ResponsiveContainer>
     </Frame>
   );

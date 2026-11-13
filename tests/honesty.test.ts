@@ -114,7 +114,7 @@ describe("no fabricated statistics in the UI (§4.1, §4.2)", () => {
         // a Brier score of 0.25 means, and that is a property of the scoring rule rather
         // than a measurement of this model. They live in one audited constant so that the
         // no-literals rule in the components can stay absolute.
-        if (/SCALE_REFERENCE\./.test(code)) return;
+        if (/SCALE_REFERENCE\.|RISK_PROFILE_BOUNDS\./.test(code)) return;
         offenders.push(`${relative(ROOT, file)}:${i + 1}: ${line.trim()}`);
       });
     }

@@ -15,6 +15,13 @@
       "when": 1794497725119,
       "tag": "0001_majestic_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794540000000,
+      "tag": "0002_watchlist_scope",
+      "breakpoints": true
     }
   ]
 }

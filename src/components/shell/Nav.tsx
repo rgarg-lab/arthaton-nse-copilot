@@ -14,7 +14,10 @@ const LINKS = [
   { href: "/dashboard", label: "Model card" },
   { href: "/evidence", label: "Evidence" },
   { href: "/workspace", label: "Copilot" },
-  { href: "/memory", label: "Watchlist" },
+  // Was `/memory` behind a "Watchlist" label — real data, but not what the label
+  // promised. `/watchlist` is the real thing; the memory page keeps its own name and is
+  // linked from it.
+  { href: "/watchlist", label: "Watchlist" },
   { href: "/outbox", label: "Alerts" },
   { href: "/preflight", label: "Preflight" },
 ];

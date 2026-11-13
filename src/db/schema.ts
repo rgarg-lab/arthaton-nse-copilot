@@ -258,22 +258,35 @@ export const llmCache = pgTable("llm_cache", {
 // that failure surfaces inside the assistant's own answer, which is a confusing place to
 // debug it.
 
-/** Names the user is tracking. */
+/**
+ * Names the user is tracking.
+ *
+ * Keyed by `scope`, not by session. The watchlist is a *page*, reached from the nav, and a
+ * page has no agent session — scoping it per conversation would mean a list that silently
+ * emptied whenever a new chat started. `scope` is the signed-in user's id, or the literal
+ * `anonymous` when auth is unconfigured, which is the supported default here.
+ *
+ * The unique index is what makes "add" idempotent. It cannot be `(session_id, ticker)`:
+ * Postgres treats NULLs as distinct in a unique index, so with a null session every add
+ * would insert another row and the page would have to de-duplicate on read.
+ */
+export const ANONYMOUS_SCOPE = "anonymous";
+
 export const watchlist = pgTable(
   "watchlist",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    sessionId: uuid("session_id").references(() => agentSessions.id, { onDelete: "cascade" }),
+    scope: text("scope").notNull().default(ANONYMOUS_SCOPE),
+    /** Provenance only — which conversation added it, when one was involved. */
+    sessionId: uuid("session_id").references(() => agentSessions.id, { onDelete: "set null" }),
     userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
     ticker: text("ticker").notNull(),
     note: text("note"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    index("watchlist_session").on(table.sessionId, table.createdAt),
-    // One entry per ticker per session: adding the same name twice is a no-op, not a
-    // duplicate row the UI then has to de-duplicate on read.
-    uniqueIndex("watchlist_session_ticker").on(table.sessionId, table.ticker),
+    index("watchlist_scope").on(table.scope, table.createdAt),
+    uniqueIndex("watchlist_scope_ticker").on(table.scope, table.ticker),
   ],
 );
 
@@ -321,16 +334,15 @@ export const riskProfile = pgTable(
   "risk_profile",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    sessionId: uuid("session_id")
-      .references(() => agentSessions.id, { onDelete: "cascade" })
-      .notNull(),
+    /** Same scoping as `watchlist`, and for the same reason. */
+    scope: text("scope").notNull().default(ANONYMOUS_SCOPE),
     userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
     horizonSessions: integer("horizon_sessions").notNull().default(1),
     riskTolerance: text("risk_tolerance").notNull().default("balanced"),
     minProbability: real("min_probability").notNull().default(0.5),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [uniqueIndex("risk_profile_session").on(table.sessionId)],
+  (table) => [uniqueIndex("risk_profile_scope").on(table.scope)],
 );
 
 /** One row per eval run; the number that goes in the README's "Measured accuracy". */
