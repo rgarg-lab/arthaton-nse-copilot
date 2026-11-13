@@ -234,6 +234,14 @@ export const MetricsPayloadSchema = z.object({
     })
     .optional(),
   known_limitations: z.array(z.string()).optional(),
+  /**
+   * Merged in by the service from `feature_importance.json`. Gain-based importance off the
+   * fitted booster — `share` is already normalised to sum to 1 by `train.py`, so nothing
+   * downstream has to compute it.
+   */
+  feature_importance: z
+    .array(z.object({ feature: z.string(), gain: z.number(), share: z.number() }))
+    .optional(),
 });
 
 // ── neighbours ──────────────────────────────────────────────────────────────────

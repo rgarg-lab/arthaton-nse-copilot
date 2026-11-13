@@ -1,59 +1,76 @@
 import { currentUserOrDemo } from "@/auth";
+import { ArcDeck } from "@/components/landing/ArcDeck";
 import { BeamNetwork } from "@/components/landing/BeamNetwork";
 import { TryIt } from "@/components/landing/BigType";
+import { EvidencePlates } from "@/components/landing/EvidencePlates";
 import { Features } from "@/components/landing/Features";
 import { Footer } from "@/components/landing/Footer";
 import { Hero } from "@/components/landing/Hero";
-import { HowItWorks } from "@/components/landing/HowItWorks";
+import { MotionWall } from "@/components/landing/MotionWall";
+import { ProofStrip } from "@/components/landing/ProofStrip";
 import { QuickChatProvider, type QuickChatVisitor } from "@/components/landing/QuickChat";
-import { MeasuredStrip } from "@/components/finance/MeasuredStrip";
-import { getMetrics } from "@/lib/ml/client";
+import { SkillStream } from "@/components/landing/SkillStream";
 import { config } from "@/lib/config";
+import { landingData } from "@/lib/landingData";
 
 export const dynamic = "force-dynamic";
 
 /**
  * The landing page.
  *
- * Four of the inherited sections are gone, all for the same reason: their content was
- * someone else's.
+ * ## What happened here, and the correction
  *
- * The course stream, the proof strip and the evidence plates were well-built sections
- * whose only content was counts from the demo seed's PRNG — a corpus size, a
- * confirmed-edge ratio, a 1,284,000-user population. `ArcDeck` was worse on inspection: a
- * five-card explainer hard-coding a "Cloud Engineer" goal, a skill DAG of
- * Python/Linux/Git/SQL, and a six-row scoring breakdown of invented decimals, one of them
- * labelled "Learners' next". In a domain-agnostic template all of that is a documented
- * placeholder; on a finance submission it is precisely the fabricated-statistics pattern
- * §4.1 forbids, and the earlier version of this project lost its credibility to exactly
- * that.
+ * The first pass at this project **deleted** five of the shell's sections — the stream,
+ * the arc deck, the counting strip, the motion wall and the evidence plates — because
+ * their content came from the template's seeded PRNG and §4.1 forbids fabricated figures
+ * in a finance submission.
  *
- * `MeasuredStrip` replaces them with four figures read from the evaluation artifact, and
- * shows nothing at all when the service is down. `HowItWorks` renders
- * `idea.config.landing.howItWorks`, which already held this project's three steps and was
- * being rendered nowhere.
+ * Deleting them was the wrong reading of that rule. §4.1 says do not invent statistics; it
+ * does not say throw away the components that display them. The build spec is explicit in
+ * the other direction — do not redesign the shell — and removing most of it is a redesign.
+ * The result was a page of plain tables that lost everything the inherited UI was good at.
  *
- * What stays is the part of the shell that was always copy-driven and is now true: the
- * hero, the feature cards, the beam network and the quick chat.
+ * Every section is back, and each one now takes its figures as props from
+ * `src/lib/landingData.ts`, which reads `ml/artifacts/*.json` through the service. The
+ * layout, the motion, the CSS modules and the scroll choreography are untouched.
+ *
+ * ## Still no fabrication
+ *
+ * `landingData()` returns `null` when the ML service is unreachable, and every section
+ * that would show a number is omitted entirely rather than rendered with placeholders.
+ * What remains — the hero, the feature cards, the beam network, the quick chat — is
+ * copy-driven from `idea.config.ts` and true regardless.
+ *
+ * ## Speed
+ *
+ * `landingData` is cached for five minutes. The artifacts change once a day at most, and
+ * the old version blocked the whole render on two uncached HTTP round trips, every visit.
  */
 async function visitorState(): Promise<QuickChatVisitor> {
-  // The quick chat only needs to know whether anyone is signed in; it opens a fresh agent
-  // session either way, because the app has no login wall.
   return { signedIn: Boolean(await currentUserOrDemo()) };
 }
 
 export default async function Home() {
   const idea = config();
-  const [visitor, metrics] = await Promise.all([visitorState(), getMetrics()]);
+  const [visitor, data] = await Promise.all([visitorState(), landingData()]);
 
   return (
     <QuickChatProvider visitor={visitor}>
       <main className="flex flex-1 flex-col">
         <Hero storyHref="#how-it-works" />
-        <Features idea={idea} />
-        <HowItWorks idea={idea} />
-        <MeasuredStrip id="measured" result={metrics} />
+        {data && <SkillStream id="basket" cards={data.stream} nextHref="#how-it-works" />}
+        <ArcDeck id="how-it-works" importance={data?.importance} />
+        {data && (
+          <ProofStrip
+            id="proof"
+            title="What has this actually been measured at?"
+            cells={data.proof}
+          />
+        )}
+        <MotionWall id="different" data={data?.wall ?? null} />
         <BeamNetwork id="engine" />
+        {data && <EvidencePlates id="evidence" plates={data.plates} />}
+        <Features idea={idea} />
         <TryIt id="try" />
         <Footer />
       </main>

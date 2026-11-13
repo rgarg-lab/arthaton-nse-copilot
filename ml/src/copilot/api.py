@@ -41,6 +41,7 @@ from . import __version__
 from .config import (
     CALIBRATOR_PATH,
     DISCLAIMER,
+    IMPORTANCE_PATH,
     METRICS_PATH,
     MODEL_PATH,
     PANEL_PATH,
@@ -92,6 +93,14 @@ class State:
 
         if METRICS_PATH.exists():
             self.metrics = json.loads(METRICS_PATH.read_text(encoding="utf-8"))
+            # Feature importance is produced by `train.py` into its own artifact rather
+            # than by `evaluate.py`, because it is a property of the fitted model and not
+            # of the holdout. It is merged into the metrics document here so the app has
+            # one endpoint for "what the model is", instead of a second fetch for one
+            # array. Real gain off the booster — see train.py.
+            if IMPORTANCE_PATH.exists():
+                importance = json.loads(IMPORTANCE_PATH.read_text(encoding="utf-8"))
+                self.metrics["feature_importance"] = importance.get("features", [])
         else:
             self.load_errors.append(f"missing {METRICS_PATH.name} — run `make -C ml eval`")
 
