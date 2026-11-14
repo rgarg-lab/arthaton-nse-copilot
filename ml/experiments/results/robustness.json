@@ -1,0 +1,55 @@
+{
+ "threshold": 0.6,
+ "windows": [
+  {
+   "window": "fold1_val2022",
+   "n": 4216,
+   "full_accuracy": 0.5657020872865275,
+   "calls": 1331,
+   "coverage": 0.3157020872865275,
+   "accuracy_on_calls": 0.613824192336589,
+   "auc": 0.5916737034084874
+  },
+  {
+   "window": "fold2_val2023",
+   "n": 4165,
+   "full_accuracy": 0.5438175270108043,
+   "calls": 636,
+   "coverage": 0.15270108043217287,
+   "accuracy_on_calls": 0.6367924528301887,
+   "auc": 0.56779584995087
+  },
+  {
+   "window": "fold3_val2024",
+   "n": 4182,
+   "full_accuracy": 0.5224772835963654,
+   "calls": 581,
+   "coverage": 0.13892874222859875,
+   "accuracy_on_calls": 0.5576592082616179,
+   "auc": 0.5431986490769035
+  },
+  {
+   "window": "fold4_val2025H1",
+   "n": 2091,
+   "full_accuracy": 0.5179340028694405,
+   "calls": 400,
+   "coverage": 0.1912960306073649,
+   "accuracy_on_calls": 0.625,
+   "auc": 0.5428292374974839
+  }
+ ],
+ "holdout_published": {
+  "n": 5729,
+  "full_accuracy": 0.513702,
+  "calls": 582,
+  "coverage": 0.101588,
+  "accuracy_on_calls": 0.554983
+ },
+ "summary": {
+  "on_calls_min": 0.554983,
+  "on_calls_median": 0.613824192336589,
+  "on_calls_max": 0.6367924528301887,
+  "windows_at_or_above_60pct": 3,
+  "windows_total": 5
+ }
+}

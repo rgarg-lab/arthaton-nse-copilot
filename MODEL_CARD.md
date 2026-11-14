@@ -295,10 +295,30 @@ calls.
 
 The same model, at the same threshold, scores **55.50%** on the final holdout.
 
-Two adjacent windows, seven points apart, no change to anything. On a few hundred calls that
-is what sampling noise plus one regime shift looks like, and it is the honest error bar on
-every low-coverage claim in this project. A deck advertising 62.5% would be quoting the
-luckier of two measurements of the same quantity; this card quotes the one it can defend.
+Two adjacent windows, seven points apart, no change to anything. So rather than pick one,
+`ml/experiments/robustness.py` measures the identical claim in every window, each
+out-of-sample for a model fitted only on the data preceding it:
+
+| window | full accuracy | coverage | accuracy on calls |
+|---|---|---|---|
+| val 2022 | 56.57% | 31.6% | **61.38%** |
+| val 2023 | 54.38% | 15.3% | **63.68%** |
+| val 2024 | 52.25% | 13.9% | 55.77% |
+| val 2025 H1 | 51.79% | 19.1% | **62.50%** |
+| final holdout | 51.37% | 10.2% | 55.50% |
+
+**Median 61.38%, range 55.50–63.68%, at or above 60% in three of five windows.** Full
+coverage stays near 52% throughout.
+
+The defensible statement is therefore: *on the sessions where conviction clears the frozen
+threshold, accuracy has a median of 61.4% across five out-of-sample windows and ranged from
+55.5% to 63.7%.* Any single one of those numbers quoted alone — including the flattering
+63.68% — would misrepresent an eight-point spread. The headline of this card stays the
+full-coverage holdout figure because that is the number with the least room to flatter.
+
+Coverage is not stable either: 31.6% in 2022 falling to 10.2% on the holdout. The model has
+become less willing to call over time, which is the frozen threshold behaving correctly as
+the available edge decayed rather than a defect.
 
 ---
 

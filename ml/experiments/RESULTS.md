@@ -176,6 +176,35 @@ That spread is the honest error bar on any low-coverage claim here. On 400 calls
 7-point swing is what sampling noise plus one regime change looks like. A deck that
 advertises 62.5% is quoting the luckier of two measurements of the same thing.
 
+### So measure it five times instead of once
+
+Two numbers cannot say which is typical, so `robustness.py` measures the identical claim —
+the frozen configuration at the frozen 0.60 threshold — independently in every window, each
+out-of-sample for a model fitted only on the data preceding it. Nothing is selected here;
+this is not a search.
+
+| window | val rows | full accuracy | calls | coverage | **accuracy on calls** |
+|---|---|---|---|---|---|
+| val 2022 | 4,216 | 56.57% | 1,331 | 31.6% | **61.38%** |
+| val 2023 | 4,165 | 54.38% | 636 | 15.3% | **63.68%** |
+| val 2024 | 4,182 | 52.25% | 581 | 13.9% | 55.77% |
+| val 2025 H1 | 2,091 | 51.79% | 400 | 19.1% | **62.50%** |
+| **final holdout** | 5,729 | 51.37% | 582 | 10.2% | 55.50% |
+
+**Accuracy on called sessions: min 55.50%, median 61.38%, max 63.68% — at or above 60% in
+three of five windows.** Full-coverage accuracy over the same windows: 51.37% to 56.57%,
+median 52.25%.
+
+That is the defensible form of the 60% claim, and it is worth stating precisely:
+
+> On the sessions where its conviction clears the frozen threshold, the model's accuracy has
+> a **median of 61.4% across five out-of-sample windows**, ranging from 55.5% to 63.7%. It
+> exceeded 60% in three of the five. At full coverage it stays near 52% in every window.
+
+Note what also falls out of the table: coverage is not stable either — 31.6% in 2022 down to
+10.2% on the holdout. The model has been getting less willing to call, which is the
+threshold doing its job as the available edge decayed, not a defect.
+
 ---
 
 ## What was not tried, and why
