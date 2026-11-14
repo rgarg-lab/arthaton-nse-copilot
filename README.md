@@ -22,6 +22,12 @@ Every number in this section is read from
 was typed by hand, and `tests/honesty.test.ts` fails the build if a metric-shaped literal
 appears anywhere in the UI.
 
+**For the full evaluation protocol, failure modes and limitations, read
+[`MODEL_CARD.md`](./MODEL_CARD.md).** It states the protocol before the results, and §5.5
+carries the caveat that matters most and is not visible in any single headline figure: above
+the abstention threshold the measured edge is almost entirely in the *down*-calls, while the
+up-calls are close to a coin flip.
+
 **Final holdout: 2025-07-01 → 2026-11-09, 5,729 rows the model never saw.** Read exactly
 once; the ledger is at [`ml/artifacts/holdout_ledger.json`](./ml/artifacts/holdout_ledger.json).
 
