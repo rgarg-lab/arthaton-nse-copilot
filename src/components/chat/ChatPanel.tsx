@@ -335,7 +335,16 @@ export function ChatPanel({
             className={styles.textarea}
             rows={1}
             value={input}
-            placeholder={focused ? (messages.length === 0 ? `Tell ${ASSISTANT_NAME} what you want to become…` : `Reply to ${ASSISTANT_NAME}…`) : ""}
+            // Inherited copy said "Tell <assistant> what you want to become" — the learning
+            // product this shell came from. Wrong domain, on the surface the demo spends the
+            // most time on.
+            placeholder={
+              focused
+                ? messages.length === 0
+                  ? `Ask ${ASSISTANT_NAME} about any name in the basket…`
+                  : `Reply to ${ASSISTANT_NAME}…`
+                : ""
+            }
             onChange={(e) => setInput(e.target.value)}
             onFocus={() => {
               setFocused(true);

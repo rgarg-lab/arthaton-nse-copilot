@@ -60,13 +60,17 @@ export default async function Home() {
         <Hero storyHref="#how-it-works" />
         {data && <SkillStream id="basket" cards={data.stream} nextHref="#how-it-works" />}
         <ArcDeck id="how-it-works" importance={data?.importance} />
-        {data && (
-          <ProofStrip
-            id="proof"
-            title="What has this actually been measured at?"
-            cells={data.proof}
-          />
-        )}
+        {/*
+          Always rendered, unlike the sections above and below it. This is the strip
+          SETUP.md points at when it promises an explicit error instead of a placeholder
+          figure, so it has to be present to carry that error — see the service-down branch
+          in ProofStrip.
+        */}
+        <ProofStrip
+          id="proof"
+          title="What has this actually been measured at?"
+          cells={data?.proof ?? null}
+        />
         <MotionWall id="different" data={data?.wall ?? null} />
         <BeamNetwork id="engine" />
         {data && <EvidencePlates id="evidence" plates={data.plates} />}

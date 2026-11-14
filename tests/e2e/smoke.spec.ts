@@ -69,10 +69,23 @@ test("the demo path works with no keys", async ({ page }) => {
     /hero-module__\w+__loader/,
   );
 
-  // The landing's numbers strip either shows measured figures or says the service is down.
-  // What it must never do is show a figure with no service behind it.
-  await expect(page.locator("#measured")).toContainText(
-    /Holdout accuracy|model service is not running/i,
+  /**
+   * The landing's numbers strip either shows measured figures or says the service is down.
+   * What it must never do is show a figure with no service behind it.
+   *
+   * This assertion caught two real breakages at once when the landing was re-skinned onto
+   * the restored components, and both were invisible to `npm test`:
+   *
+   * 1. It pointed at `#measured`, an id that no longer exists — the strip is `#proof`, and
+   *    its copy changed with it. A retired selector fails the same way a broken page does,
+   *    so the id is asserted separately below to keep the two causes apart.
+   * 2. More seriously, the section was rendered `{data && …}`, so with the service down it
+   *    vanished instead of reporting. The "or says the service is down" half of this
+   *    invariant was unreachable. ProofStrip now owns that state.
+   */
+  await expect(page.locator("#proof"), "the measured strip must be on the page").toHaveCount(1);
+  await expect(page.locator("#proof")).toContainText(
+    /Sessions tested|model service is not running/i,
   );
 
   // ── the workspace ───────────────────────────────────────────────────────────
@@ -88,8 +101,18 @@ test("the demo path works with no keys", async ({ page }) => {
    * queue → tray → approve → outbox journey is exercised in one turn. `create_task` is
    * enabled precisely so a fresh clone can show that with no connector configured.
    */
-  const composer = page.locator("#smart-input");
-  await expect(composer).toBeVisible({ timeout: 60_000 });
+  /**
+   * `chat-input`, not `#smart-input`. The restored workspace puts `ChatPanel` in the
+   * shell's always-mounted chat region, and that panel's textarea already carried this
+   * testid — `SmartInput`, which owns `id="smart-input"`, is a separate component the
+   * workspace does not use. So this assertion failed with "element(s) not found" and read
+   * as a workspace that never rendered a composer, when the composer was there under a
+   * selector that already existed.
+   */
+  const composer = page.getByTestId("chat-input");
+  await expect(composer, "the workspace must render a chat composer").toBeVisible({
+    timeout: 60_000,
+  });
   // `fill`, never `click`: a rotating suggestion can sit over a composer and is itself a
   // button, so a programmatic click on the field gets intercepted and retries forever.
   await composer.fill(
@@ -99,12 +122,37 @@ test("the demo path works with no keys", async ({ page }) => {
   await composer.press("Control+Enter");
 
   // ── the trace shows real tool calls ─────────────────────────────────────────
+  /**
+   * The trace and the approvals tray live in the workspace's **Agent** tab, and the default
+   * tab is Signals — so neither is in the DOM until the tab is selected. The previous
+   * version of this test asserted on them directly and failed as though the agent had never
+   * run, which is a misleading way to discover a tab.
+   *
+   * Selected *after* the turn is sent, deliberately: the trace events accumulate in
+   * `CopilotWorkspace`'s own state rather than the pane's, so switching tabs mid-turn keeps
+   * every event. Asserting that is the point — a trace that only exists while its tab is
+   * open would be a real defect.
+   */
+  await page.getByTestId("tab-agent").click();
+
   const trace = page.getByRole("region", { name: /agent trace/i });
   await expect(trace).toBeVisible({ timeout: 60_000 });
   await expect(trace).toContainText(/tool call/i, { timeout: 180_000 });
 
-  // The answer arrives in the results column.
-  await expect(page.getByRole("region", { name: /^Results$/i })).toContainText(/\w/, {
+  /**
+   * The answer arrives in the chat conversation, not a "Results" column — that region
+   * belonged to the earlier layout and does not exist in the restored shell, where the
+   * conversation is the always-mounted chat region beside the tabs.
+   *
+   * Asserted on the assistant's own message rather than on the region's text, because the
+   * region also contains the question that was just typed into it, and a test that any text
+   * is present would pass on the echo of its own input.
+   */
+  const answer = page
+    .getByRole("region", { name: /conversation/i })
+    .locator('[data-role="assistant"]')
+    .first();
+  await expect(answer, "the assistant must answer in the conversation").toContainText(/\w/, {
     timeout: 180_000,
   });
 
@@ -114,10 +162,36 @@ test("the demo path works with no keys", async ({ page }) => {
   const preview = (await tray.locator("pre").first().innerText()).trim();
   expect(preview.length).toBeGreaterThan(0);
 
+  /**
+   * How many the turn actually queued. Not assumed to be one: the agent is free to queue
+   * several actions in a turn, and on a mock-mode run of this question it queues two.
+   *
+   * The previous version approved `.first()` and then asserted the whole tray was hidden,
+   * which fails whenever more than one action is waiting — the tray was correctly still
+   * showing the *other* action. That read as a broken approve button for a while; it was a
+   * test that had hard-coded a queue depth of one.
+   */
+  const queued = await tray.locator("pre").count();
+  expect(queued, "the turn must queue at least one action").toBeGreaterThan(0);
+
   // Keyboard activation: hold-to-confirm is a pointer affordance, and the button takes
   // Enter precisely so it stays reachable without one.
   await tray.getByRole("button", { name: /hold to approve/i }).first().press("Enter");
-  await expect(tray).toBeHidden({ timeout: 90_000 });
+
+  // The approved action leaves the queue. Asserted on *this* action rather than on the
+  // tray's visibility, so the assertion means the same thing at any queue depth.
+  if (queued === 1) {
+    await expect(tray, "approving the only action empties the tray").toBeHidden({
+      timeout: 90_000,
+    });
+  } else {
+    await expect
+      .poll(async () => tray.locator("pre").count(), {
+        timeout: 90_000,
+        message: "the approved action should leave the queue",
+      })
+      .toBe(queued - 1);
+  }
 
   const firstLine = preview.split("\n")[0].slice(0, 40);
   await expect

@@ -232,7 +232,8 @@ export function ProofStrip({
 }: {
   id?: string;
   title: string;
-  cells: Cell[];
+  /** `null` when the ML service is unreachable — see the service-down branch below. */
+  cells: Cell[] | null;
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(0);
   const [focusIndex, setFocusIndex] = useState<number | null>(null);
@@ -241,6 +242,45 @@ export function ProofStrip({
   const pointerTypeRef = useRef<string>("mouse");
 
   const release = (index: number) => setActiveIndex((current) => (current === index ? 0 : current));
+
+  /**
+   * Service down: say so, in place, rather than disappearing.
+   *
+   * `app/page.tsx` used to render this section only `{data && …}`, so with the ML service
+   * unreachable the whole strip silently vanished from the landing page. That satisfies the
+   * letter of §4.1 — nothing fabricated — while breaking the claim the project actually
+   * makes: `SETUP.md` promises the landing's numbers strip "shows an explicit error", and
+   * the smoke test's stated invariant is that it either shows measured figures *or* says
+   * the service is down. A section that is simply absent says nothing at all, and a visitor
+   * reads a missing section as a page that was never built rather than a model that is not
+   * answering.
+   *
+   * No `<Count>` here on purpose: there is no number to animate, and a zero counting up
+   * would read as a measurement.
+   */
+  if (!cells) {
+    return (
+      <section id={id} className={styles.section} aria-labelledby="proof-title">
+        <header className={styles.kicker}>
+          <h2 id="proof-title" className={styles.title}>
+            {title}
+          </h2>
+        </header>
+        <div className={styles.row}>
+          <article className={styles.cell}>
+            <div className={styles.content}>
+              <p className={`${styles.label} label-caps`}>No figures</p>
+              <p className={styles.note}>
+                The model service is not running, so there are no measured numbers to show.
+                Nothing here is estimated in its place — start it with{" "}
+                <code>python ml/tasks.py serve</code> and reload.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id={id} className={styles.section} aria-labelledby="proof-title">

@@ -164,6 +164,20 @@ export function CopilotWorkspace({
       }
       pane={
         <>
+          {/*
+            The page's one `h1`. The inherited shell carries its hierarchy visually — the
+            rail, the nav and the tab strip — and so ships no `h1` at all, which left every
+            pane heading an `h2` under nothing and `/workspace` the only page in the app
+            with no top-level heading. A screen reader user landing here got a document
+            that starts at level two.
+
+            Visually hidden rather than drawn, because adding a visible title above the tabs
+            would change a layout that is deliberately not mine to redesign. It names the
+            tab so the heading tracks what the pane is actually showing.
+          */}
+          <h1 className="sr-only">
+            Copilot workspace — {TABS.find((t) => t.id === tab)?.label ?? "Signals"}
+          </h1>
           {tab === "signals" && (
             <section data-testid="signals-section" className="flex flex-col gap-4">
               <div>
