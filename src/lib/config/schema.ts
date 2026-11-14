@@ -126,7 +126,23 @@ export const IdeaConfigSchema = z.object({
   name: z.string().min(1).max(40),
   tagline: z.string().min(1).max(120),
   problem: z.string().min(1),
-  targetUser: z.string().min(1).max(160),
+  targetUser: z.string().min(1).max(240),
+  /**
+   * What the primary user does *today*, without this tool.
+   *
+   * Separate from `problem` because it is a different claim: `problem` says the category is
+   * badly designed, this says what the person is actually doing in its absence. It is also
+   * the honest human baseline — the model is measured against always-up, previous-day sign
+   * and a 3-feature logistic regression, none of which is what a real person does instead.
+   */
+  userToday: z.string().min(1).max(320),
+  /**
+   * What this deliberately is not.
+   *
+   * Stated because a scope this narrow is a design decision rather than a limitation, and
+   * an unstated one reads as something the build simply never reached.
+   */
+  nonGoals: z.array(z.string().min(1).max(160)).min(3).max(8),
   theme: ThemeSchema,
   assistant: AssistantSchema,
   contact: ContactSchema,

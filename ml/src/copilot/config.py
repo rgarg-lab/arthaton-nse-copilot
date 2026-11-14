@@ -238,6 +238,6 @@ def api_port() -> int:
 
 
 DISCLAIMER = (
-    "Historical and paper-trading analysis only. Not investment advice. "
-    "Past measured accuracy does not predict future results."
+    "Historical and paper-trading analysis only. Not investment advice, and not from a "
+    "SEBI-registered investment adviser. Past measured accuracy does not predict future results."
 )

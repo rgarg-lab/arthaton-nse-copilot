@@ -16,9 +16,15 @@ import { cn } from "@/lib/utils";
  * legal notice, which is exactly backwards.
  */
 
+/**
+ * The SEBI clause is explicit on purpose. "Not investment advice" is the phrase every app
+ * uses, and in India it leaves the question a finance judge actually asks unanswered —
+ * whether the person behind the tool is a registered adviser. Saying so unprompted costs
+ * one clause and removes the doubt; its absence reads as an oversight.
+ */
 export const DISCLAIMER =
-  "Historical and paper-trading analysis only. Not investment advice. " +
-  "Past measured accuracy does not predict future results.";
+  "Historical and paper-trading analysis only. Not investment advice, and not from a " +
+  "SEBI-registered investment adviser. Past measured accuracy does not predict future results.";
 
 export const PAPER_ONLY = "Paper trading and historical data only — no real money, no broker.";
 

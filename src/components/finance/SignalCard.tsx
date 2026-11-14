@@ -133,10 +133,21 @@ export function AbstentionCard({ signal }: { signal: Signal }) {
         <dd className="text-right font-mono text-ink-2">{probability(signal.threshold)}</dd>
       </dl>
 
+      {/*
+        Why the threshold sits where it does, in the one place a user meets it.
+        The asymmetry is the whole argument for abstaining rather than lowering the gate: a
+        wrong call costs real money plus the cost of the trade, while a skipped session costs
+        an opportunity the user never had a measured edge on. The threshold is therefore set
+        where conviction is high enough to pay for being wrong, not where it maximises the
+        number of calls — and the model card shows that the accuracy-maximising point would
+        be further right still, at near-zero coverage.
+      */}
       <p className="text-[11px] leading-relaxed text-ink-4">
         The model&rsquo;s calibrated probability is deliberately not shown as a direction here.
         Conviction below the frozen threshold means its measured edge does not justify a call
-        on this name today.
+        on this name today — and a wrong call costs more than a missed one, since acting on
+        noise loses money and brokerage while waiting only forgoes an edge that was never
+        measurable. That asymmetry is why the gate is set to be paid for, not to be busy.
       </p>
     </CardFrame>
   );

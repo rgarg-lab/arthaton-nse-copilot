@@ -33,8 +33,39 @@ export const idea: IdeaConfig = {
     "sessions that most resemble today, with what " +
     "actually happened next, and an assistant that will quote its own measured failure rate " +
     "when you ask whether to trust it.",
+  /**
+   * One person, with an amount, a cadence and a decision. The earlier version of this field
+   * said "a self-directed Indian equity investor who already reads charts" — a segment, not
+   * a user, and it left the product with no decision to be judged against.
+   */
   targetUser:
-    "A self-directed Indian equity investor who already reads charts, and wants to know when the model should be ignored.",
+    "A salaried investor holding ₹2–5 lakh across 6–8 NSE large-caps, who checks the market " +
+    "once or twice a week and wants one thing: is today a day to act, or a day to wait?",
+
+  /**
+   * The honest baseline. The model is measured against always-up, previous-day sign and a
+   * three-feature logistic regression, and none of those is what the user actually does
+   * instead — they act on confident-sounding noise. That is a harder thing to beat than a
+   * coin flip and an easier thing to beat than it sounds, and naming it is the difference
+   * between a benchmark and a straw man.
+   */
+  userToday:
+    "Reads a news headline, a broker's BUY badge, or a Telegram tip, then decides on gut " +
+    "feel — with no way to tell a day the signal is real from a day it is noise, because " +
+    "none of those sources ever says 'nothing is knowable today'.",
+
+  /**
+   * Scope, stated as refusals. Each line is a thing the model genuinely cannot do or the
+   * product deliberately will not do — not a feature that ran out of time.
+   */
+  nonGoals: [
+    "Not intraday. One horizon only: the next session's close against today's.",
+    "Not a tip service. No watchlist of the day, no 'top picks', no ranked conviction table.",
+    "Not portfolio optimisation. It says nothing about position size, allocation or hedging.",
+    "No execution. Nothing reaches a broker; paper trading and historical analysis only.",
+    "Not advice. Not from a SEBI-registered adviser, and it will not tell you what to do.",
+    "Not a price target. It calls direction or nothing — never how big the move will be.",
+  ],
 
   theme: { primary: "#2f7d64", accent: "#d4a23c" },
 

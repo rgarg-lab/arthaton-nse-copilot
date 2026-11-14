@@ -4,6 +4,7 @@ import { BeamNetwork } from "@/components/landing/BeamNetwork";
 import { TryIt } from "@/components/landing/BigType";
 import { EvidencePlates } from "@/components/landing/EvidencePlates";
 import { Features } from "@/components/landing/Features";
+import { ScopeNote } from "@/components/finance/ScopeNote";
 import { Footer } from "@/components/landing/Footer";
 import { Hero } from "@/components/landing/Hero";
 import { MotionWall } from "@/components/landing/MotionWall";
@@ -75,6 +76,8 @@ export default async function Home() {
         <BeamNetwork id="engine" />
         {data && <EvidencePlates id="evidence" plates={data.plates} />}
         <Features idea={idea} />
+        {/* Judgement, not measurement — see ScopeNote. Alongside the inherited sections, not through them. */}
+        <ScopeNote id="scope" idea={idea} />
         <TryIt id="try" />
         <Footer />
       </main>

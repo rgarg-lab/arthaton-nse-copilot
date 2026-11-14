@@ -88,6 +88,17 @@ test("the demo path works with no keys", async ({ page }) => {
     /Sessions tested|model service is not running/i,
   );
 
+  /**
+   * The scope section, which is the only place the landing states who this is for and what
+   * it refuses to do. Asserted because `targetUser`, `userToday` and `nonGoals` live in
+   * `idea.config.ts`, and config with no consumer is config that silently stops being true
+   * — the whole point of putting them there was that they appear on the page.
+   */
+  const scope = page.locator("#scope");
+  await expect(scope, "the landing must state its scope").toHaveCount(1);
+  await expect(scope).toContainText(/Not intraday/i);
+  await expect(scope).toContainText(/Not a tip service/i);
+
   // ── the workspace ───────────────────────────────────────────────────────────
   // Navigated rather than clicked: the links are asserted above, and the CTA that targets
   // the workspace sits below the fold behind a motion-gated section, so clicking it needs
