@@ -261,6 +261,24 @@ three candidates, chosen by fold log loss. A deeper model scored worse. The sign
 ratio on a one-session horizon is the constraint, and more parameters cannot manufacture
 signal that is not in the data.
 
+**This was tested rather than asserted.** `ml/experiments/RESULTS.md` records a search for
+60%: 23 configurations across five algorithm families (LightGBM, HistGradientBoosting,
+random forest, extra trees, regularised logistic regression), five feature sets, five
+noise-reduction schemes, and a five-model ensemble — all on the walk-forward folds, with the
+holdout untouched.
+
+Every one of them lands between **51.3% and 51.8%** on a fold that played no part in
+selecting it. Added features contributed nothing (a 0.23-point spread, including
+short-horizon reversal, the best-documented daily equity effect there is). Every
+noise-reduction scheme made it worse. ExtraTrees beat this model by 1.5 points on the
+selection folds and then came **last** of three on the confirmation fold — overfitting to a
+validation set, visible in one table.
+
+The search also measured the thing that makes all such numbers suspect: the
+**validation-to-unseen gap on this problem is 2.6 to 4.6 points**, and it is largest for
+whichever configuration searched hardest. That is why this card's headline is a holdout
+number and not a validation number.
+
 **The earlier version of this project reported 58.15%** with raw prices and 30 close lags as
 features and a row-wise split. That number was higher and meant nothing. Going from 58.15%
 to 51.37% is the actual result of this work.
@@ -268,6 +286,19 @@ to 51.37% is the actual result of this work.
 **The usable product is not the headline.** It is the 55.50% on the 10.16% of sessions where
 conviction clears a frozen threshold, plus knowing *which* sessions those are — and, per
 §5.5, knowing that the edge there is concentrated in the down-calls.
+
+### Where 60% does exist, and why it is not the headline
+
+The model clears 60% if it abstains enough. On the 2025 H1 validation fold, at its own
+frozen threshold of 0.60, it scores **62.50%** on the 19.1% of sessions it calls — 400
+calls.
+
+The same model, at the same threshold, scores **55.50%** on the final holdout.
+
+Two adjacent windows, seven points apart, no change to anything. On a few hundred calls that
+is what sampling noise plus one regime shift looks like, and it is the honest error bar on
+every low-coverage claim in this project. A deck advertising 62.5% would be quoting the
+luckier of two measurements of the same quantity; this card quotes the one it can defend.
 
 ---
 

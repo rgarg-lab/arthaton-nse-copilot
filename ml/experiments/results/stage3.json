@@ -1,0 +1,142 @@
+[
+ {
+  "name": "nr-none",
+  "model": "et",
+  "features": "baseline",
+  "n": 12563,
+  "accuracy": 0.5588633288227334,
+  "auc": 0.5821083596554593,
+  "logloss": 0.6844110410272201,
+  "per_fold": [
+   {
+    "fold": "fold1_val2022",
+    "n": 4216,
+    "accuracy": 0.5808823529411765
+   },
+   {
+    "fold": "fold2_val2023",
+    "n": 4165,
+    "accuracy": 0.5589435774309723
+   },
+   {
+    "fold": "fold3_val2024",
+    "n": 4182,
+    "accuracy": 0.5365853658536586
+   }
+  ],
+  "fold_accuracy_std": 0.01808443947724364,
+  "seconds": 25.7
+ },
+ {
+  "name": "nr-winsor-01",
+  "model": "et",
+  "features": "baseline",
+  "n": 12563,
+  "accuracy": 0.5544853936161744,
+  "auc": 0.5808856446251092,
+  "logloss": 0.6832110901233716,
+  "per_fold": [
+   {
+    "fold": "fold1_val2022",
+    "n": 4216,
+    "accuracy": 0.5742409867172675
+   },
+   {
+    "fold": "fold2_val2023",
+    "n": 4165,
+    "accuracy": 0.556062424969988
+   },
+   {
+    "fold": "fold3_val2024",
+    "n": 4182,
+    "accuracy": 0.5329985652797704
+   }
+  ],
+  "fold_accuracy_std": 0.016876476254893382,
+  "seconds": 18.9
+ },
+ {
+  "name": "nr-winsor-05",
+  "model": "et",
+  "features": "baseline",
+  "n": 12563,
+  "accuracy": 0.554405794794237,
+  "auc": 0.5789044300757241,
+  "logloss": 0.6835105885957794,
+  "per_fold": [
+   {
+    "fold": "fold1_val2022",
+    "n": 4216,
+    "accuracy": 0.573055028462998
+   },
+   {
+    "fold": "fold2_val2023",
+    "n": 4165,
+    "accuracy": 0.5567827130852341
+   },
+   {
+    "fold": "fold3_val2024",
+    "n": 4182,
+    "accuracy": 0.5332376853180296
+   }
+  ],
+  "fold_accuracy_std": 0.016345496815929346,
+  "seconds": 19.0
+ },
+ {
+  "name": "nr-top20",
+  "model": "et",
+  "features": "baseline",
+  "n": 12563,
+  "accuracy": 0.5457295232030566,
+  "auc": 0.5770842900862732,
+  "logloss": 0.6833499900782427,
+  "per_fold": [
+   {
+    "fold": "fold1_val2022",
+    "n": 4216,
+    "accuracy": 0.5706831119544592
+   },
+   {
+    "fold": "fold2_val2023",
+    "n": 4165,
+    "accuracy": 0.5399759903961585
+   },
+   {
+    "fold": "fold3_val2024",
+    "n": 4182,
+    "accuracy": 0.5263032042085126
+   }
+  ],
+  "fold_accuracy_std": 0.018557563920790613,
+  "seconds": 28.1
+ },
+ {
+  "name": "nr-top30-winsor",
+  "model": "et",
+  "features": "baseline",
+  "n": 12563,
+  "accuracy": 0.5551221841916739,
+  "auc": 0.5806116123109182,
+  "logloss": 0.682812084788148,
+  "per_fold": [
+   {
+    "fold": "fold1_val2022",
+    "n": 4216,
+    "accuracy": 0.584203036053131
+   },
+   {
+    "fold": "fold2_val2023",
+    "n": 4165,
+    "accuracy": 0.5457382953181272
+   },
+   {
+    "fold": "fold3_val2024",
+    "n": 4182,
+    "accuracy": 0.5351506456241033
+   }
+  ],
+  "fold_accuracy_std": 0.021075977933436137,
+  "seconds": 32.9
+ }
+]

@@ -1,0 +1,2 @@
+# Search logs are reproducible from the scripts; the JSON results are the evidence.
+*.log

@@ -17,6 +17,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx --env-file-if-exists=.env.local scripts/migrate.ts",
     "seed": "tsx --env-file-if-exists=.env.local scripts/seed.ts",
+    "cache:clear": "tsx --env-file-if-exists=.env.local scripts/cache-clear.ts",
     "test:e2e": "playwright test",
     "eval": "tsx --env-file-if-exists=.env.local scripts/eval.ts",
     "preflight": "tsx --env-file-if-exists=.env.local scripts/preflight.ts",
