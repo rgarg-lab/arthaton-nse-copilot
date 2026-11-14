@@ -1,4 +1,5 @@
 import type { Message, Provider, ProviderRequest, ProviderResponse, ToolCall } from "../types";
+import { UNIVERSE } from "@/lib/universe";
 
 /**
  * The provider that makes the demo unbreakable.
@@ -147,16 +148,33 @@ function plan(prompt: string, tools: { name: string; description: string }[]): s
   for (const name of offered) if (!BUILTIN_TOOLS.has(name)) add(name);
 
   /**
-   * Make sure one approval-queueing tool runs, if the idea enabled any.
+   * Make sure one approval-queueing tool runs — but only when the question asks for
+   * something to happen.
    *
-   * "Nothing acts without a human" is the template's signature moment and a must-build at
-   * most events, but in mock mode it only appeared when a keyword happened to match — so
-   * an idea could rehearse all day and never see its own approval tray. Detected from the
-   * tool's own description rather than a hard-coded list, so an idea's custom external
-   * tool is covered too: every queueing tool says so in the text the model reads.
+   * The template added one unconditionally, because "nothing acts without a human" is its
+   * signature moment and an idea could otherwise rehearse all day without seeing its own
+   * approval tray. That is the right trade for a learning product, where queueing a task is
+   * harmless noise.
+   *
+   * It is the wrong trade here. Asking "what are today's signals?" — a read-only question —
+   * queued an action for approval, which misrepresents what the agent did and puts a
+   * pending item in the tray that the user never asked for. On a finance tool that reads
+   * worse than a missing feature: the one thing this product must never look like is
+   * something that takes positions on its own initiative.
+   *
+   * So it is gated on action intent. The keyword rules above still add `create_task`,
+   * `send_message` and `schedule_reminder` on their own words, and DEMO_SCRIPT's scripted
+   * line ("create a task to review today's abstentions") matches `\btask\b` — so the
+   * approval tray is still one typed question away, as the demo needs.
    */
-  const queueing = tools.find((t) => /\bapprov(e|al)|queue[sd]?\b/i.test(t.description));
-  if (queueing) add(queueing.name);
+  const asksForAnAction =
+    /\b(queue|create|make|add|send|alert|notify|remind|schedule|watch|track|flag|draft|file|log)\b/.test(
+      text,
+    );
+  if (asksForAnAction) {
+    const queueing = tools.find((t) => /\bapprov(e|al)|queue[sd]?\b/i.test(t.description));
+    if (queueing) add(queueing.name);
+  }
 
   // Then the habits the template is trying to teach: consult memory before answering,
   // and verify before asserting.
@@ -191,6 +209,30 @@ function plan(prompt: string, tools: { name: string; description: string }[]): s
 function numbersIn(prompt: string): number[] {
   const matches = prompt.match(/\d[\d,]*(?:\.\d+)?/g) ?? [];
   return matches.map((m) => Number(m.replace(/,/g, ""))).filter((n) => Number.isFinite(n));
+}
+
+/**
+ * A ticker the model service will actually accept.
+ *
+ * Without this the generic fallback produced `"mock ticker"`, the API upper-cased it, and
+ * every signal question in mock mode came back as
+ * `HTTP 404: "MOCK TICKER is not in the universe"` — on the workspace, which is the
+ * demo's centrepiece, in the configuration the project tells you to demo in. Two of the
+ * six tools failed on every turn.
+ *
+ * Resolved from the prompt where possible so "should I buy Reliance" reads the signal for
+ * Reliance rather than an unrelated name, matching what a real model would do. The basket
+ * is small and its names are distinctive, so a substring match on the bare symbol is
+ * enough; `UNIVERSE` is the same list the service validates against, so a match cannot
+ * 404.
+ */
+function tickerFor(prompt: string): string {
+  const haystack = prompt.toUpperCase();
+  const named = UNIVERSE.find((ticker) => haystack.includes(ticker.replace(/\.NS$/, "")));
+  if (named) return named;
+  // No name in the question — "what are today's signals?" is the common case. Deterministic
+  // rather than random so a cached mock run replays identically.
+  return UNIVERSE[hash(prompt) % UNIVERSE.length];
 }
 
 /**
@@ -239,6 +281,7 @@ function constrainedString(node: Record<string, unknown>, prompt: string, key: s
   if (format === "uuid") return "00000000-0000-4000-8000-000000000000";
 
   // Keys whose value must be usable by the receiving tool, not merely well-typed.
+  if (/^(ticker|symbol)$/i.test(key)) return tickerFor(prompt);
   if (/^expression$/i.test(key)) return expressionFor(prompt);
   if (/^(query|claim|text|source|content|body|message|question)$/i.test(key)) {
     return prompt.slice(0, 400) || "mock input";
