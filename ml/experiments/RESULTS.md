@@ -4,9 +4,10 @@
 by permuting algorithms, adding features, adding data and reducing noise — without changing
 the core functionality, and without cheating?
 
-**Answer.** No, at full coverage. 23 configurations across five algorithm families, five
-feature sets, five noise-reduction schemes and a five-model ensemble all land between
-**51.3% and 51.8%** on data that played no part in selecting them. 60% *is* reachable, but
+**Answer.** No, at full coverage. 29 configurations across five algorithm families, five
+feature sets, five noise-reduction schemes, recency weighting, regime specialisation and a
+five-model ensemble all land between **51.3% and 51.8%** on data that played no part in
+selecting them. 60% *is* reachable, but
 only by abstaining on most sessions, and the measurement is unstable at ±7 points between
 windows.
 
@@ -99,9 +100,35 @@ At which point it looked like the goal was met. It was not.
 
 ---
 
-## Stage 5 — confirmation on the untouched fold
+## Stage 5 — recency weighting and regime specialisation
 
-Every number above is a *selection* number, chosen as the best of 23. Fold 4 played no part
+Both motivated by patterns already in the measurements rather than by hope. Selection
+accuracy falls monotonically by fold (56.6% → 54.4% → 52.3%), which would suggest old rows
+are misleading; and the holdout spreads ten points across volatility terciles with the
+middle tercile's AUC below 0.5, which would suggest one model is averaging incompatible
+regimes.
+
+| candidate | accuracy | AUC |
+|---|---|---|
+| **baseline (no weighting, pooled)** | **55.89%** | **0.5821** |
+| recency, 4-year half-life | 55.78% | 0.5784 |
+| per-regime (ExtraTrees) | 55.60% | 0.5759 |
+| recency, 1-year half-life | 55.58% | 0.5757 |
+| recency, 2-year half-life | 55.52% | 0.5761 |
+| per-regime (LightGBM) | 53.91% | 0.5613 |
+
+Both fail. Every recency half-life is worse than no weighting, so the year-over-year decline
+is not old data being misleading — it is either noise or a genuine decay in available signal,
+and down-weighting history only costs training rows. Fitting a model per tercile is worse
+still: the regimes do not have enough rows each to support a separate fit, and the pooled
+model's cross-regime structure is worth more than the specialisation.
+
+That makes **29 configurations** in total, none of which beat the pooled, unweighted,
+57-feature baseline.
+
+## Stage 6 — confirmation on the untouched fold
+
+Every number above is a *selection* number, chosen as the best of 29. Fold 4 played no part
 in any of it.
 
 | configuration | selection accuracy | **confirmation accuracy** | drop |

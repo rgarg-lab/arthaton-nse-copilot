@@ -262,10 +262,10 @@ ratio on a one-session horizon is the constraint, and more parameters cannot man
 signal that is not in the data.
 
 **This was tested rather than asserted.** `ml/experiments/RESULTS.md` records a search for
-60%: 23 configurations across five algorithm families (LightGBM, HistGradientBoosting,
+60%: 29 configurations across five algorithm families (LightGBM, HistGradientBoosting,
 random forest, extra trees, regularised logistic regression), five feature sets, five
-noise-reduction schemes, and a five-model ensemble — all on the walk-forward folds, with the
-holdout untouched.
+noise-reduction schemes, recency weighting, regime specialisation, and a five-model
+ensemble — all on the walk-forward folds, with the holdout untouched.
 
 Every one of them lands between **51.3% and 51.8%** on a fold that played no part in
 selecting it. Added features contributed nothing (a 0.23-point spread, including
