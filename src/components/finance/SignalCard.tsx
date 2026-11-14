@@ -3,6 +3,7 @@ import { Disclaimer } from "./Disclaimer";
 import {
   REGIME_COPY,
   bareTicker,
+  fixed,
   probability,
   rupees,
   sessionDate,
@@ -131,6 +132,35 @@ export function AbstentionCard({ signal }: { signal: Signal }) {
         <dd className="text-right font-mono text-ink-2">{probability(signal.conviction)}</dd>
         <dt className="text-ink-4">Needed to call it</dt>
         <dd className="text-right font-mono text-ink-2">{probability(signal.threshold)}</dd>
+        {/*
+          The per-name model output, which the API has always sent "for transparency" and
+          which nothing rendered.
+
+          It matters because the calibrator is isotonic — a step function — so on a quiet day
+          a dozen names with genuinely different model outputs come out the other side with
+          the *identical* calibrated probability. A board of twelve cards all reading 51.8%
+          looks exactly like hardcoded placeholder data, which is the worst possible
+          impression for a project whose entire claim is that no figure is invented. This is
+          the column that shows the twelve are distinct.
+
+          Four decimals, not two: at two it rounds to the same value as its neighbours and
+          defeats the purpose. Labelled "uncalibrated" and never as a confidence (§4.6) —
+          it is a diagnostic, and the calibrated number above it is the one that means
+          anything.
+        */}
+        {signal.raw_model_output !== undefined && (
+          <>
+            <dt className="text-ink-4">
+              Uncalibrated output{" "}
+              <span className="text-ink-5" title="Diagnostic only — not a confidence. The calibrated conviction above is the figure that is measured.">
+                (diagnostic)
+              </span>
+            </dt>
+            <dd className="text-right font-mono text-ink-4">
+              {fixed(signal.raw_model_output.value, 4)}
+            </dd>
+          </>
+        )}
       </dl>
 
       {/*

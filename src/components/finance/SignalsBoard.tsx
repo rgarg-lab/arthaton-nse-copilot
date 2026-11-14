@@ -68,6 +68,10 @@ export function SignalsBoard({ result }: { result: MlResult<SignalsPayload> }) {
   const payload = result.data;
   const { summary, signals, model } = payload;
 
+  // How many distinct calibrated probabilities the board is actually showing. Used only to
+  // decide whether the isotonic-step explanation below is worth printing.
+  const distinctProbabilities = new Set(signals.map((s) => s.probability_up)).size;
+
   if (signals.length === 0) {
     return (
       <div className="flex flex-col gap-3">
@@ -137,6 +141,35 @@ export function SignalsBoard({ result }: { result: MlResult<SignalsPayload> }) {
             fault: the threshold was chosen on validation to emit a signal on about a tenth of
             sessions, and it is frozen — it cannot be lowered to produce calls on a quiet day.
           </p>
+          {/*
+            Why several cards show the *same* percentage.
+
+            The calibrator is isotonic regression, which is a piecewise-constant step
+            function, and in the crowded region just above 0.5 it has very few steps. So on a
+            quiet day a dozen names with genuinely different model outputs map onto one step
+            and display an identical calibrated probability.
+
+            That needs saying out loud. Twelve cards reading 51.8% is the single most
+            fake-looking thing this app can render — it is indistinguishable from hardcoded
+            placeholder data, on a project whose whole claim is that nothing is invented. The
+            per-name uncalibrated output on each card is the evidence they are distinct; this
+            sentence tells the reader why to look at it.
+
+            Shown only when it is actually true. On a day with a wide spread this paragraph
+            would be explaining a phenomenon the reader cannot see.
+          */}
+          {distinctProbabilities < signals.length && (
+            <p className="max-w-[72ch] text-[11px] leading-relaxed text-ink-4">
+              {distinctProbabilities === 1
+                ? "Every name shows the same calibrated probability today."
+                : `These ${signals.length} names show only ${distinctProbabilities} distinct calibrated probabilities.`}{" "}
+              That is the calibrator, not a placeholder: isotonic regression is a step
+              function, and near a coin flip it has few steps, so different model outputs
+              round onto the same one. Each card lists its own uncalibrated output — those are
+              all different, and they are what the model actually computed for that name.
+            </p>
+          )}
+
           <p className="max-w-[72ch] text-[11px] leading-relaxed text-ink-4">
             Ask the Copilot why, and it will quote its measured accuracy in today&rsquo;s
             volatility regime and the split among the closest historical sessions. The model
