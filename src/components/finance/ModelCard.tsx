@@ -475,10 +475,10 @@ export function ModelCard({ result }: { result: MlResult<MetricsPayload> }) {
             head={["Volatility regime", "India VIX", "Rows", "Accuracy", "Brier"]}
             rows={m.breakdowns.per_vix_regime.map((r) => [
               String(r.regime),
-              (r.vix_range as string) ?? "—",
-              count(r.n as number),
-              percent(r.accuracy as number, 2),
-              fixed(r.brier as number, 4),
+              r.vix_range ?? "—",
+              count(r.n),
+              percent(r.accuracy, 2),
+              fixed(r.brier, 4),
             ])}
             caption="Terciles fit on training rows only."
           />

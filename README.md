@@ -140,14 +140,16 @@ Python 3.12 and Node 22 are the only prerequisites. **Three commands**, and no A
 ```bash
 npm ci                                 # 1. install the app
 pip install -e ./ml && npm run db:migrate   # 2. install the ML service and the embedded DB
-npm run dev                            # 3. http://localhost:3000
+npm run demo                           # 3. http://localhost:3000
 ```
 
-Then, in a second terminal, the model service:
+`npm run demo` boots **both** processes — it finds the right Python interpreter, waits for
+the model service to finish loading its artifacts before starting the web server, does a
+production build rather than `next dev`, and stops both on one Ctrl-C. Those four details
+are each a way this used to go wrong for someone running it for the first time.
 
-```bash
-python ml/tasks.py serve               # 127.0.0.1:8000
-```
+To run the two services yourself instead: `python ml/tasks.py serve` in one terminal,
+`npm run dev` in another.
 
 The app runs **without** the ML service — the agent loop, memory, approvals and the outbox
 all work, and the model-backed panels show an explicit "service not answering" state. They

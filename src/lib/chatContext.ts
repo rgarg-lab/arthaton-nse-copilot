@@ -114,7 +114,7 @@ export async function metricsContext(): Promise<MetricsContext> {
   if (perRegime.length > 0) {
     const parts = perRegime
       .filter((r) => r.regime !== "unknown")
-      .map((r) => `${r.regime} ${percent(r.accuracy as number, 1)} (n=${r.n})`);
+      .map((r) => `${r.regime} ${percent(r.accuracy, 1)} (n=${r.n})`);
     if (parts.length > 0) {
       lines.push(
         `- Accuracy by volatility regime: ${parts.join(", ")}.`,

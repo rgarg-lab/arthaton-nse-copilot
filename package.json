@@ -20,7 +20,9 @@
     "test:e2e": "playwright test",
     "eval": "tsx --env-file-if-exists=.env.local scripts/eval.ts",
     "preflight": "tsx --env-file-if-exists=.env.local scripts/preflight.ts",
+    "demo": "tsx --env-file-if-exists=.env.local scripts/demo.ts",
     "demo-check": "npm run preflight && npm run eval && npm run test:e2e",
+    "verify": "npm run lint && npm run typecheck && npm test",
     "ml:serve": "python -m uvicorn copilot.api:app --app-dir ml/src --host 127.0.0.1 --port 8000"
   },
   "dependencies": {

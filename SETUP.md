@@ -27,15 +27,30 @@ a thin wrapper that delegates to it, so every pipeline command works on a machin
 ```bash
 npm ci                                      # 1
 pip install -e ./ml && npm run db:migrate   # 2
-npm run dev                                 # 3
+npm run demo                                # 3
 ```
 
-Open <http://localhost:3000>.
+Open <http://localhost:3000>. **`npm run demo` is the one to use**, and the only command in
+this file you need if you are just trying to see the app work. It:
 
-Then, in a **second terminal**, start the model service:
+- picks the Python that actually has the dependencies — `ml/.venv` first, then `$PYTHON`,
+  then whatever `python` resolves to, because guessing wrong here is the most common way
+  this fails;
+- starts the model service and **waits for it to answer `/health`** before starting Next, so
+  the first page render does not race a service still loading a 49k-row parquet and show the
+  service-down state for a few seconds;
+- does a **production build**, not `next dev`, for the reasons under "Speed" below;
+- and stops both services on one Ctrl-C, so you cannot leave an orphan holding port 3000.
+
+`npm run demo -- --dev` uses `next dev` instead, for when you are editing.
+
+### Or run the two services yourself
 
 ```bash
+# terminal 1
 python ml/tasks.py serve                    # 127.0.0.1:8000
+# terminal 2
+npm run dev
 ```
 
 That is the whole install. There is no database to provision (an embedded Postgres creates

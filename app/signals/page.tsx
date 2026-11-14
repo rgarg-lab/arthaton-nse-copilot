@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { cachedSignals } from "@/lib/ml/cached";
+import { cachedMetrics, cachedSignals } from "@/lib/ml/cached";
 import { config } from "@/lib/config";
 import { currentDriver, driverFor } from "@/db";
 import { llmMode } from "@/lib/llm/router";
 import { DemoBanner } from "@/components/common/DemoBanner";
 import { Nav } from "@/components/shell/Nav";
+import { RegimeNote } from "@/components/finance/RegimeNote";
 import { SignalsBoard } from "@/components/finance/SignalsBoard";
 
 export const metadata: Metadata = {
@@ -25,7 +26,7 @@ export const dynamic = "force-dynamic";
 
 export default async function SignalsPage() {
   const idea = config();
-  const result = await cachedSignals();
+  const [result, metrics] = await Promise.all([cachedSignals(), cachedMetrics()]);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -43,6 +44,15 @@ export default async function SignalsPage() {
             evaluated model artifacts; none of it is computed in the browser.
           </p>
         </header>
+
+        {/*
+          Today's regime against the model's measured accuracy in it. Rendered only when
+          both reads succeeded — with either service call down there is no honest
+          comparison to draw, and RegimeNote returns null rather than half a sentence.
+        */}
+        {result.source === "service" && metrics.source === "service" && (
+          <RegimeNote signals={result.data} metrics={metrics.data} />
+        )}
 
         <SignalsBoard result={result} />
       </main>

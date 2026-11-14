@@ -115,6 +115,28 @@ export const BaselineSchema = DirectionMetricsSchema.partial().extend({
   description: z.string().optional(),
 });
 
+/**
+ * One row of a per-slice breakdown: per year, per volatility regime, or per ticker.
+ *
+ * The three slices carry different label columns — `year`, `regime` + `vix_range`,
+ * `ticker` — so each is optional and consumers read the one that applies to them. The
+ * metrics, by contrast, are the same everywhere, and `accuracy`/`auc`/`brier` are nullable
+ * because a slice can be too small to compute them.
+ */
+export const BreakdownRowSchema = z
+  .object({
+    n: z.number(),
+    accuracy: z.number().nullable().optional(),
+    auc: z.number().nullable().optional(),
+    brier: z.number().nullable().optional(),
+    year: z.union([z.number(), z.string()]).optional(),
+    regime: z.string().optional(),
+    regime_code: z.number().optional(),
+    vix_range: z.string().optional(),
+    ticker: z.string().optional(),
+  })
+  .loose();
+
 export const CalibrationBinSchema = z.object({
   bin: z.number(),
   p_lower: z.number().nullable(),
@@ -190,11 +212,20 @@ export const MetricsPayloadSchema = z.object({
       buy_and_hold: z.record(z.string(), z.unknown()),
     })
     .optional(),
+  /**
+   * The per-slice breakdowns.
+   *
+   * Typed, rather than `z.record(z.string(), z.unknown())` as these were. The loose version
+   * pushed the cost onto every consumer as an `as number` cast — three of them did it — and
+   * `accuracy` is genuinely nullable in a slice with no rows, so those casts were asserting
+   * something the data does not promise and would have put "NaN%" on the model card rather
+   * than failing. `.loose()` keeps any extra columns the pipeline adds later.
+   */
   breakdowns: z
     .object({
-      per_year: z.array(z.record(z.string(), z.unknown())),
-      per_vix_regime: z.array(z.record(z.string(), z.unknown())),
-      per_ticker: z.array(z.record(z.string(), z.unknown())),
+      per_year: z.array(BreakdownRowSchema),
+      per_vix_regime: z.array(BreakdownRowSchema),
+      per_ticker: z.array(BreakdownRowSchema),
     })
     .optional(),
   abstention: z
