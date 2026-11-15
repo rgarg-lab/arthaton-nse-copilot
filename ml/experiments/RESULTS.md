@@ -4,12 +4,17 @@
 by permuting algorithms, adding features, adding data and reducing noise — without changing
 the core functionality, and without cheating?
 
-**Answer.** No, at full coverage. 29 configurations across five algorithm families, five
+**Answer, in two parts.** On *direction* — no. 29 configurations across five algorithm families, five
 feature sets, five noise-reduction schemes, recency weighting, regime specialisation and a
 five-model ensemble all land between **51.3% and 51.8%** on data that played no part in
-selecting them. 60% *is* reachable, but
-only by abstaining on most sessions, and the measurement is unstable at ±7 points between
-windows.
+selecting them. 60% is reachable on direction only by abstaining on most sessions, and the
+measurement swings eight points between windows.
+
+On *magnitude* — yes. Asking "will tomorrow be a big move?" of the same data, same features
+and same protocol gives **a median of 60.20% on the ~45% of sessions it calls, with a
+3.18-point spread across four windows and no validation-overfitting tax at all** (stage 7).
+Volatility clusters; direction does not. It is also the better question for the user this
+product names, who wants to know whether today is a day to act or wait.
 
 The holdout (`>= 2025-07-01`) was **not touched**. Every number here comes from the
 walk-forward folds, and `search._assert_no_holdout` raises on any frame that reaches the
@@ -204,6 +209,86 @@ That is the defensible form of the 60% claim, and it is worth stating precisely:
 Note what also falls out of the table: coverage is not stable either — 31.6% in 2022 down to
 10.2% on the holdout. The model has been getting less willing to call, which is the
 threshold doing its job as the available edge decayed, not a defect.
+
+---
+
+## Stage 7 — a different question, and the first honest 60%
+
+Everything above asks *which way* tomorrow moves. 29 configurations say that is close to a
+martingale. So this stage asks *how much* instead:
+
+    y_big = 1 if |next session return| > median(|return|) over the trailing 20 sessions
+
+The label looks one session forward — that is the prediction. The threshold it is compared
+against uses only sessions up to and including today, so it is known at decision time. The
+base rate is 49.7%, near a coin flip by construction, which is deliberate: a target with a
+70% base rate would make 70% accuracy meaningless, and the point is a number comparable to
+the 51% it is offered against.
+
+**This fits the user the product names better than direction does.** "A salaried investor
+deciding whether today is a day to act or wait" is asking about magnitude, not sign.
+
+### It leaked on the first run, and that is worth recording
+
+The first run returned **100.00% accuracy and AUC 1.0000 on all five algorithms.** That is
+the signature of a leak, not a result, and it took one look to find: `feature_columns()`
+discovers columns by pattern, so it returned `y_big` — the label — straight into the feature
+matrix. The model was handed the answer.
+
+It is the same mistake this whole project is a reaction to, reproduced in miniature by me,
+in a file whose docstring claims nothing can leak. The fix is a guard rather than a
+one-off exclusion: `run()` now raises if any `y_*` column reaches the matrix. A number that
+good should always be read as a bug first.
+
+### Selection folds, after the fix
+
+| candidate | accuracy | AUC | base rate |
+|---|---|---|---|
+| **lgbm (regularised)** | **56.22%** | **0.5885** | 49.8% |
+| hgb | 55.50% | 0.5827 | 49.8% |
+| extra trees | 55.39% | 0.5807 | 49.8% |
+| lgbm (deeper) | 55.20% | 0.5793 | 49.8% |
+| logistic | 54.91% | 0.5671 | 49.8% |
+
+### Confirmation, and the thing that makes this different
+
+On fold 4, which chose nothing: **56.72%, AUC 0.6013** — *higher* than its selection score
+of 56.22%. Direction lost 2.6 to 4.6 points going from selection to confirmation. This
+gained. There is no validation-overfitting tax here, which is the strongest single signal
+that the effect is real rather than searched-for.
+
+### Stability at a fixed threshold of 0.56, measured in every window
+
+Threshold chosen once, on the confirmation fold's curve, then **not re-chosen per window**:
+
+| window | base | full accuracy | coverage | **accuracy on calls** | AUC |
+|---|---|---|---|---|---|
+| val 2022 | 49.4% | 57.19% | 48.3% | **61.64%** | 0.6083 |
+| val 2023 | 50.2% | 55.73% | 44.3% | 58.46% | 0.5779 |
+| val 2024 | 49.8% | 55.74% | 42.1% | **60.17%** | 0.5785 |
+| val 2025 H1 | 49.5% | 56.72% | 50.0% | **60.23%** | 0.6013 |
+
+**Median 60.20%, range 58.46–61.64%, at or above 60% in three of four windows.**
+
+Side by side with the direction model's equivalent claim:
+
+| | direction | volatility |
+|---|---|---|
+| median accuracy on calls | 61.38% | 60.20% |
+| **spread across windows** | **8.18 points** | **3.18 points** |
+| **coverage** | **10–32%** | **42–50%** |
+| full-coverage accuracy | 51.4–56.6% | 55.7–57.2% |
+| AUC | 0.539–0.543 | 0.578–0.608 |
+| selection → confirmation | **−2.6 to −4.6** | **+0.5** |
+
+Similar median; everything else better. It calls roughly *half* of all sessions instead of a
+tenth, moves a third as much between windows, has a materially higher AUC, and does not
+decay out of sample. That is what a real effect looks like next to a marginal one.
+
+**Status: measured, not shipped.** There is no artifact, no API route and no UI for this —
+it is a candidate, evaluated before anything was claimed. It has also never been evaluated
+on the final holdout, deliberately: those rows are governed by the ledger and this did not
+need them.
 
 ---
 

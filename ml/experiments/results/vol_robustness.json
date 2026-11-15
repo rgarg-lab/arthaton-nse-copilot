@@ -1,0 +1,62 @@
+{
+ "threshold": 0.56,
+ "model": {
+  "kind": "lgbm",
+  "params": {
+   "num_leaves": 7,
+   "learning_rate": 0.03,
+   "min_child_samples": 500,
+   "n_estimators": 400
+  }
+ },
+ "windows": [
+  {
+   "window": "fold1_val2022",
+   "n": 4216,
+   "base_rate": 0.49430740037950666,
+   "full_accuracy": 0.5718690702087287,
+   "calls": 2036,
+   "coverage": 0.4829222011385199,
+   "accuracy_on_calls": 0.6164047151277013,
+   "auc": 0.6082521885679509
+  },
+  {
+   "window": "fold2_val2023",
+   "n": 4165,
+   "base_rate": 0.5015606242496998,
+   "full_accuracy": 0.5572629051620648,
+   "calls": 1844,
+   "coverage": 0.44273709483793516,
+   "accuracy_on_calls": 0.5845986984815619,
+   "auc": 0.5778845701541518
+  },
+  {
+   "window": "fold3_val2024",
+   "n": 4182,
+   "base_rate": 0.49808703969392637,
+   "full_accuracy": 0.5573888091822095,
+   "calls": 1760,
+   "coverage": 0.42085126733620276,
+   "accuracy_on_calls": 0.6017045454545454,
+   "auc": 0.5785472221529718
+  },
+  {
+   "window": "fold4_val2025H1",
+   "n": 2091,
+   "base_rate": 0.4949784791965567,
+   "full_accuracy": 0.5671927307508369,
+   "calls": 1046,
+   "coverage": 0.5002391200382592,
+   "accuracy_on_calls": 0.6022944550669216,
+   "auc": 0.6013047138047138
+  }
+ ],
+ "summary": {
+  "on_calls_min": 0.5845986984815619,
+  "on_calls_median": 0.6019995002607335,
+  "on_calls_max": 0.6164047151277013,
+  "on_calls_spread": 0.03180601664613947,
+  "windows_at_or_above_60pct": 3,
+  "windows_total": 4
+ }
+}
