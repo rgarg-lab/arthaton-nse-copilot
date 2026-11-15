@@ -113,3 +113,64 @@ def test_band_definitions_name_the_no_call_cases(tiers: dict) -> None:
     assert "no call" in labels
     assert any(b["calls"] for b in tiers["bands"]), "at least one band must be a call"
     assert any(not b["calls"] for b in tiers["bands"]), "the declining bands must be shown"
+
+
+# ── the lean, as shipped on every signal ────────────────────────────────────────────
+
+
+def test_every_signal_carries_a_lean_with_its_band_accuracy() -> None:
+    """The lean must never travel without the number that makes it readable.
+
+    "Leaning down" alone reads as a recommendation; "leaning down, this band is right
+    52.5% of the time" reads as a coin flip with extra steps. The second figure is the
+    entire safety mechanism, so it is required rather than optional.
+    """
+    import json
+
+    from copilot.config import SIGNALS_PATH
+
+    if not SIGNALS_PATH.exists():
+        pytest.skip("no signals artifact in this checkout")
+    payload = json.loads(SIGNALS_PATH.read_text(encoding="utf-8"))
+    for s in payload["signals"]:
+        lean = s.get("lean")
+        assert lean, f"{s['ticker']} has no lean"
+        assert lean["direction"] in {"up", "down"}
+        assert lean["band_accuracy"] is not None, f"{s['ticker']} lean has no band accuracy"
+        assert lean["confidence"], f"{s['ticker']} lean has no confidence label"
+
+
+def test_the_lean_never_replaces_the_direction_invariant() -> None:
+    """Adding the lean must not have smuggled a direction onto an abstained signal.
+
+    This is the invariant the rules layer and the e2e test depend on: `direction` means a
+    call the model stands behind, and an abstained signal does not get one. The lean is a
+    separate, weaker field precisely so this stays true.
+    """
+    import json
+
+    from copilot.config import SIGNALS_PATH
+
+    if not SIGNALS_PATH.exists():
+        pytest.skip("no signals artifact in this checkout")
+    payload = json.loads(SIGNALS_PATH.read_text(encoding="utf-8"))
+    for s in payload["signals"]:
+        if s["abstain"]:
+            assert "direction" not in s, f"{s['ticker']} abstains but carries a direction"
+            assert s["lean"]["calls"] is False, f"{s['ticker']} abstains but its lean claims a call"
+
+
+def test_lean_band_matches_the_published_tiers() -> None:
+    """A signal's band must be the one its conviction actually falls into."""
+    import json
+
+    from copilot.config import SIGNALS_PATH
+    from copilot.signals import confidence_band
+
+    if not SIGNALS_PATH.exists() or not CONFIDENCE_PATH.exists():
+        pytest.skip("artifacts not present in this checkout")
+    payload = json.loads(SIGNALS_PATH.read_text(encoding="utf-8"))
+    for s in payload["signals"]:
+        expected = confidence_band(float(s["conviction"]))
+        assert s["lean"]["band"] == expected["band"], f"{s['ticker']} is in the wrong band"
+        assert s["lean"]["band_accuracy"] == pytest.approx(expected["band_accuracy"])

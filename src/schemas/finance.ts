@@ -53,6 +53,31 @@ export const SignalSchema = z.object({
   direction: z.enum(["up", "down"]).optional(),
   /** Present only when `abstain` is true. */
   abstain_reason: z.string().optional(),
+  /**
+   * The side the probability falls on, for **every** name — and deliberately a different
+   * field from `direction`.
+   *
+   * `direction` means "a call the model stands behind" and is absent below the gate, which
+   * a Python test, the rules layer and an e2e test all enforce. The lean is the weaker
+   * thing: the sign of a probability that was always being sent anyway. Naming it is
+   * strictly more honest than shipping `probability_up` and pretending the sign is not
+   * derivable from it.
+   *
+   * It never travels without `band_accuracy` — the measured accuracy of its own confidence
+   * band, which for most names is near a coin flip. That number is what stops "leaning
+   * down" from reading as a recommendation.
+   */
+  lean: z
+    .object({
+      direction: z.enum(["up", "down"]),
+      note: z.string().optional(),
+      band: z.string().nullable(),
+      confidence: z.string(),
+      band_accuracy: z.number().nullable(),
+      band_coverage: z.number().nullable().optional(),
+      calls: z.boolean(),
+    })
+    .optional(),
 });
 
 export const SignalsPayloadSchema = z.object({

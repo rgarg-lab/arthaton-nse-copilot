@@ -4,7 +4,7 @@ import { EmptyState, ErrorState } from "@/components/common/EmptyState";
 import { Disclaimer, PAPER_ONLY } from "./Disclaimer";
 import { BasketOverview } from "./BasketOverview";
 import { SignalCard } from "./SignalCard";
-import { count, probability, sessionDate } from "./format";
+import { bareTicker, count, probability, sessionDate } from "./format";
 
 /**
  * Today's board: every name in the basket, calls and abstentions together.
@@ -87,6 +87,10 @@ export function SignalsBoard({
   // decide whether the isotonic-step explanation below is worth printing.
   const distinctProbabilities = new Set(signals.map((s) => s.probability_up)).size;
 
+  // The name that came closest to clearing the gate. Reduce rather than sort: this runs on
+  // every render and the board does not otherwise need an ordered copy.
+  const strongest = signals.reduce((best, s) => (s.conviction > best.conviction ? s : best));
+
   if (signals.length === 0) {
     return (
       <div className="flex flex-col gap-3">
@@ -103,38 +107,49 @@ export function SignalsBoard({
     <div className="flex flex-col gap-4">
       <Disclaimer variant="banner" />
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-        {/*
-          Both heads in the first row. The board used to open with direction's "0", which
-          reads as a broken page rather than as the product working — and it buried the
-          head that *does* have calls today further down every card.
-        */}
+      {/*
+        Tiles that change. The first version of this row spent three of its five slots on
+        constants — "Threshold 60%" and "Horizon 1 session" never move, and "Abstentions"
+        is just the basket size minus the calls. Prominent space filled with configuration
+        teaches a reader nothing and makes the two live numbers harder to find. The frozen
+        threshold and the horizon are still on the page, in the model line below and on the
+        overview's axis, where they belong as context rather than as headline figures.
+      */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat
           label="Direction calls"
           value={count(summary.signals_emitted)}
-          hint={`${summary.up_calls} up · ${summary.down_calls} down`}
+          hint={
+            summary.signals_emitted === 0
+              ? `nothing cleared the ${probability(model.threshold)} gate`
+              : `${summary.up_calls} up · ${summary.down_calls} down`
+          }
         />
         {magnitude && (
           <Stat
             label="Move-size calls"
             value={count(Object.values(magnitude).filter((m) => !m.abstain).length)}
-            hint="bigger or quieter than usual"
+            hint={`of ${signals.length} · bigger or quieter than usual`}
           />
         )}
+        {/*
+          How close the best name actually got. "0 calls" says nothing about whether the
+          model nearly spoke or was nowhere near — this is the difference between a quiet
+          day and a dead one, and it is the number that moves most.
+        */}
         <Stat
-          label="Abstentions"
-          value={count(summary.abstained)}
-          hint={`of ${signals.length} names in the basket`}
+          label="Strongest today"
+          value={probability(strongest.conviction, 1)}
+          hint={`${bareTicker(strongest.ticker)} · gate is ${probability(model.threshold)}`}
         />
         <Stat
-          label="Threshold"
-          value={probability(model.threshold)}
-          hint="frozen conviction gate"
-        />
-        <Stat
-          label="Horizon"
-          value={`${model.horizon_sessions} session`}
-          hint="next trading session only"
+          label="Data freshness"
+          value={
+            payload.data.sessions_behind === 0
+              ? "current"
+              : `${payload.data.sessions_behind} session${payload.data.sessions_behind === 1 ? "" : "s"}`
+          }
+          hint={`latest: ${sessionDate(payload.data.last_session)}`}
         />
       </div>
 

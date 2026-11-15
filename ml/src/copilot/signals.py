@@ -36,6 +36,7 @@ import numpy as np
 import pandas as pd
 
 from .config import (
+    ARTIFACTS_DIR,
     CALIBRATOR_PATH,
     DISCLAIMER,
     MODEL_PATH,
@@ -58,6 +59,44 @@ def latest_rows(panel: pd.DataFrame) -> pd.DataFrame:
         .sort_values("ticker")
         .reset_index(drop=True)
     )
+
+
+_CONFIDENCE_BANDS: list[dict] | None = None
+
+
+def _band_label(band: dict) -> str:
+    """"0.60-0.65", or "0.65+" for the open-ended top band."""
+    lo = f"{band['from']:.2f}"
+    return f"{lo}+" if band["to"] is None else f"{lo}-{band['to']:.2f}"
+
+
+def confidence_band(conviction: float) -> dict:
+    """Which confidence band a conviction falls into, and that band's measured accuracy.
+
+    Read from `confidence_tiers.json`, which `confidence.py` computes from the out-of-fold
+    walk-forward predictions. Returns the label plus the accuracy *of that band* — not the
+    model's overall accuracy, because a prediction drawn from the 50-55% band is not
+    described by the average of a distribution it is not in.
+
+    Degrades to a label with no number when the artifact is absent, rather than guessing.
+    """
+    global _CONFIDENCE_BANDS
+    if _CONFIDENCE_BANDS is None:
+        path = ARTIFACTS_DIR / "confidence_tiers.json"
+        _CONFIDENCE_BANDS = (
+            json.loads(path.read_text(encoding="utf-8")).get("bands", []) if path.exists() else []
+        )
+    for band in _CONFIDENCE_BANDS:
+        hi = band["to"] if band["to"] is not None else 1.01
+        if band["from"] <= conviction < hi:
+            return {
+                "band": _band_label(band),
+                "confidence": band["label"],
+                "band_accuracy": band["accuracy"],
+                "band_coverage": band["coverage"],
+                "calls": band["calls"],
+            }
+    return {"band": None, "confidence": "unknown", "band_accuracy": None, "calls": False}
 
 
 def build_signals(panel: pd.DataFrame, bundle, calibrator) -> dict[str, object]:
@@ -93,6 +132,28 @@ def build_signals(panel: pd.DataFrame, bundle, calibrator) -> dict[str, object]:
                     "Uncalibrated classifier output. Shown for transparency only; never "
                     "present this as a confidence (§4.6)."
                 ),
+            },
+            # ── The confidence factor, on every name ─────────────────────────────
+            #
+            # `direction` below means "a call the model stands behind" and is omitted
+            # when it abstains — an invariant a Python test, the rules layer and an e2e
+            # test all enforce, because a client cannot misreport a field it never got.
+            #
+            # But the *lean* exists for every name regardless: `probability_up` is always
+            # sent, so the sign is already derivable. Hiding its name while shipping the
+            # number it comes from was the worst of both worlds. So the lean is named
+            # here, deliberately as a different field from `direction`, and it never
+            # travels without the measured accuracy of its own confidence band — which,
+            # in the band most names sit in, is close to a coin flip. That figure is the
+            # thing that stops "leaning down" from reading as a recommendation.
+            "lean": {
+                "direction": direction,
+                "note": (
+                    "The side the probability falls on. NOT a call: below the frozen "
+                    "threshold the model declines, and `direction` is absent. Read this "
+                    "only together with `band_accuracy`."
+                ),
+                **confidence_band(float(conviction[i])),
             },
             "volatility_regime": REGIME_NAMES.get(int(regimes[i]), "unknown"),
             "predicted_range": {

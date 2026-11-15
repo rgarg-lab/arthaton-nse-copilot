@@ -196,6 +196,64 @@ function MagnitudeRow({ magnitude }: { magnitude?: MagnitudeSignal }) {
   );
 }
 
+/**
+ * The lean and its confidence band, on every card including the abstentions.
+ *
+ * ## What changed and why
+ *
+ * An abstained card used to show no direction at all. That is still true of `direction`,
+ * which means "a call the model stands behind" — but `probability_up` was being sent for
+ * every name anyway, so the sign was always derivable and the card was hiding a name for
+ * something it was already shipping. The honest version names it, as a visibly weaker
+ * thing, and never shows it without the measured accuracy of its own band.
+ *
+ * ## The band accuracy is the whole safety mechanism
+ *
+ * "Leaning down" on its own reads as a recommendation. "Leaning down — this band is right
+ * 52.5% of the time" reads as what it is: a coin flip with extra steps. The figure is not
+ * the model's overall accuracy but that band's, because a prediction from the 50-55% band
+ * is not described by the average of a distribution it does not belong to.
+ *
+ * Below the gate the wording is deliberately flat — "leaning", never "expects" — and the
+ * accuracy sits immediately beside it in the same line.
+ */
+function LeanRow({ lean }: { lean?: Signal["lean"] }) {
+  if (!lean) return null;
+  const weak = !lean.calls;
+  return (
+    <div
+      className={
+        weak
+          ? "flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded-card border border-dashed border-line px-2.5 py-2 text-[11.5px]"
+          : "flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded-card border border-line-strong bg-glass px-2.5 py-2 text-[11.5px]"
+      }
+    >
+      <span className="label-caps text-[10px] text-ink-4">
+        {weak ? "Leaning" : "Call"}
+      </span>
+      <span className={weak ? "font-medium text-ink-2" : "font-medium text-ink-1"}>
+        {lean.direction}
+      </span>
+      <span
+        className={
+          weak
+            ? "rounded-pill border border-line px-1.5 text-[10px] uppercase tracking-wide text-ink-4"
+            : "rounded-pill border border-line-strong px-1.5 text-[10px] uppercase tracking-wide text-ink-2"
+        }
+      >
+        {lean.confidence === "no call" ? "low confidence" : `${lean.confidence} confidence`}
+      </span>
+      {lean.band_accuracy !== null && lean.band_accuracy !== undefined && (
+        <span className="text-ink-4">
+          — this confidence band is right{" "}
+          <span className="font-mono text-ink-2">{probability(lean.band_accuracy, 1)}</span> of
+          the time
+        </span>
+      )}
+    </div>
+  );
+}
+
 /** The abstention. The product's identity, not its failure mode. */
 export function AbstentionCard({
   signal,
@@ -265,6 +323,8 @@ export function AbstentionCard({
         be further right still, at near-zero coverage.
       */}
 
+      <LeanRow lean={signal.lean} />
+
       <MagnitudeRow magnitude={magnitude} />
 
       <TickerTrackRecord accuracy={tickerAccuracy} n={tickerSessions} />
@@ -325,6 +385,8 @@ export function CallCard({
           </p>
         </div>
       )}
+
+      <LeanRow lean={signal.lean} />
 
       <MagnitudeRow magnitude={magnitude} />
 
