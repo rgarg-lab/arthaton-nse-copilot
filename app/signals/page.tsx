@@ -6,6 +6,7 @@ import { DemoBanner } from "@/components/common/DemoBanner";
 import { Nav } from "@/components/shell/Nav";
 import { RegimeNote } from "@/components/finance/RegimeNote";
 import { SignalsBoard } from "@/components/finance/SignalsBoard";
+import { perTickerAccuracy } from "@/components/finance/format";
 
 export const metadata: Metadata = {
   title: "Today's signals",
@@ -53,7 +54,12 @@ export default async function SignalsPage() {
           <RegimeNote signals={result.data} metrics={metrics.data} />
         )}
 
-        <SignalsBoard result={result} />
+        <SignalsBoard
+          result={result}
+          perTicker={
+            metrics.source === "service" ? perTickerAccuracy(metrics.data.breakdowns) : undefined
+          }
+        />
       </main>
     </div>
   );

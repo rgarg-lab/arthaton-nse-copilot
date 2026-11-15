@@ -48,7 +48,18 @@ function FreshnessNote({ data }: { data: SignalsPayload["data"] }) {
   );
 }
 
-export function SignalsBoard({ result }: { result: MlResult<SignalsPayload> }) {
+/**
+ * @param perTicker this name's measured accuracy on the holdout, keyed by ticker. Optional:
+ * it comes from the metrics read, which can be unavailable independently of the signals
+ * read, and a card without it simply omits the line.
+ */
+export function SignalsBoard({
+  result,
+  perTicker,
+}: {
+  result: MlResult<SignalsPayload>;
+  perTicker?: Record<string, { accuracy?: number | null; n?: number }>;
+}) {
   if (result.source === "unavailable") {
     return (
       <div className="flex flex-col gap-3">
@@ -182,7 +193,11 @@ export function SignalsBoard({ result }: { result: MlResult<SignalsPayload> }) {
       <ul className="grid list-none grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {signals.map((signal) => (
           <li key={signal.ticker}>
-            <SignalCard signal={signal} />
+            <SignalCard
+              signal={signal}
+              tickerAccuracy={perTicker?.[signal.ticker]?.accuracy ?? undefined}
+              tickerSessions={perTicker?.[signal.ticker]?.n}
+            />
           </li>
         ))}
       </ul>

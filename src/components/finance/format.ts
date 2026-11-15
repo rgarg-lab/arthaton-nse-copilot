@@ -27,16 +27,28 @@ export function percent(fraction: number | null | undefined, places = 1): string
 }
 
 /**
- * A probability as a whole percent: 0.6234 -> "62%".
+ * A probability as a percentage: 0.6234 -> "62%", or "62.3%" at one place.
  *
- * Whole percents on purpose. "62.34%" implies the model resolves a third of a percentage
- * point of probability, and it does not — the calibration curve has ten bins across
- * roughly 50,000 rows, so the honest resolution is a couple of points at best. Rendering
- * the extra digits would be a precision claim the evaluation does not support.
+ * ## Two arguments, and why the default is still whole percents
+ *
+ * **Against decimals:** "62.34%" implies the model resolves a third of a percentage point,
+ * and it does not. The calibration curve has five populated bins across ~50,000 rows, so
+ * the honest resolution is a couple of points at best, and extra digits are a precision
+ * claim the evaluation does not support. That argument is why the default is 0.
+ *
+ * **For decimals, in one specific place:** the signals board shows seventeen names at once,
+ * and the isotonic calibrator is a step function, so on a quiet day a dozen of them land on
+ * the same step — 0.5183 and 0.5208 both render "52%". A board of twelve identical
+ * percentages reads as hardcoded placeholder data, which is a worse failure than
+ * over-precision on a project whose whole claim is that nothing is invented.
+ *
+ * So `places` is opt-in and used only where values must be *told apart*. The extra digit
+ * there is doing a different job from implying resolution: it distinguishes two numbers the
+ * model genuinely computed differently. The frozen threshold still reads "60%".
  */
-export function probability(p: number | null | undefined): string {
+export function probability(p: number | null | undefined, places = 0): string {
   if (p === null || p === undefined || !Number.isFinite(p)) return "—";
-  return `${Math.round(p * 100)}%`;
+  return `${(p * 100).toFixed(places)}%`;
 }
 
 /** A plain number with thousands separators. */
@@ -103,3 +115,21 @@ export const REGIME_COPY: Record<string, { label: string; hint: string }> = {
   stressed: { label: "Stressed", hint: "India VIX in the highest third of its training range" },
   unknown: { label: "Unknown", hint: "No India VIX reading for this session" },
 };
+
+/**
+ * Per-ticker measured accuracy, keyed by ticker, from the holdout breakdown.
+ *
+ * Built here rather than in each page so the two surfaces that render the board — `/signals`
+ * and the workspace's Signals tab — cannot disagree about what a name's track record is.
+ * Returns an empty object when the metrics read failed, and the cards then omit the line
+ * rather than showing a placeholder.
+ */
+export function perTickerAccuracy(
+  breakdowns: { per_ticker?: { ticker?: string; accuracy?: number | null; n?: number }[] } | undefined,
+): Record<string, { accuracy?: number | null; n?: number }> {
+  const out: Record<string, { accuracy?: number | null; n?: number }> = {};
+  for (const row of breakdowns?.per_ticker ?? []) {
+    if (row.ticker) out[row.ticker] = { accuracy: row.accuracy, n: row.n };
+  }
+  return out;
+}

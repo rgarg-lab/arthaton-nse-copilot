@@ -116,8 +116,57 @@ function CardFrame({
   );
 }
 
+/**
+ * This name's own measured accuracy, from the holdout's per-ticker breakdown.
+ *
+ * ## Why every card needed this
+ *
+ * The board looked identical across all 17 names: the same conviction to the nearest whole
+ * percent and the same "needed to call it", because the threshold is one global frozen
+ * number and the calibrator's step function collapses a quiet day's probabilities onto a
+ * couple of values. Nothing on a card was specific to the company it was about.
+ *
+ * This is, and it is already measured: `breakdowns.per_ticker` in `metrics.json` spans
+ * 46.29% (TCS) to 55.19% (Bajaj Finance) over 337 holdout sessions each. **Four of the
+ * seventeen are below a coin flip** — SBIN, ITC, Infosys and TCS — which is the most useful
+ * thing the board can tell someone and was previously invisible. A called signal on a name
+ * the model has never beaten a coin flip on deserves to be read differently from one on a
+ * name where it has.
+ *
+ * Tone follows the measurement rather than being chosen: below 50% is marked as a caution,
+ * because that is what it is.
+ */
+function TickerTrackRecord({ accuracy, n }: { accuracy?: number; n?: number }) {
+  if (accuracy === undefined || accuracy === null || !Number.isFinite(accuracy)) return null;
+  const belowCoinFlip = accuracy < 0.5;
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 border-t border-line pt-2 text-[11px]">
+      <span className="text-ink-4">On this name, historically</span>
+      <span
+        className={
+          belowCoinFlip ? "font-mono font-medium text-coral" : "font-mono font-medium text-ink-2"
+        }
+      >
+        {probability(accuracy, 1)}
+      </span>
+      {n !== undefined && <span className="text-ink-5">over {n} sessions</span>}
+      {belowCoinFlip && (
+        <span className="text-coral">— worse than a coin flip on this one</span>
+      )}
+    </div>
+  );
+}
+
 /** The abstention. The product's identity, not its failure mode. */
-export function AbstentionCard({ signal }: { signal: Signal }) {
+export function AbstentionCard({
+  signal,
+  tickerAccuracy,
+  tickerSessions,
+}: {
+  signal: Signal;
+  tickerAccuracy?: number;
+  tickerSessions?: number;
+}) {
   return (
     <CardFrame signal={signal} tone="abstain">
       <div className="flex flex-col gap-2">
@@ -128,8 +177,10 @@ export function AbstentionCard({ signal }: { signal: Signal }) {
       <ConvictionBar probability={signal.probability_up} threshold={signal.threshold} />
 
       <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-[12px]">
+        {/* One decimal: see `probability` in format.ts — whole percents made a dozen
+            genuinely different values all read "52%". */}
         <dt className="text-ink-4">Conviction</dt>
-        <dd className="text-right font-mono text-ink-2">{probability(signal.conviction)}</dd>
+        <dd className="text-right font-mono text-ink-2">{probability(signal.conviction, 1)}</dd>
         <dt className="text-ink-4">Needed to call it</dt>
         <dd className="text-right font-mono text-ink-2">{probability(signal.threshold)}</dd>
         {/*
@@ -179,12 +230,22 @@ export function AbstentionCard({ signal }: { signal: Signal }) {
         noise loses money and brokerage while waiting only forgoes an edge that was never
         measurable. That asymmetry is why the gate is set to be paid for, not to be busy.
       </p>
+
+      <TickerTrackRecord accuracy={tickerAccuracy} n={tickerSessions} />
     </CardFrame>
   );
 }
 
 /** A real call: direction, calibrated probability, volatility-implied range. */
-export function CallCard({ signal }: { signal: Signal }) {
+export function CallCard({
+  signal,
+  tickerAccuracy,
+  tickerSessions,
+}: {
+  signal: Signal;
+  tickerAccuracy?: number;
+  tickerSessions?: number;
+}) {
   const up = signal.direction === "up";
   return (
     <CardFrame signal={signal} tone="call">
@@ -226,11 +287,30 @@ export function CallCard({ signal }: { signal: Signal }) {
           </p>
         </div>
       )}
+
+      <TickerTrackRecord accuracy={tickerAccuracy} n={tickerSessions} />
     </CardFrame>
   );
 }
 
-/** Dispatches on the one field that matters. */
-export function SignalCard({ signal }: { signal: Signal }) {
-  return signal.abstain ? <AbstentionCard signal={signal} /> : <CallCard signal={signal} />;
+/**
+ * Dispatches on the one field that matters, and passes this name's own track record to
+ * whichever card renders. Optional throughout: with the metrics read unavailable there is
+ * no per-ticker breakdown, and `TickerTrackRecord` renders nothing rather than a placeholder.
+ */
+export function SignalCard({
+  signal,
+  tickerAccuracy,
+  tickerSessions,
+}: {
+  signal: Signal;
+  tickerAccuracy?: number;
+  tickerSessions?: number;
+}) {
+  const record = { tickerAccuracy, tickerSessions };
+  return signal.abstain ? (
+    <AbstentionCard signal={signal} {...record} />
+  ) : (
+    <CallCard signal={signal} {...record} />
+  );
 }

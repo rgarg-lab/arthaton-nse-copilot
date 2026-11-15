@@ -15,7 +15,7 @@ import { CONFIDENCE_THRESHOLD, IDEA_NAME } from "@/lib/config/client";
 import { SignalsBoard } from "./SignalsBoard";
 import { EvidenceTimeline } from "./EvidenceTimeline";
 import { ModelCard } from "./ModelCard";
-import { sessionDate } from "./format";
+import { perTickerAccuracy, sessionDate } from "./format";
 
 /**
  * The workspace, in the shell's own three-region layout: icon rail · chat · switchable
@@ -187,7 +187,14 @@ export function CopilotWorkspace({
                   Ask the Copilot on the left why any of them reads the way it does.
                 </p>
               </div>
-              <SignalsBoard result={signals} />
+              <SignalsBoard
+                result={signals}
+                perTicker={
+                  metrics.source === "service"
+                    ? perTickerAccuracy(metrics.data.breakdowns)
+                    : undefined
+                }
+              />
             </section>
           )}
 
