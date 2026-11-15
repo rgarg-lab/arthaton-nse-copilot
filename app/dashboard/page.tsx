@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { config } from "@/lib/config";
-import { cachedMetrics } from "@/lib/ml/cached";
+import { cachedConfidence, cachedMetrics } from "@/lib/ml/cached";
 import { llmMode } from "@/lib/llm/router";
 import { DemoBanner } from "@/components/common/DemoBanner";
 import { Nav } from "@/components/shell/Nav";
+import { ConfidenceLadder } from "@/components/finance/ConfidenceLadder";
 import { ModelCard } from "@/components/finance/ModelCard";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
  */
 export default async function ModelCardPage() {
   const idea = config();
-  const result = await cachedMetrics();
+  const [result, confidence] = await Promise.all([cachedMetrics(), cachedConfidence()]);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -45,6 +46,13 @@ export default async function ModelCardPage() {
             source — if the service is down, the page says so instead of showing a figure.
           </p>
         </header>
+
+        {/*
+          Directly above the model card: "how accurate is it when it actually speaks" is
+          the first question a reader has after the headline, and it used to be answerable
+          only by reading the coverage curve further down.
+        */}
+        {confidence.source === "service" && <ConfidenceLadder data={confidence.data} />}
 
         <ModelCard result={result} />
       </main>

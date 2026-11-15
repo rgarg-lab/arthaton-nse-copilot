@@ -1,12 +1,14 @@
 import { unstable_cache } from "next/cache";
 import {
   findNeighbors,
+  getConfidence,
   getMagnitude,
   getMetrics,
   getSignals,
   type MlResult,
 } from "@/lib/ml/client";
 import type {
+  ConfidencePayload,
   MagnitudePayload,
   MetricsPayload,
   NeighborsPayload,
@@ -65,6 +67,12 @@ export const cachedSignals = unstable_cache(
 export const cachedMagnitude = unstable_cache(
   async (): Promise<MlResult<MagnitudePayload>> => getMagnitude(),
   ["ml-magnitude"],
+  { revalidate: 300, tags: ["ml-artifacts"] },
+);
+
+export const cachedConfidence = unstable_cache(
+  async (): Promise<MlResult<ConfidencePayload>> => getConfidence(),
+  ["ml-confidence"],
   { revalidate: 300, tags: ["ml-artifacts"] },
 );
 

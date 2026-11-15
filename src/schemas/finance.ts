@@ -435,3 +435,57 @@ export const MagnitudePayloadSchema = z.object({
 
 export type MagnitudeSignal = z.infer<typeof MagnitudeSignalSchema>;
 export type MagnitudePayload = z.infer<typeof MagnitudePayloadSchema>;
+
+
+/**
+ * Accuracy by conviction tier, from the out-of-fold walk-forward predictions.
+ *
+ * `holdout_comparison` is not optional in spirit: the tiers are validation figures and run
+ * several points above what the final holdout recorded at the same gate, so a surface that
+ * renders a tier without that comparison is misreporting. The producer writes it into the
+ * artifact so no consumer has to remember.
+ */
+export const ConfidenceBandSchema = z.object({
+  from: z.number(),
+  to: z.number().nullable(),
+  label: z.string(),
+  description: z.string(),
+  calls: z.boolean(),
+  coverage: z.number(),
+  n: z.number(),
+  accuracy: z.number().nullable(),
+  note: z.string().nullable().optional(),
+});
+
+export const ConfidencePayloadSchema = z.object({
+  basis: z.string().optional(),
+  source: z.string().optional(),
+  threshold: z.number(),
+  gates: z.array(
+    z.object({
+      gate: z.number(),
+      coverage: z.number(),
+      n: z.number(),
+      accuracy: z.number(),
+      per_fold_min: z.number().nullable().optional(),
+      per_fold_max: z.number().nullable().optional(),
+    }),
+  ),
+  bands: z.array(ConfidenceBandSchema),
+  holdout_comparison: z
+    .object({
+      note: z.string().optional(),
+      gate: z.number(),
+      validation_accuracy: z.number().nullable(),
+      validation_coverage: z.number().nullable(),
+      holdout_accuracy: z.number(),
+      holdout_coverage: z.number(),
+      gap: z.number().nullable(),
+      full_coverage_holdout_accuracy: z.number().nullable(),
+    })
+    .optional(),
+  disclaimer: z.string().optional(),
+});
+
+export type ConfidenceBand = z.infer<typeof ConfidenceBandSchema>;
+export type ConfidencePayload = z.infer<typeof ConfidencePayloadSchema>;

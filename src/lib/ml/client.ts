@@ -1,5 +1,6 @@
 import { env, envInt } from "@/lib/env";
 import type {
+  ConfidencePayload,
   MagnitudePayload,
   MetricsPayload,
   NeighborsPayload,
@@ -165,6 +166,10 @@ export function getMagnitude(ticker?: string): Promise<MlResult<MagnitudePayload
   return request<MagnitudePayload>(
     `/magnitude${ticker ? `?ticker=${encodeURIComponent(ticker)}` : ""}`,
   );
+}
+
+export function getConfidence(): Promise<MlResult<ConfidencePayload>> {
+  return request<ConfidencePayload>("/confidence");
 }
 
 export function getMetrics(section?: string): Promise<MlResult<MetricsPayload>> {

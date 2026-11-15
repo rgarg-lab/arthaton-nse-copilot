@@ -42,6 +42,7 @@ from .config import (
     CALIBRATOR_PATH,
     DISCLAIMER,
     IMPORTANCE_PATH,
+    ARTIFACTS_DIR,
     MAGNITUDE_METRICS_PATH,
     MAGNITUDE_MODEL_PATH,
     METRICS_PATH,
@@ -73,6 +74,7 @@ class State:
         # endpoint rather than failing to boot.
         self.magnitude: Any = None
         self.magnitude_metrics: dict[str, Any] | None = None
+        self.confidence: dict[str, Any] | None = None
         self.loaded_at: str | None = None
         self.load_errors: list[str] = []
         self.cache: dict[str, Any] = {}
@@ -116,6 +118,10 @@ class State:
             self.magnitude_metrics = json.loads(
                 MAGNITUDE_METRICS_PATH.read_text(encoding="utf-8")
             )
+        confidence_path = ARTIFACTS_DIR / "confidence_tiers.json"
+        if confidence_path.exists():
+            self.confidence = json.loads(confidence_path.read_text(encoding="utf-8"))
+
         # No `load_errors` entry when it is absent, deliberately: `/health` drives
         # `npm run preflight`, and a service whose every other endpoint works is not
         # unhealthy. `/magnitude` reports its own absence with a 503 instead.
@@ -518,3 +524,27 @@ def magnitude(
         "signals": rows,
         "disclaimer": DISCLAIMER,
     }
+
+
+@app.get("/confidence")
+def confidence() -> dict[str, Any]:
+    """How accurate the model is at each level of conviction.
+
+    The headline 51.37% is what the model scores if forced to call every session, and it is
+    not the number a user meets: the product abstains, so when it speaks it speaks from the
+    confident tail, which is measurably better than the average.
+
+    Produced by `confidence.py` from the out-of-fold walk-forward predictions. **These are
+    validation figures.** The response carries `holdout_comparison` for exactly that reason
+    — at the frozen gate the validation number is several points above what the final
+    holdout recorded, and any surface showing one must show the other.
+    """
+    if state.confidence is None:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "confidence tiers are not loaded",
+                "hint": "run `python ml/tasks.py confidence` to produce them",
+            },
+        )
+    return {**state.confidence, "disclaimer": DISCLAIMER}

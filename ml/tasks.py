@@ -67,6 +67,10 @@ TARGETS: dict[str, tuple[str, list[str]]] = {
             "8000",
         ],
     ),
+    "confidence": (
+        "compute accuracy-by-conviction tiers -> artifacts/confidence_tiers.json",
+        [sys.executable, "-m", "copilot.confidence"],
+    ),
     "magnitude": (
         "train and freeze the magnitude head (will tomorrow be a big move?)",
         [sys.executable, "-m", "copilot.magnitude"],

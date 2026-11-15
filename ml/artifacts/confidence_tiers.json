@@ -1,0 +1,105 @@
+{
+ "generated_at": "2026-11-15T15:08:43",
+ "generated_by": "ml/src/copilot/confidence.py \u2014 the only producer of confidence tiers",
+ "source": "Out-of-fold predictions from the purged walk-forward, 2022-01-03 to 2025-06-30, 14,654 rows. Calibrated probabilities (p_cal). Validation, not holdout.",
+ "basis": "validation",
+ "threshold": 0.6,
+ "gates": [
+  {
+   "gate": 0.5,
+   "coverage": 1.0,
+   "n": 14654,
+   "accuracy": 0.5506346390064146,
+   "per_fold_min": 0.5227164036346246,
+   "per_fold_max": 0.5671252371916509
+  },
+  {
+   "gate": 0.55,
+   "coverage": 0.2958919066466494,
+   "n": 4336,
+   "accuracy": 0.6116236162361623,
+   "per_fold_min": 0.5842583249243188,
+   "per_fold_max": 0.6315492957746479
+  },
+  {
+   "gate": 0.6,
+   "coverage": 0.16166234475228605,
+   "n": 2369,
+   "accuracy": 0.63064584212748,
+   "per_fold_min": 0.5701149425287356,
+   "per_fold_max": 0.6788321167883211
+  },
+  {
+   "gate": 0.65,
+   "coverage": 0.06346390064146308,
+   "n": 930,
+   "accuracy": 0.6602150537634408,
+   "per_fold_min": 0.6408839779005525,
+   "per_fold_max": 0.6796116504854369
+  },
+  {
+   "gate": 0.7,
+   "coverage": 0.009553705472908422,
+   "n": 140,
+   "accuracy": 0.7142857142857143,
+   "per_fold_min": 0.6666666666666666,
+   "per_fold_max": 0.7317073170731707
+  }
+ ],
+ "bands": [
+  {
+   "from": 0.5,
+   "to": 0.55,
+   "label": "no call",
+   "description": "Conviction barely off a coin flip. The model declines.",
+   "calls": false,
+   "coverage": 0.7041080933533507,
+   "n": 10318,
+   "accuracy": 0.5250048459003683,
+   "note": null
+  },
+  {
+   "from": 0.55,
+   "to": 0.6,
+   "label": "no call",
+   "description": "Leaning, but under the frozen gate. The model still declines.",
+   "calls": false,
+   "coverage": 0.1342295618943633,
+   "n": 1967,
+   "accuracy": 0.5887137773258769,
+   "note": null
+  },
+  {
+   "from": 0.6,
+   "to": 0.65,
+   "label": "high",
+   "description": "Clears the frozen gate. This is a call the model stands behind.",
+   "calls": true,
+   "coverage": 0.09819844411082299,
+   "n": 1439,
+   "accuracy": 0.6115357887421821,
+   "note": null
+  },
+  {
+   "from": 0.65,
+   "to": null,
+   "label": "very high",
+   "description": "The most confident band the model produces.",
+   "calls": true,
+   "coverage": 0.06346390064146308,
+   "n": 930,
+   "accuracy": 0.6602150537634408,
+   "note": null
+  }
+ ],
+ "holdout_comparison": {
+  "note": "The same frozen gate, measured on the final holdout instead of the validation folds. The difference is the validation-optimism tax and must be displayed wherever a tier figure is displayed.",
+  "gate": 0.6,
+  "validation_accuracy": 0.63064584212748,
+  "validation_coverage": 0.16166234475228605,
+  "holdout_accuracy": 0.554983,
+  "holdout_coverage": 0.101588,
+  "gap": 0.07566284212747998,
+  "full_coverage_holdout_accuracy": 0.513702
+ }
+}
