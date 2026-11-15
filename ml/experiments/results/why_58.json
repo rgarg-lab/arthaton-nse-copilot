@@ -1,0 +1,138 @@
+[
+ {
+  "label": "1. honest setup (date split, no prices)",
+  "random_split": false,
+  "with_prices": false,
+  "n": 12563,
+  "accuracy": 0.5503462548754279,
+  "auc": 0.5681341074251337,
+  "conviction": [
+   {
+    "threshold": 0.5,
+    "coverage": 1.0,
+    "n": 12563,
+    "accuracy": 0.5503462548754279
+   },
+   {
+    "threshold": 0.6,
+    "coverage": 0.3614582504178938,
+    "n": 4541,
+    "accuracy": 0.5939220436027307
+   },
+   {
+    "threshold": 0.7,
+    "coverage": 0.0718777362095041,
+    "n": 903,
+    "accuracy": 0.6345514950166113
+   },
+   {
+    "threshold": 0.8,
+    "coverage": 0.011462230358990686,
+    "n": 144,
+    "accuracy": 0.6875
+   }
+  ]
+ },
+ {
+  "label": "2. + raw prices and 30 close lags",
+  "random_split": false,
+  "with_prices": true,
+  "n": 12563,
+  "accuracy": 0.5464459126004935,
+  "auc": 0.569318933008819,
+  "conviction": [
+   {
+    "threshold": 0.5,
+    "coverage": 1.0,
+    "n": 12563,
+    "accuracy": 0.5464459126004935
+   },
+   {
+    "threshold": 0.6,
+    "coverage": 0.36265223274695535,
+    "n": 4556,
+    "accuracy": 0.5976733977172959
+   },
+   {
+    "threshold": 0.7,
+    "coverage": 0.07545968319668869,
+    "n": 948,
+    "accuracy": 0.6139240506329114
+   },
+   {
+    "threshold": 0.8,
+    "coverage": 0.011701026824802993,
+    "n": 147,
+    "accuracy": 0.6122448979591837
+   }
+  ]
+ },
+ {
+  "label": "3. + row-wise random split",
+  "random_split": true,
+  "with_prices": false,
+  "n": 8806,
+  "accuracy": 0.6422893481717011,
+  "auc": 0.6941402760884315,
+  "conviction": [
+   {
+    "threshold": 0.5,
+    "coverage": 1.0,
+    "n": 8806,
+    "accuracy": 0.6422893481717011
+   },
+   {
+    "threshold": 0.6,
+    "coverage": 0.4256188962071315,
+    "n": 3748,
+    "accuracy": 0.7358591248665955
+   },
+   {
+    "threshold": 0.7,
+    "coverage": 0.11015216897569839,
+    "n": 970,
+    "accuracy": 0.8278350515463917
+   },
+   {
+    "threshold": 0.8,
+    "coverage": 0.016466045877810583,
+    "n": 145,
+    "accuracy": 0.8896551724137931
+   }
+  ]
+ },
+ {
+  "label": "4. BOTH (the old pipeline)",
+  "random_split": true,
+  "with_prices": true,
+  "n": 8806,
+  "accuracy": 0.6361571655689303,
+  "auc": 0.6855303833966229,
+  "conviction": [
+   {
+    "threshold": 0.5,
+    "coverage": 1.0,
+    "n": 8806,
+    "accuracy": 0.6361571655689303
+   },
+   {
+    "threshold": 0.6,
+    "coverage": 0.3973427208721326,
+    "n": 3499,
+    "accuracy": 0.7244927122034867
+   },
+   {
+    "threshold": 0.7,
+    "coverage": 0.10583692936634113,
+    "n": 932,
+    "accuracy": 0.8047210300429185
+   },
+   {
+    "threshold": 0.8,
+    "coverage": 0.01964569611628435,
+    "n": 173,
+    "accuracy": 0.8323699421965318
+   }
+  ]
+ }
+]

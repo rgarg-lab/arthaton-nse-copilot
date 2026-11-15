@@ -258,6 +258,29 @@ had specific, nameable defects. Each one is now a constraint with a test behind 
 | A confidence of "60%" | A **Python function default argument** | Isotonic calibration on out-of-fold predictions; the curve is on the model card |
 | An LLM summary citing "47 recent news articles" | It had read **none** | Explanations are grounded by tool calls; a rule annotates any directional claim with no `get_signal` behind it |
 | Features: every column, including raw rupee prices and 30 raw close lags | The model partitioned on 2017–2024 price *levels*, then was asked about 2026 | 58 scale-free features, no prices, no lags, ≤60 ceiling |
+| A row-wise random train/test split | **This was the real leak** — see the measurement below | Purged walk-forward split on dates, with a 5-session embargo |
+
+### Which of those defects actually cost the accuracy — measured, not assumed
+
+This table blamed the price features for the inflated number. That was wrong, and
+`ml/experiments/why_58.py` reintroduces each defect to the current pipeline one at a time to
+find out which mattered:
+
+| setup | accuracy | AUC | accuracy at 0.70 conviction |
+|---|---|---|---|
+| Honest: date split, no prices | 55.03% | 0.5681 | 63.46% |
+| **+ raw prices and 30 close lags** | **54.64%** | 0.5693 | 61.39% |
+| **+ row-wise random split** | **64.23%** | **0.6941** | **82.78%** |
+| Both (the old pipeline) | 63.62% | 0.6855 | 80.47% |
+
+**The random split is worth +9.2 points on its own. The price features are worth nothing**
+(−0.4, inside noise). The intuition that absolute rupee prices let a tree memorise the time
+axis is reasonable, and it is also not what happened — with a date-based split the model
+cannot exploit them, and with a random split it does not need them. Eighteen tickers share
+the same ~2,900 sessions, so a random split puts the same date on both sides of the
+boundary, and the cross-sectional rank features make those rows mutually informative.
+
+That is the honest answer to "why was the old number higher": one line of splitting code.
 | `improved_model_v4.py` | Future-target leakage, in-sample stacking, test-based model selection | Purged walk-forward, a once-read holdout, a ledger that makes the claim auditable |
 | No disclaimer anywhere in `src/` | Directional calls on a real listed company with no notice at all | `<Disclaimer />` on every signal surface, asserted by a test, duplicated into every API payload |
 
