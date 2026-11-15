@@ -389,3 +389,49 @@ export type PaperTrading = NonNullable<z.infer<typeof MetricsPayloadSchema>["pap
 export type CostScenario = PaperTrading["scenarios"][string];
 export type RiskProfile = z.infer<typeof RiskProfileSchema>;
 export type WatchlistEntry = z.infer<typeof WatchlistEntrySchema>;
+
+/**
+ * The magnitude head: will tomorrow be a big move?
+ *
+ * A second, independent prediction beside the direction call. Direction on this horizon is
+ * close to a martingale — 51.37% on the holdout — while volatility clusters, so this head
+ * reaches a median of 60.2% on the sessions it calls while covering ~45% of them.
+ *
+ * `expectation` is `null` exactly when `abstain` is true, mirroring how the direction
+ * payload omits `direction` when it declines: a client cannot render a call it was never
+ * given.
+ */
+export const MagnitudeSignalSchema = z.object({
+  ticker: z.string(),
+  as_of_session: z.string(),
+  probability_big_move: z.number(),
+  expectation: z.string().nullable(),
+  abstain: z.boolean(),
+  threshold: z.number(),
+  typical_move_abs: z.number().optional(),
+});
+
+export const MagnitudePayloadSchema = z.object({
+  generated_by: z.string().optional(),
+  target: z.string().optional(),
+  threshold: z.number(),
+  measured: z
+    .object({
+      accuracy_when_calling_median: z.number(),
+      accuracy_when_calling_min: z.number(),
+      accuracy_when_calling_max: z.number(),
+      windows_at_or_above_60pct: z.number(),
+      windows_total: z.number(),
+      coverage_min: z.number(),
+      coverage_max: z.number(),
+      full_coverage_accuracy_median: z.number(),
+      base_rate: z.number(),
+    })
+    .optional(),
+  holdout_note: z.string().optional(),
+  signals: z.array(MagnitudeSignalSchema),
+  disclaimer: z.string().optional(),
+});
+
+export type MagnitudeSignal = z.infer<typeof MagnitudeSignalSchema>;
+export type MagnitudePayload = z.infer<typeof MagnitudePayloadSchema>;

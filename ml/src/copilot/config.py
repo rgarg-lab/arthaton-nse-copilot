@@ -32,6 +32,30 @@ SIGNALS_PATH = ARTIFACTS_DIR / "latest_signals.json"
 IMPORTANCE_PATH = ARTIFACTS_DIR / "feature_importance.json"
 NEIGHBORS_INDEX_PATH = ARTIFACTS_DIR / "neighbors_index.npz"
 
+# ── The magnitude model: "will tomorrow be a big move?" ──────────────────────────────
+#
+# A second, independent head added after the direction model was frozen, because direction
+# on this horizon is close to a martingale (51.37% on the holdout, and 29 configurations in
+# ml/experiments/RESULTS.md failed to beat it) while *volatility clusters* and is genuinely
+# predictable. It is also the question the product's named user actually asks — whether today
+# is a day to act or wait is about magnitude, not sign.
+#
+# Deliberately separate artifacts. The direction model, its calibrator and its threshold are
+# frozen by §6.5 and nothing here may touch them, so this model gets its own files, its own
+# metrics and its own threshold.
+MAGNITUDE_MODEL_PATH = ARTIFACTS_DIR / "magnitude_model.pkl"
+MAGNITUDE_METRICS_PATH = ARTIFACTS_DIR / "magnitude_metrics.json"
+
+# Trailing window the label's threshold is computed over: is tomorrow's absolute move
+# bigger than the typical move of the last 20 sessions? A median, so the base rate sits
+# near 50% and the accuracy is directly comparable to the direction model's.
+MAGNITUDE_WINDOW = 20
+
+# Conviction gate, chosen once on the walk-forward confirmation fold and then measured
+# unchanged in every window (58.46% / 60.17% / 60.23% / 61.64%). Not re-tuned per window and
+# not tuned on the holdout.
+MAGNITUDE_THRESHOLD = 0.56
+
 for _d in (RAW_DIR, PROCESSED_DIR, ARTIFACTS_DIR, NEWS_DIR):
     _d.mkdir(parents=True, exist_ok=True)
 

@@ -1,0 +1,61 @@
+{
+ "generated_at": "2026-11-15T08:29:16",
+ "generated_by": "ml/src/copilot/magnitude.py \u2014 the only producer of magnitude metrics",
+ "target": "y_big = 1 if |next session return| > trailing 20-session median |return|. The threshold is known at decision time; only the return being compared is in the future.",
+ "why_this_head": "Next-session direction is close to a martingale (51.37% on the holdout, and 29 configurations failed to beat it). Volatility clusters and is predictable. This head answers the question the product's user actually asks.",
+ "threshold": 0.56,
+ "threshold_note": "Chosen once on the walk-forward confirmation fold, then measured unchanged in every window. Never tuned on the final holdout, which this head does not read.",
+ "holdout_note": "Not evaluated on the final holdout: those rows are governed by the direction model's committed ledger. The evidence offered is stability across four independent out-of-sample walk-forward windows.",
+ "train_rows": 43690,
+ "train_end": "2025-06-30",
+ "feature_count": 58,
+ "base_rate": 0.4973220416571298,
+ "windows": [
+  {
+   "window": "fold1_val2022",
+   "n": 4216,
+   "base_rate": 0.49430740037950666,
+   "accuracy": 0.5718690702087287,
+   "calls": 2036,
+   "coverage": 0.4829222011385199,
+   "accuracy_when_calling": 0.6164047151277013
+  },
+  {
+   "window": "fold2_val2023",
+   "n": 4165,
+   "base_rate": 0.5015606242496998,
+   "accuracy": 0.5572629051620648,
+   "calls": 1844,
+   "coverage": 0.44273709483793516,
+   "accuracy_when_calling": 0.5845986984815619
+  },
+  {
+   "window": "fold3_val2024",
+   "n": 4182,
+   "base_rate": 0.49808703969392637,
+   "accuracy": 0.5573888091822095,
+   "calls": 1760,
+   "coverage": 0.42085126733620276,
+   "accuracy_when_calling": 0.6017045454545454
+  },
+  {
+   "window": "fold4_val2025H1",
+   "n": 2091,
+   "base_rate": 0.4949784791965567,
+   "accuracy": 0.5671927307508369,
+   "calls": 1046,
+   "coverage": 0.5002391200382592,
+   "accuracy_when_calling": 0.6022944550669216
+  }
+ ],
+ "summary": {
+  "accuracy_when_calling_min": 0.5845986984815619,
+  "accuracy_when_calling_median": 0.6019995002607335,
+  "accuracy_when_calling_max": 0.6164047151277013,
+  "windows_at_or_above_60pct": 3,
+  "windows_total": 4,
+  "coverage_min": 0.42085126733620276,
+  "coverage_max": 0.5002391200382592,
+  "full_coverage_accuracy_median": 0.5622907699665232
+ }
+}

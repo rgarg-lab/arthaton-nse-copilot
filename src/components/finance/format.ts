@@ -133,3 +133,18 @@ export function perTickerAccuracy(
   }
   return out;
 }
+
+/**
+ * The magnitude head's signals keyed by ticker, so a board can look one up per card.
+ *
+ * Beside `perTickerAccuracy` and for the same reason: two surfaces render this board and
+ * they must not disagree. Returns an empty object when that head is unavailable, and the
+ * cards omit the row rather than showing a placeholder.
+ */
+export function magnitudeByTicker<T extends { ticker: string }>(
+  signals: T[] | undefined,
+): Record<string, T> {
+  const out: Record<string, T> = {};
+  for (const row of signals ?? []) out[row.ticker] = row;
+  return out;
+}

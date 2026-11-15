@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { cachedMetrics, cachedSignals } from "@/lib/ml/cached";
+import { cachedMagnitude, cachedMetrics, cachedSignals } from "@/lib/ml/cached";
 import { config } from "@/lib/config";
 import { llmMode } from "@/lib/llm/router";
 import { DemoBanner } from "@/components/common/DemoBanner";
 import { Nav } from "@/components/shell/Nav";
 import { RegimeNote } from "@/components/finance/RegimeNote";
 import { SignalsBoard } from "@/components/finance/SignalsBoard";
-import { perTickerAccuracy } from "@/components/finance/format";
+import { magnitudeByTicker, perTickerAccuracy } from "@/components/finance/format";
 
 export const metadata: Metadata = {
   title: "Today's signals",
@@ -26,7 +26,11 @@ export const dynamic = "force-dynamic";
 
 export default async function SignalsPage() {
   const idea = config();
-  const [result, metrics] = await Promise.all([cachedSignals(), cachedMetrics()]);
+  const [result, metrics, magnitude] = await Promise.all([
+    cachedSignals(),
+    cachedMetrics(),
+    cachedMagnitude(),
+  ]);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -58,6 +62,11 @@ export default async function SignalsPage() {
           result={result}
           perTicker={
             metrics.source === "service" ? perTickerAccuracy(metrics.data.breakdowns) : undefined
+          }
+          magnitude={
+            magnitude.source === "service"
+              ? magnitudeByTicker(magnitude.data.signals)
+              : undefined
           }
         />
       </main>

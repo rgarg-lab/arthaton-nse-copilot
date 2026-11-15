@@ -1,11 +1,17 @@
 import { unstable_cache } from "next/cache";
 import {
   findNeighbors,
+  getMagnitude,
   getMetrics,
   getSignals,
   type MlResult,
 } from "@/lib/ml/client";
-import type { MetricsPayload, NeighborsPayload, SignalsPayload } from "@/schemas/finance";
+import type {
+  MagnitudePayload,
+  MetricsPayload,
+  NeighborsPayload,
+  SignalsPayload,
+} from "@/schemas/finance";
 
 /**
  * Cached reads of the ML service, for use by pages.
@@ -47,6 +53,18 @@ import type { MetricsPayload, NeighborsPayload, SignalsPayload } from "@/schemas
 export const cachedSignals = unstable_cache(
   async (): Promise<MlResult<SignalsPayload>> => getSignals(),
   ["ml-signals"],
+  { revalidate: 300, tags: ["ml-artifacts"] },
+);
+
+/**
+ * The magnitude head, cached like the rest.
+ *
+ * Same cadence argument: it is fitted once and its artifact changes only when the panel is
+ * refreshed, so a per-request round trip buys nothing.
+ */
+export const cachedMagnitude = unstable_cache(
+  async (): Promise<MlResult<MagnitudePayload>> => getMagnitude(),
+  ["ml-magnitude"],
   { revalidate: 300, tags: ["ml-artifacts"] },
 );
 

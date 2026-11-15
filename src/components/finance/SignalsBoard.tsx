@@ -1,5 +1,5 @@
 import type { MlResult } from "@/lib/ml/client";
-import type { SignalsPayload } from "@/schemas/finance";
+import type { MagnitudeSignal, SignalsPayload } from "@/schemas/finance";
 import { EmptyState, ErrorState } from "@/components/common/EmptyState";
 import { Disclaimer, PAPER_ONLY } from "./Disclaimer";
 import { SignalCard } from "./SignalCard";
@@ -56,9 +56,12 @@ function FreshnessNote({ data }: { data: SignalsPayload["data"] }) {
 export function SignalsBoard({
   result,
   perTicker,
+  magnitude,
 }: {
   result: MlResult<SignalsPayload>;
   perTicker?: Record<string, { accuracy?: number | null; n?: number }>;
+  /** The magnitude head's call per ticker. Absent when that head is not loaded. */
+  magnitude?: Record<string, MagnitudeSignal>;
 }) {
   if (result.source === "unavailable") {
     return (
@@ -197,6 +200,7 @@ export function SignalsBoard({
               signal={signal}
               tickerAccuracy={perTicker?.[signal.ticker]?.accuracy ?? undefined}
               tickerSessions={perTicker?.[signal.ticker]?.n}
+              magnitude={magnitude?.[signal.ticker]}
             />
           </li>
         ))}

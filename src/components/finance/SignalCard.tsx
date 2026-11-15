@@ -1,4 +1,4 @@
-import type { Signal } from "@/schemas/finance";
+import type { MagnitudeSignal, Signal } from "@/schemas/finance";
 import { Disclaimer } from "./Disclaimer";
 import {
   REGIME_COPY,
@@ -157,15 +157,56 @@ function TickerTrackRecord({ accuracy, n }: { accuracy?: number; n?: number }) {
   );
 }
 
+/**
+ * The magnitude head's call for this name: will tomorrow be a big move?
+ *
+ * An independent second opinion beside the direction call, and on this horizon a
+ * better-behaved one. Direction is close to a martingale — 51.37% on the holdout, and 29
+ * configurations in `ml/experiments/RESULTS.md` failed to beat it — while volatility
+ * clusters, so this head reaches a median of 60.2% on the sessions it calls while covering
+ * roughly 45% of them against direction's ~10%.
+ *
+ * It is on the card because it is the question the product's named user actually asks:
+ * whether today is a day to act or wait is about magnitude, not sign. A name the direction
+ * head declines can still carry useful information here, and today nine of seventeen do
+ * while direction calls none.
+ *
+ * `expectation` is null exactly when this head abstains, the same contract the direction
+ * payload uses — there is no call to render, so none is rendered.
+ */
+function MagnitudeRow({ magnitude }: { magnitude?: MagnitudeSignal }) {
+  if (!magnitude) return null;
+  const { abstain, expectation, probability_big_move: p } = magnitude;
+  return (
+    <div className="flex flex-col gap-1 rounded-card border border-line bg-glass px-2.5 py-2">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+        <span className="label-caps text-[10px] text-ink-4">Tomorrow&rsquo;s move size</span>
+        <span className="font-mono text-[11px] text-ink-3">{probability(p, 1)}</span>
+      </div>
+      {abstain || !expectation ? (
+        <p className="text-[11px] leading-snug text-ink-4">
+          No call on size either — conviction is inside this head&rsquo;s own abstention band.
+        </p>
+      ) : (
+        <p className="text-[12px] leading-snug text-ink-1">
+          Likely <strong className="font-medium">{expectation}</strong> for this name.
+        </p>
+      )}
+    </div>
+  );
+}
+
 /** The abstention. The product's identity, not its failure mode. */
 export function AbstentionCard({
   signal,
   tickerAccuracy,
   tickerSessions,
+  magnitude,
 }: {
   signal: Signal;
   tickerAccuracy?: number;
   tickerSessions?: number;
+  magnitude?: MagnitudeSignal;
 }) {
   return (
     <CardFrame signal={signal} tone="abstain">
@@ -231,6 +272,8 @@ export function AbstentionCard({
         measurable. That asymmetry is why the gate is set to be paid for, not to be busy.
       </p>
 
+      <MagnitudeRow magnitude={magnitude} />
+
       <TickerTrackRecord accuracy={tickerAccuracy} n={tickerSessions} />
     </CardFrame>
   );
@@ -241,10 +284,12 @@ export function CallCard({
   signal,
   tickerAccuracy,
   tickerSessions,
+  magnitude,
 }: {
   signal: Signal;
   tickerAccuracy?: number;
   tickerSessions?: number;
+  magnitude?: MagnitudeSignal;
 }) {
   const up = signal.direction === "up";
   return (
@@ -288,6 +333,8 @@ export function CallCard({
         </div>
       )}
 
+      <MagnitudeRow magnitude={magnitude} />
+
       <TickerTrackRecord accuracy={tickerAccuracy} n={tickerSessions} />
     </CardFrame>
   );
@@ -302,12 +349,14 @@ export function SignalCard({
   signal,
   tickerAccuracy,
   tickerSessions,
+  magnitude,
 }: {
   signal: Signal;
   tickerAccuracy?: number;
   tickerSessions?: number;
+  magnitude?: MagnitudeSignal;
 }) {
-  const record = { tickerAccuracy, tickerSessions };
+  const record = { tickerAccuracy, tickerSessions, magnitude };
   return signal.abstain ? (
     <AbstentionCard signal={signal} {...record} />
   ) : (

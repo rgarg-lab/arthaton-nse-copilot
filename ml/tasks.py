@@ -67,6 +67,10 @@ TARGETS: dict[str, tuple[str, list[str]]] = {
             "8000",
         ],
     ),
+    "magnitude": (
+        "train and freeze the magnitude head (will tomorrow be a big move?)",
+        [sys.executable, "-m", "copilot.magnitude"],
+    ),
     "test": (
         "run the Python test suite (includes the leakage and purge tests)",
         [sys.executable, "-m", "pytest", "-q"],

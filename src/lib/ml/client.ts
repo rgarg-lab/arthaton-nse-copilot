@@ -1,5 +1,6 @@
 import { env, envInt } from "@/lib/env";
 import type {
+  MagnitudePayload,
   MetricsPayload,
   NeighborsPayload,
   SignalsPayload,
@@ -153,6 +154,17 @@ export function getSignals(opts?: {
 
 export function getSignal(ticker: string): Promise<MlResult<SingleSignalPayload>> {
   return request<SingleSignalPayload>(`/signals/${encodeURIComponent(ticker)}`);
+}
+
+/**
+ * The magnitude head. Returns `unavailable` with a 503 reason when the service is running
+ * but the magnitude artifacts are absent — it was added after the direction model was
+ * frozen, so a checkout without them still serves everything else.
+ */
+export function getMagnitude(ticker?: string): Promise<MlResult<MagnitudePayload>> {
+  return request<MagnitudePayload>(
+    `/magnitude${ticker ? `?ticker=${encodeURIComponent(ticker)}` : ""}`,
+  );
 }
 
 export function getMetrics(section?: string): Promise<MlResult<MetricsPayload>> {

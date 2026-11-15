@@ -42,6 +42,8 @@ from .config import (
     CALIBRATOR_PATH,
     DISCLAIMER,
     IMPORTANCE_PATH,
+    MAGNITUDE_METRICS_PATH,
+    MAGNITUDE_MODEL_PATH,
     METRICS_PATH,
     MODEL_PATH,
     PANEL_PATH,
@@ -66,6 +68,11 @@ class State:
         self.metrics: dict[str, Any] | None = None
         self.signals: dict[str, Any] | None = None
         self.neighbors: NeighborIndex | None = None
+        # The magnitude head is optional on purpose: it was added after the direction model
+        # was frozen, so a checkout without its artifacts must still serve every other
+        # endpoint rather than failing to boot.
+        self.magnitude: Any = None
+        self.magnitude_metrics: dict[str, Any] | None = None
         self.loaded_at: str | None = None
         self.load_errors: list[str] = []
         self.cache: dict[str, Any] = {}
@@ -103,6 +110,15 @@ class State:
                 self.metrics["feature_importance"] = importance.get("features", [])
         else:
             self.load_errors.append(f"missing {METRICS_PATH.name} — run `make -C ml eval`")
+
+        if MAGNITUDE_MODEL_PATH.exists() and MAGNITUDE_METRICS_PATH.exists():
+            self.magnitude = joblib.load(MAGNITUDE_MODEL_PATH)
+            self.magnitude_metrics = json.loads(
+                MAGNITUDE_METRICS_PATH.read_text(encoding="utf-8")
+            )
+        # No `load_errors` entry when it is absent, deliberately: `/health` drives
+        # `npm run preflight`, and a service whose every other endpoint works is not
+        # unhealthy. `/magnitude` reports its own absence with a 503 instead.
 
         # latest_signals.json is committed, but recomputing it from the frozen
         # model at startup is cheap (18 rows) and means a panel refresh does not
@@ -408,3 +424,97 @@ if __name__ == "__main__":  # pragma: no cover
     t0 = time.time()
     uvicorn.run(app, host=api_host(), port=api_port())
     print(f"served for {time.time() - t0:.0f}s")
+
+
+@app.get("/magnitude")
+def magnitude(
+    ticker: str | None = Query(
+        default=None, description="One ticker from the universe; omit for the whole basket."
+    ),
+) -> dict[str, Any]:
+    """Will tomorrow be a big move? — the magnitude head.
+
+    A second, independent prediction beside the direction call, and on this horizon a far
+    better-behaved one. Direction is close to a martingale (51.37% on the holdout, and 29
+    configurations in `ml/experiments/RESULTS.md` failed to beat it); volatility clusters,
+    so this head reaches a median of 60.2% on the sessions it calls while covering roughly
+    45% of them.
+
+    It is also the question the product's named user actually asks: whether today is a day
+    to act or wait is about magnitude, not sign.
+
+    Every figure in the response comes from `magnitude_metrics.json`, written by
+    `magnitude.py`, which is the only producer of them.
+    """
+    if state.magnitude is None or state.magnitude_metrics is None:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "the magnitude head is not loaded",
+                "hint": "run `python ml/tasks.py magnitude` to train and freeze it",
+            },
+        )
+    if state.panel is None:
+        raise HTTPException(status_code=503, detail={"error": "panel unavailable"})
+
+    from .magnitude import add_magnitude_label
+
+    panel = add_magnitude_label(state.panel)
+    if ticker is not None:
+        ticker = ticker.upper()
+        if ticker not in set(UNIVERSE):
+            raise HTTPException(
+                status_code=404,
+                detail={"error": f"{ticker} is not in the universe", "universe": list(UNIVERSE)},
+            )
+        panel = panel[panel["ticker"] == ticker]
+
+    # The most recent row per ticker: the state the prediction is made from.
+    latest = panel.sort_values("date").groupby("ticker", as_index=False).tail(1)
+    if len(latest) == 0:
+        raise HTTPException(status_code=503, detail={"error": "no scoreable rows in the panel"})
+
+    probabilities = state.magnitude.probability_big(latest)
+    threshold = float(state.magnitude.threshold)
+    summary = state.magnitude_metrics["summary"]
+
+    rows = []
+    for (_, row), p in zip(latest.iterrows(), probabilities, strict=True):
+        p = float(p)
+        # Conviction is distance from a coin flip, symmetric: the head is as willing to say
+        # "quieter than usual" as "bigger than usual", and a one-sided gate would make it a
+        # volatility-only bias dressed as caution.
+        calls = p >= threshold or p <= 1 - threshold
+        rows.append(
+            {
+                "ticker": str(row["ticker"]),
+                "as_of_session": str(row["date"])[:10],
+                "probability_big_move": round(p, 6),
+                "expectation": ("bigger than usual" if p > 0.5 else "quieter than usual")
+                if calls
+                else None,
+                "abstain": not calls,
+                "threshold": threshold,
+                "typical_move_abs": round(float(row["typical_move"]), 6),
+            }
+        )
+
+    return {
+        "generated_by": "ml/src/copilot/magnitude.py",
+        "target": state.magnitude_metrics["target"],
+        "threshold": threshold,
+        "measured": {
+            "accuracy_when_calling_median": summary["accuracy_when_calling_median"],
+            "accuracy_when_calling_min": summary["accuracy_when_calling_min"],
+            "accuracy_when_calling_max": summary["accuracy_when_calling_max"],
+            "windows_at_or_above_60pct": summary["windows_at_or_above_60pct"],
+            "windows_total": summary["windows_total"],
+            "coverage_min": summary["coverage_min"],
+            "coverage_max": summary["coverage_max"],
+            "full_coverage_accuracy_median": summary["full_coverage_accuracy_median"],
+            "base_rate": state.magnitude_metrics["base_rate"],
+        },
+        "holdout_note": state.magnitude_metrics["holdout_note"],
+        "signals": rows,
+        "disclaimer": DISCLAIMER,
+    }
