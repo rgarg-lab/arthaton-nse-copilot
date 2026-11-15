@@ -256,3 +256,69 @@ def test_disclaimer_inconsistency_is_disclosed(card: str, metrics: dict) -> None
     assert re.search(r"known inconsistency in the artifact", card, re.I), (
         "the artifact's disclaimer differs from the code's; the card must disclose it"
     )
+
+
+# ── §9, the magnitude head ──────────────────────────────────────────────────────────
+
+
+@pytest.fixture(scope="module")
+def magnitude() -> dict:
+    from copilot.config import MAGNITUDE_METRICS_PATH
+
+    if not MAGNITUDE_METRICS_PATH.exists():
+        pytest.skip("magnitude metrics not produced in this checkout")
+    return json.loads(MAGNITUDE_METRICS_PATH.read_text(encoding="utf-8"))
+
+
+def test_magnitude_section_exists(card: str) -> None:
+    assert "## 9. The second head" in card, "MODEL_CARD.md §9 should document the magnitude head"
+
+
+def test_magnitude_headline_figures(card: str, magnitude: dict) -> None:
+    """Scoped to §9.3, so a wrong figure cannot hide behind a right one elsewhere."""
+    block = section(card, "### 9.3 What it scores")
+    s = magnitude["summary"]
+    for figure in (
+        pct(s["accuracy_when_calling_median"]),
+        pct(s["accuracy_when_calling_min"]),
+        pct(s["accuracy_when_calling_max"]),
+        pct(magnitude["base_rate"]),
+        f"{magnitude['train_rows']:,}",
+        magnitude["train_end"],
+        str(magnitude["threshold"]),
+    ):
+        assert figure in block or figure in card, f"{figure} is not in MODEL_CARD.md §9"
+
+
+def test_magnitude_per_window_table(card: str, magnitude: dict) -> None:
+    block = section(card, "### 9.3 What it scores")
+    for w in magnitude["windows"]:
+        assert pct(w["accuracy"]) in block, f"{w['window']} full accuracy missing"
+        if w["accuracy_when_calling"]:
+            assert pct(w["accuracy_when_calling"]) in block, f"{w['window']} on-calls missing"
+
+
+def test_magnitude_claim_still_holds(magnitude: dict) -> None:
+    """The card claims a median at or above 60% in three of four windows."""
+    s = magnitude["summary"]
+    assert s["accuracy_when_calling_median"] >= 0.60
+    assert s["windows_at_or_above_60pct"] >= 3
+    assert s["windows_total"] >= 4
+
+
+def test_magnitude_discloses_that_it_never_read_the_holdout(card: str) -> None:
+    """The weaker-evidence caveat must travel with the number."""
+    block = section(card, "### 9.5 Limitations specific to this head")
+    assert "never been evaluated on the final holdout" in block
+
+
+def test_magnitude_discloses_the_leak(card: str) -> None:
+    """A 100%-accuracy leak that nearly shipped belongs in the limitations, not a commit log."""
+    block = section(card, "### 9.5 Limitations specific to this head")
+    assert "100.00%" in block
+    assert "y_big" in block
+
+
+def test_magnitude_does_not_claim_a_direction(card: str) -> None:
+    block = section(card, "## 9. The second head")
+    assert "not" in block.lower() and "direction" in block.lower()

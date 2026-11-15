@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { Tool } from "@/lib/agent/types";
 import {
   findNeighbors,
+  getMagnitude,
   getMetrics,
   getSignal,
   getSignals,
@@ -225,6 +226,77 @@ export const findSimilarDaysTool: Tool<typeof FindSimilarInput> = {
       guidance:
         "Name two or three of these dates explicitly. The point of this tool is that the " +
         "user can go and look the sessions up.",
+    };
+  },
+};
+
+
+// ── get_move_size ───────────────────────────────────────────────────────────────
+
+const GetMoveSizeInput = z.object({
+  ticker: z
+    .string()
+    .min(1)
+    .max(24)
+    .optional()
+    .describe(
+      "An NSE ticker in the covered basket, e.g. RELIANCE.NS. Omit for the whole basket.",
+    ),
+});
+
+/**
+ * The magnitude head, as a tool.
+ *
+ * Added because the assistant could discuss direction and had no way to mention the one
+ * prediction this project makes that clears 60% — a user asking "is today a day to act"
+ * was being answered entirely from a head that is close to a coin flip.
+ *
+ * The description carries the *comparison* deliberately — a model given two heads reaches
+ * for whichever its prompt describes most confidently, and the honest ordering is that this
+ * head is the better measured on this horizon. It carries no *figures*, and sends the model
+ * to the `measured` block of the payload instead: a number written here cannot know what
+ * the current artifact says, and the same drift argument is why `idea.config.ts` forbids
+ * model statistics outright. (For a reader: as of writing, `magnitude_metrics.json` has a
+ * median of 60.20% on called sessions against the direction model's 51.37% in
+ * `metrics.json` — check both rather than trusting this sentence.)
+ *
+ * It must also not be allowed to blur the two — "likely to be a big move" is not a
+ * direction, and a model that conflates them would be inventing a call neither head made.
+ */
+export const getMoveSizeTool: Tool<typeof GetMoveSizeInput> = {
+  name: "get_move_size",
+  description:
+    "Get the magnitude call: is tomorrow likely to be a BIGGER or QUIETER move than usual " +
+    "for this name? This is a separate and better-measured prediction than direction, and " +
+    "it has a call on a far larger share of sessions. Its own accuracy figures come back in " +
+    "the `measured` block of the response — quote those; do not state a figure from this " +
+    "description, which cannot know what the current artifact says. " +
+    "Reach for this whenever the user asks whether today is a day to act or wait, whether " +
+    "anything is likely to happen, or about volatility — it answers those far better than " +
+    "`get_signal` does, and it often has a call on a name where direction abstains. " +
+    "It is NOT a direction: 'bigger than usual' says nothing about up or down, and you must " +
+    "never present it as, or combine it into, a directional call. If `abstain` is true this " +
+    "head has no call either and `expectation` is null. Use `get_signal` for direction and " +
+    "report the two separately.",
+  inputSchema: GetMoveSizeInput,
+
+  async run(input) {
+    const result = await getMagnitude(input.ticker?.toUpperCase());
+    if (result.source === "unavailable") return toolUnavailable(result);
+    const payload = result.data;
+    return {
+      ok: true,
+      source: "service",
+      threshold: payload.threshold,
+      target: payload.target,
+      measured: payload.measured,
+      holdout_note: payload.holdout_note,
+      signals: payload.signals,
+      guidance:
+        "Report `expectation` as a statement about move SIZE only, never direction. When " +
+        "`abstain` is true say this head is also declining. The accuracy figures in " +
+        "`measured` are a median and a range across four windows — quote the range, not " +
+        "just the best window, and say it covers about 45% of sessions.",
     };
   },
 };

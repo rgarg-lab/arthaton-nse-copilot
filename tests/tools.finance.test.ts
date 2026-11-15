@@ -2,7 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { config } from "@/lib/config";
 import type { ToolContext } from "@/lib/agent/types";
 import { ALL_TOOLS, allToolNames, assertToolsExist, toToolSpecs, toolByName } from "@/lib/tools";
-import { findSimilarDaysTool, getModelMetricsTool, getSignalTool } from "@/lib/tools/finance";
+import {
+  findSimilarDaysTool,
+  getModelMetricsTool,
+  getMoveSizeTool,
+  getSignalTool,
+} from "@/lib/tools/finance";
 
 /**
  * The finance tools, tested in the state a judge is most likely to encounter: the ML
@@ -38,7 +43,7 @@ type Unavailable = {
 
 describe("registration", () => {
   it("every finance tool is in the registry", () => {
-    for (const name of ["get_signal", "get_model_metrics", "find_similar_days"]) {
+    for (const name of ["get_signal", "get_move_size", "get_model_metrics", "find_similar_days"]) {
       expect(allToolNames(), `${name} must be registered`).toContain(name);
       expect(toolByName(name)).toBeDefined();
     }
@@ -46,7 +51,7 @@ describe("registration", () => {
 
   it("every finance tool is enabled in idea.config.ts", () => {
     const enabled = config().agent.enabledTools;
-    for (const name of ["get_signal", "get_model_metrics", "find_similar_days"]) {
+    for (const name of ["get_signal", "get_move_size", "get_model_metrics", "find_similar_days"]) {
       expect(enabled, `${name} must be enabled, not just registered`).toContain(name);
     }
   });
@@ -190,5 +195,49 @@ describe("tool descriptions, which are prompts", () => {
 
   it("find_similar_days distinguishes evidence from probability", () => {
     expect(findSimilarDaysTool.description).toMatch(/evidence, not a probability/i);
+  });
+});
+
+
+describe("get_move_size keeps the two heads apart", () => {
+  /**
+   * The magnitude head is the better-measured of the two, which makes it the one most
+   * likely to be misreported: "bigger than usual" is not a direction, and a model that
+   * blurs them would be inventing a call neither head made. These assertions are on the
+   * text the model is actually shown, because that text is the only thing stopping it.
+   */
+  it("tells the model it is not a direction", () => {
+    const d = getMoveSizeTool.description.toLowerCase();
+    expect(d).toContain("not a direction");
+    expect(d).toMatch(/never present it as|must never/);
+  });
+
+  it("sends the model to the payload for its figures rather than stating them", () => {
+    // A number written into a tool description cannot know what the current artifact
+    // says — the same drift argument that keeps statistics out of idea.config.ts.
+    expect(getMoveSizeTool.description).not.toMatch(/\d{2}(\.\d+)?\s*%/);
+    expect(getMoveSizeTool.description).toContain("measured");
+  });
+
+  it("says when to prefer it over the direction head", () => {
+    const d = getMoveSizeTool.description.toLowerCase();
+    expect(d).toMatch(/act or wait/);
+    expect(d).toMatch(/abstains?|declines?/);
+  });
+
+  it("reads, and never acts", () => {
+    expect(getMoveSizeTool.external ?? false).toBe(false);
+  });
+
+  it("declines rather than inventing a figure when the service is down", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("ECONNREFUSED"));
+    try {
+      const out = (await getMoveSizeTool.run({}, ctx)) as Unavailable;
+      expect(out.ok).toBe(false);
+      expect(out.source).toBe("unavailable");
+      expect(JSON.stringify(out)).not.toMatch(/probability_big_move/);
+    } finally {
+      fetchSpy.mockRestore();
+    }
   });
 });

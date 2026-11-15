@@ -390,7 +390,91 @@ assumptions, not a claim about tradeability. The directional edge is the measure
 
 ---
 
-## 9. Ethical and practical considerations
+## 9. The second head: move size
+
+Everything above is the **direction** model. A second, independent head was added after it
+was frozen, and on this horizon it is the better-measured of the two. Its numbers come from
+`ml/artifacts/magnitude_metrics.json`, produced by `ml/src/copilot/magnitude.py`, which is
+the only code permitted to compute them.
+
+### 9.1 Why a second head at all
+
+Direction is close to a martingale — 51.37%, and §6 records 29 configurations that failed to
+beat it. **Volatility clusters**, which is one of the most robust facts in empirical finance,
+so the same features answer a magnitude question far better than a sign question.
+
+It is also the question §1's user actually asks. "Is today a day to act or wait" is about
+magnitude, not direction.
+
+### 9.2 Target
+
+```
+y_big = 1 if |next session return| > median(|return|) over the trailing 20 sessions
+```
+
+The label looks one session forward — that is the prediction. The threshold it is compared
+against uses only sessions up to and including today, so it is known at decision time.
+
+**Base rate 49.73%**, near a coin flip by construction. That is deliberate: a target with a
+70% base rate would make 70% accuracy meaningless, and the point is a number comparable to
+the direction head's and to a coin flip.
+
+### 9.3 What it scores
+
+Trained on **43,690** rows to **2025-06-30**, 58 features. Conviction gate **0.56**, chosen
+once on the walk-forward confirmation fold and then measured unchanged in every window:
+
+| window | base | full accuracy | coverage | **accuracy on calls** |
+|---|---|---|---|---|
+| val 2022 | 49.4% | 57.19% | 48.3% | **61.64%** |
+| val 2023 | 50.2% | 55.73% | 44.3% | 58.46% |
+| val 2024 | 49.8% | 55.74% | 42.1% | **60.17%** |
+| val 2025 H1 | 49.5% | 56.72% | 50.0% | **60.23%** |
+
+**Median 60.20% on called sessions, range 58.46–61.64%, at or above 60% in three of four
+windows.** Coverage 42.1–50.0%. Median full-coverage accuracy 56.23%.
+
+### 9.4 Why this is more believable than the direction head's 60%
+
+§6's note on where 60% lives applies to direction and comes with an eight-point spread. This
+does not:
+
+| | direction | **move size** |
+|---|---|---|
+| median accuracy on calls | 61.38% | 60.20% |
+| spread across windows | 8.18 points | **3.18 points** |
+| coverage | 10–32% | **42–50%** |
+| selection → confirmation | **−2.6 to −4.6** | **+0.5** |
+
+The last row is the one that matters. Every configuration in §6's search *lost* accuracy
+moving from the folds that selected it to a fold that did not. This head **gained** it. That
+is the difference between an effect and a search artefact.
+
+### 9.5 Limitations specific to this head
+
+- **It has never been evaluated on the final holdout.** Those rows are governed by the
+  committed ledger and this head did not need them, so the evidence offered is stability
+  across four independent walk-forward windows rather than one holdout number. It is a
+  weaker form of evidence than §4's and is labelled as such in the artifact's
+  `holdout_note`.
+- **It says nothing about direction.** "Bigger than usual" is not "up". The agent's
+  `get_move_size` tool description forbids merging the two, and the rules layer flags a
+  directional claim with no `get_signal` call behind it.
+- **"Usual" is this name's own recent normal**, a 20-session trailing median, not a
+  market-wide or absolute level. A quiet stock and a volatile one are each judged against
+  themselves.
+- **It leaked on the first run.** All five candidate algorithms reported 100.00% accuracy
+  and an AUC of 1.0000, because `feature_columns()` discovers columns by pattern and
+  returned `y_big` — the label — into the feature matrix. Nine tests in
+  `ml/tests/test_magnitude.py` now guard against it, including one that rejects any `y_*`
+  column reaching a feature list and one that fails if the shipped bundle lists a label
+  among its columns. Recorded here because it is exactly the class of error that produced
+  the 58.15% this project is a reaction to, and it was caught by reading a result that was
+  too good rather than by a test.
+
+---
+
+## 10. Ethical and practical considerations
 
 - **It can be wrong about money.** Roughly 48 times in 100 when it speaks, by its own
   measurement; and on the 2025 half of the holdout it was worse than always-up.

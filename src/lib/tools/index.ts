@@ -7,7 +7,12 @@ import { verifyTool } from "./verify";
 import { compareWithMemoryTool, saveMemoryTool, searchMemoryTool } from "./memory";
 import { fetchUrlTool, ragLookupTool, webSearchTool } from "./retrieval";
 import { createTaskTool, scheduleReminderTool, sendMessageTool } from "./actions";
-import { findSimilarDaysTool, getModelMetricsTool, getSignalTool } from "./finance";
+import {
+  findSimilarDaysTool,
+  getModelMetricsTool,
+  getMoveSizeTool,
+  getSignalTool,
+} from "./finance";
 
 export type { Tool };
 
@@ -46,6 +51,7 @@ export const ALL_TOOLS: Tool[] = [
   scheduleReminderTool,
   // ── finance (this project) ──
   getSignalTool,
+  getMoveSizeTool,
   getModelMetricsTool,
   findSimilarDaysTool,
 ];

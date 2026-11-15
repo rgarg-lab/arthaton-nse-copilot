@@ -31,6 +31,35 @@ up-calls are close to a coin flip.
 **Final holdout: 2025-07-01 → 2026-11-09, 5,729 rows the model never saw.** Read exactly
 once; the ledger is at [`ml/artifacts/holdout_ledger.json`](./ml/artifacts/holdout_ledger.json).
 
+### Two predictions, and the second one is the good one
+
+There are **two independent heads**, and it is worth being blunt about which is better:
+
+| | direction | **move size** |
+|---|---|---|
+| question | will it close up or down? | will the move be bigger or quieter than this name's recent normal? |
+| accuracy | **51.37%** on the holdout | **60.20% median** on the sessions it calls |
+| how stable | 8.18-point spread across windows | **3.18-point spread** |
+| how often it calls | ~10% of sessions | **42–50% of sessions** |
+| held up out of sample? | lost 2.6–4.6 points | **gained 0.5** |
+
+Direction is close to a martingale, and §6 of the model card records 29 configurations that
+failed to beat 51.37% — different algorithms, extra features, noise reduction, recency
+weighting, regime models, an ensemble. That number is not a shortfall, it is the answer.
+
+**Volatility clusters**, so the same features answer a magnitude question far better. That
+head is measured across four out-of-sample windows (58.46% / 60.17% / 60.23% / 61.64%) and,
+unlike everything in the direction search, it *gained* accuracy on the fold that selected
+nothing — which is the difference between an effect and a search artefact.
+
+It is also the question this product's user actually asks: *is today a day to act or wait* is
+about magnitude, not sign. On the current panel direction calls 0 of 17 names and move size
+calls 9.
+
+The two are never merged. "Bigger than usual" is not "up", the agent's tool description
+forbids combining them, and the rules layer flags a directional claim with no `get_signal`
+behind it. Full detail in [`MODEL_CARD.md` §9](./MODEL_CARD.md).
+
 | | Accuracy | AUC | Brier |
 |---|---|---|---|
 | **This model** (calibrated LightGBM) | **51.37%** | **0.5254** | **0.2507** |
