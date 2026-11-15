@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { currentUserOrDemo } from "@/auth";
 import { config } from "@/lib/config";
-import { currentDriver, driverFor } from "@/db";
 import { cachedMetrics, cachedNeighbors, cachedSignals } from "@/lib/ml/cached";
 import { llmMode } from "@/lib/llm/router";
 import { UNIVERSE } from "@/lib/universe";
@@ -44,7 +43,7 @@ export default async function WorkspacePage({
   return (
     <div className="flex min-h-dvh flex-col">
       <Nav ideaName={idea.name} />
-      <DemoBanner mode={llmMode()} driver={currentDriver() ?? driverFor()} />
+      <DemoBanner mode={llmMode()} />
       <CopilotWorkspace
         user={user ?? { id: "anonymous", name: idea.assistant.name, email: null, image: null }}
         signals={signals}

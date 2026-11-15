@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { config } from "@/lib/config";
-import { currentDriver, driverFor } from "@/db";
 import { cachedMetrics } from "@/lib/ml/cached";
 import { llmMode } from "@/lib/llm/router";
 import { DemoBanner } from "@/components/common/DemoBanner";
@@ -33,7 +32,7 @@ export default async function ModelCardPage() {
   return (
     <div className="flex min-h-dvh flex-col">
       <Nav ideaName={idea.name} />
-      <DemoBanner mode={llmMode()} driver={currentDriver() ?? driverFor()} />
+      <DemoBanner mode={llmMode()} />
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
         <header className="mb-6 flex flex-col gap-1">
           <h1 className="text-[22px] font-[420] tracking-[-0.03em] text-ink-1">Model card</h1>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { desc } from "drizzle-orm";
 import { config } from "@/lib/config";
-import { currentDriver, db, driverFor, memoryItems } from "@/db";
+import { db, memoryItems } from "@/db";
 import { llmMode } from "@/lib/llm/router";
 import { DemoBanner } from "@/components/common/DemoBanner";
 import { EmptyState, ErrorState } from "@/components/common/EmptyState";
@@ -32,7 +32,7 @@ export default async function MemoryPage() {
   return (
     <div className="flex min-h-dvh flex-col">
       <Nav ideaName={idea.name} />
-      <DemoBanner mode={llmMode()} driver={currentDriver() ?? driverFor()} />
+      <DemoBanner mode={llmMode()} />
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
         <h1 className="text-[20px] font-medium text-ink-1">Memory</h1>
         <p className="mt-1 mb-5 text-[13px] text-ink-3">

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { config } from "@/lib/config";
-import { currentDriver, driverFor } from "@/db";
 import { cachedSignals } from "@/lib/ml/cached";
 import { llmMode } from "@/lib/llm/router";
 import { currentScope, getRiskProfile, listWatchlist } from "@/lib/watchlist";
@@ -47,7 +46,7 @@ export default async function WatchlistPage() {
   return (
     <div className="flex min-h-dvh flex-col">
       <Nav ideaName={idea.name} />
-      <DemoBanner mode={llmMode()} driver={currentDriver() ?? driverFor()} />
+      <DemoBanner mode={llmMode()} />
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-4 py-6">
         <header className="flex flex-col gap-1">
           <h1 className="text-[22px] font-[420] tracking-[-0.03em] text-ink-1">Watchlist</h1>

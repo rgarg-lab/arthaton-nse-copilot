@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 import { config } from "@/lib/config";
-import { currentDriver, driverFor } from "@/db";
 import { llmMode } from "@/lib/llm/router";
 import { preflight, type CheckStatus } from "@/lib/preflight";
 import { DemoBanner } from "@/components/common/DemoBanner";
@@ -30,7 +29,7 @@ export default async function PreflightPage() {
   return (
     <div className="flex min-h-dvh flex-col">
       <Nav ideaName={idea.name} />
-      <DemoBanner mode={llmMode()} driver={currentDriver() ?? driverFor()} />
+      <DemoBanner mode={llmMode()} />
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-[20px] font-medium text-ink-1">Preflight</h1>
