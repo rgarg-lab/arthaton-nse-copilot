@@ -4,7 +4,12 @@ import { useCallback, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
 import type { TraceEvent } from "@/lib/agent/trace";
 import type { SessionUser } from "@/schemas";
-import type { MetricsPayload, NeighborsPayload, SignalsPayload } from "@/schemas/finance";
+import type {
+  MagnitudePayload,
+  MetricsPayload,
+  NeighborsPayload,
+  SignalsPayload,
+} from "@/schemas/finance";
 import type { MlResult } from "@/lib/ml/client";
 import { Badge } from "@/components/ui/badge";
 import { ChatPanel } from "@/components/chat/ChatPanel";
@@ -15,7 +20,7 @@ import { CONFIDENCE_THRESHOLD, IDEA_NAME } from "@/lib/config/client";
 import { SignalsBoard } from "./SignalsBoard";
 import { EvidenceTimeline } from "./EvidenceTimeline";
 import { ModelCard } from "./ModelCard";
-import { perTickerAccuracy, sessionDate } from "./format";
+import { magnitudeByTicker, perTickerAccuracy, sessionDate } from "./format";
 
 /**
  * The workspace, in the shell's own three-region layout: icon rail · chat · switchable
@@ -56,12 +61,15 @@ export function CopilotWorkspace({
   metrics,
   evidence,
   evidenceTicker,
+  magnitude,
 }: {
   user: SessionUser;
   signals: MlResult<SignalsPayload>;
   metrics: MlResult<MetricsPayload>;
   evidence: MlResult<NeighborsPayload>;
   evidenceTicker: string;
+  /** The magnitude head. Optional: that head can be absent while the rest works. */
+  magnitude?: MlResult<MagnitudePayload>;
 }) {
   const [tab, setTab] = useState<Tab>("signals");
   const [traceEvents, setTraceEvents] = useState<TraceEvent[]>([]);
@@ -192,6 +200,11 @@ export function CopilotWorkspace({
                 perTicker={
                   metrics.source === "service"
                     ? perTickerAccuracy(metrics.data.breakdowns)
+                    : undefined
+                }
+                magnitude={
+                  magnitude?.source === "service"
+                    ? magnitudeByTicker(magnitude.data.signals)
                     : undefined
                 }
               />

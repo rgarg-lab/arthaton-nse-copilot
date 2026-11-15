@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { currentUserOrDemo } from "@/auth";
 import { config } from "@/lib/config";
-import { cachedMetrics, cachedNeighbors, cachedSignals } from "@/lib/ml/cached";
+import {
+  cachedMagnitude,
+  cachedMetrics,
+  cachedNeighbors,
+  cachedSignals,
+} from "@/lib/ml/cached";
 import { llmMode } from "@/lib/llm/router";
 import { UNIVERSE } from "@/lib/universe";
 import { DemoBanner } from "@/components/common/DemoBanner";
@@ -33,11 +38,12 @@ export default async function WorkspacePage({
   const requested = (params.ticker ?? "").toUpperCase();
   const evidenceTicker = UNIVERSE.includes(requested) ? requested : UNIVERSE[0];
 
-  const [user, signals, metrics, evidence] = await Promise.all([
+  const [user, signals, metrics, evidence, magnitude] = await Promise.all([
     currentUserOrDemo(),
     cachedSignals(),
     cachedMetrics(),
     cachedNeighbors(evidenceTicker, 25),
+    cachedMagnitude(),
   ]);
 
   return (
@@ -50,6 +56,7 @@ export default async function WorkspacePage({
         metrics={metrics}
         evidence={evidence}
         evidenceTicker={evidenceTicker}
+        magnitude={magnitude}
       />
     </div>
   );
