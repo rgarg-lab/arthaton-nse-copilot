@@ -4,6 +4,7 @@ import { ErrorState } from "@/components/common/EmptyState";
 import { Disclaimer } from "./Disclaimer";
 import { CalibrationPlot, CoveragePlot, EquityCurve } from "./Charts";
 import {
+  AXIS_BANDS,
   SCALE_REFERENCE,
   count,
   fixed,
@@ -124,6 +125,61 @@ function Table({
   );
 }
 
+/**
+ * The baselines as bars, on a zoomed axis.
+ *
+ * Nothing is computed here: each value arrives from `metrics.json` and is mapped onto a
+ * width. The axis bounds are constants of the *display*, not measurements — `BAND` is
+ * named and labelled on screen so a reader can see the zoom rather than be fooled by it.
+ */
+const BAND = AXIS_BANDS.baselines;
+
+function BaselineBars({
+  rows,
+}: {
+  rows: { label: string; value: number | null | undefined; isModel?: boolean }[];
+}) {
+  const width = (v: number) =>
+    Math.max(2, Math.min(100, ((v - BAND.from) / (BAND.to - BAND.from)) * 100));
+  return (
+    <div className="flex flex-col gap-1.5 rounded-card border border-line bg-glass p-3">
+      {rows.map((r) =>
+        r.value === null || r.value === undefined ? null : (
+          <div
+            key={r.label}
+            className="grid grid-cols-[9.5rem_1fr_3.75rem] items-center gap-x-3 text-[11.5px]"
+          >
+            <span className={r.isModel ? "font-medium text-ink-1" : "text-ink-3"}>{r.label}</span>
+            <span className="relative block h-2.5 rounded-pill bg-surface-2">
+              <span
+                className={
+                  r.isModel
+                    ? "absolute inset-y-0 left-0 rounded-pill bg-ink-1"
+                    : "absolute inset-y-0 left-0 rounded-pill bg-line-strong"
+                }
+                style={{ width: `${width(r.value)}%` }}
+              />
+            </span>
+            <span
+              className={
+                r.isModel
+                  ? "text-right font-mono font-medium text-ink-1"
+                  : "text-right font-mono text-ink-3"
+              }
+            >
+              {percent(r.value, 2)}
+            </span>
+          </div>
+        ),
+      )}
+      <p className="mt-0.5 text-[10px] text-ink-4">
+        Axis zoomed to {percent(BAND.from, 0)}–{percent(BAND.to, 0)}; a coin flip is{" "}
+        {percent(0.5, 0)}. All four sit within three points of each other, which is the point.
+      </p>
+    </div>
+  );
+}
+
 export function ModelCard({ result }: { result: MlResult<MetricsPayload> }) {
   if (result.source === "unavailable") {
     return (
@@ -229,6 +285,23 @@ export function ModelCard({ result }: { result: MlResult<MetricsPayload> }) {
         title="Against four baselines"
         lede="An accuracy figure on its own is unreadable. These are the things the model has to beat before it has said anything: the market's own drift, naive momentum, a three-feature linear model on the identical split, and simply holding the basket."
       >
+        {/*
+          The comparison, drawn before it is tabulated.
+          Four accuracies within three points of each other is a table nobody reads as a
+          ranking; the bars make "it beats all three, and only just" visible in one look,
+          which is exactly the claim this section is making. Zoomed to the 45-55% band for
+          the same reason the signals overview is zoomed — on a 0-100% axis these four bars
+          are identical — and the band is labelled underneath.
+        */}
+        <BaselineBars
+          rows={[
+            { label: "This model", value: d.accuracy, isModel: true },
+            { label: "Always up", value: base.always_up.accuracy },
+            { label: "Previous-day sign", value: base.previous_day_sign.accuracy },
+            { label: "Logistic (3 features)", value: base.logistic_3_feature.accuracy },
+          ]}
+        />
+
         <Table
           head={["Baseline", "Accuracy", "AUC", "Brier"]}
           rows={[

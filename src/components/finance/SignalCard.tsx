@@ -264,13 +264,6 @@ export function AbstentionCard({
         number of calls — and the model card shows that the accuracy-maximising point would
         be further right still, at near-zero coverage.
       */}
-      <p className="text-[11px] leading-relaxed text-ink-4">
-        The model&rsquo;s calibrated probability is deliberately not shown as a direction here.
-        Conviction below the frozen threshold means its measured edge does not justify a call
-        on this name today — and a wrong call costs more than a missed one, since acting on
-        noise loses money and brokerage while waiting only forgoes an edge that was never
-        measurable. That asymmetry is why the gate is set to be paid for, not to be busy.
-      </p>
 
       <MagnitudeRow magnitude={magnitude} />
 

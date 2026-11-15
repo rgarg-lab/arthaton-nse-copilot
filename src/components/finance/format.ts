@@ -109,6 +109,27 @@ export const SCALE_REFERENCE = {
   perfectCalibrationError: 0,
 } as const;
 
+/**
+ * Zoomed axis bounds for the charts — **display constants, not measurements**.
+ *
+ * Every quantity these charts plot lives within a few points of a coin flip, so a 0–100%
+ * axis draws seventeen overlapping dots or four identical bars and communicates nothing.
+ * Zooming is the only way to make the comparison visible, and a zoomed axis is also a
+ * classic way to mislead — so the bounds live here, named and audited, and every chart that
+ * uses one prints it on screen beside the data.
+ *
+ * They are in this file for the same reason `SCALE_REFERENCE` is: `tests/honesty.test.ts`
+ * forbids metric-shaped decimals in the finance components, and it was right to flag these
+ * when they sat inline. A number that shapes how a measurement *looks* deserves the same
+ * one-audited-place treatment as one that says what a measurement *means*.
+ */
+export const AXIS_BANDS = {
+  /** Conviction on the signals overview. The gate at 0.60 sits inside this window. */
+  conviction: { from: 0.5, to: 0.65 },
+  /** The baselines bar chart on the model card; a coin flip is the midpoint. */
+  baselines: { from: 0.45, to: 0.55 },
+} as const;
+
 export const REGIME_COPY: Record<string, { label: string; hint: string }> = {
   calm: { label: "Calm", hint: "India VIX in the lowest third of its training range" },
   normal: { label: "Normal", hint: "India VIX in the middle third of its training range" },

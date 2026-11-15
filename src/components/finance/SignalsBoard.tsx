@@ -2,6 +2,7 @@ import type { MlResult } from "@/lib/ml/client";
 import type { MagnitudeSignal, SignalsPayload } from "@/schemas/finance";
 import { EmptyState, ErrorState } from "@/components/common/EmptyState";
 import { Disclaimer, PAPER_ONLY } from "./Disclaimer";
+import { BasketOverview } from "./BasketOverview";
 import { SignalCard } from "./SignalCard";
 import { count, probability, sessionDate } from "./format";
 
@@ -102,12 +103,24 @@ export function SignalsBoard({
     <div className="flex flex-col gap-4">
       <Disclaimer variant="banner" />
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+        {/*
+          Both heads in the first row. The board used to open with direction's "0", which
+          reads as a broken page rather than as the product working — and it buried the
+          head that *does* have calls today further down every card.
+        */}
         <Stat
-          label="Calls today"
+          label="Direction calls"
           value={count(summary.signals_emitted)}
           hint={`${summary.up_calls} up · ${summary.down_calls} down`}
         />
+        {magnitude && (
+          <Stat
+            label="Move-size calls"
+            value={count(Object.values(magnitude).filter((m) => !m.abstain).length)}
+            hint="bigger or quieter than usual"
+          />
+        )}
         <Stat
           label="Abstentions"
           value={count(summary.abstained)}
@@ -133,6 +146,8 @@ export function SignalsBoard({
         </p>
       </div>
 
+      <BasketOverview payload={payload} perTicker={perTicker} magnitude={magnitude} />
+
       {summary.signals_emitted === 0 && (
         /**
          * Every name abstained. This is a real and frequent outcome — the frozen threshold
@@ -149,49 +164,41 @@ export function SignalsBoard({
           className="flex flex-col gap-2 rounded-panel border border-dashed border-line-strong bg-glass p-4"
         >
           <p className="label-caps text-[11px] text-ink-2">No calls at all today</p>
-          <p className="max-w-[72ch] text-[13px] leading-relaxed text-ink-2">
-            Conviction is below the threshold on every name in the basket, so the model is
-            declining all {signals.length} of them. This is the ordinary case rather than a
-            fault: the threshold was chosen on validation to emit a signal on about a tenth of
-            sessions, and it is frozen — it cannot be lowered to produce calls on a quiet day.
-          </p>
-          {/*
-            Why several cards show the *same* percentage.
-
-            The calibrator is isotonic regression, which is a piecewise-constant step
-            function, and in the crowded region just above 0.5 it has very few steps. So on a
-            quiet day a dozen names with genuinely different model outputs map onto one step
-            and display an identical calibrated probability.
-
-            That needs saying out loud. Twelve cards reading 51.8% is the single most
-            fake-looking thing this app can render — it is indistinguishable from hardcoded
-            placeholder data, on a project whose whole claim is that nothing is invented. The
-            per-name uncalibrated output on each card is the evidence they are distinct; this
-            sentence tells the reader why to look at it.
-
-            Shown only when it is actually true. On a day with a wide spread this paragraph
-            would be explaining a phenomenon the reader cannot see.
-          */}
-          {distinctProbabilities < signals.length && (
-            <p className="max-w-[72ch] text-[11px] leading-relaxed text-ink-4">
-              {distinctProbabilities === 1
-                ? "Every name shows the same calibrated probability today."
-                : `These ${signals.length} names show only ${distinctProbabilities} distinct calibrated probabilities.`}{" "}
-              That is the calibrator, not a placeholder: isotonic regression is a step
-              function, and near a coin flip it has few steps, so different model outputs
-              round onto the same one. Each card lists its own uncalibrated output — those are
-              all different, and they are what the model actually computed for that name.
-            </p>
-          )}
-
-          <p className="max-w-[72ch] text-[11px] leading-relaxed text-ink-4">
-            Ask the Copilot why, and it will quote its measured accuracy in today&rsquo;s
-            volatility regime and the split among the closest historical sessions. The model
-            card shows what its accuracy looks like on the days it does call:{" "}
-            {probability(model.threshold)} conviction is the gate.
+          <p className="max-w-[78ch] text-[12.5px] leading-relaxed text-ink-2">
+            Direction is below the gate on all {signals.length} names — ordinary, not a fault.
+            The threshold was set on validation to call about a tenth of sessions and is
+            frozen, so it cannot be lowered to make a quiet day look busier.
+            {distinctProbabilities < signals.length && (
+              <>
+                {" "}
+                The repeated percentages above are the calibrator, not a placeholder: isotonic
+                regression is a step function, so different model outputs round onto the same
+                one. Each card&rsquo;s uncalibrated output shows they are all different.
+              </>
+            )}
+            {magnitude && (
+              <>
+                {" "}
+                The move-size head is less reticent — see the{" "}
+                <span className="text-ink-1">move size</span> column above.
+              </>
+            )}
           </p>
         </div>
       )}
+
+      {/*
+        The shared explanation, said once.
+        It used to be repeated verbatim on all seventeen cards — the same three lines about
+        why the threshold is what it is, a hundred-odd words times seventeen, which is how a
+        page gets to 4,800 pixels without saying seventeen different things.
+      */}
+      <p className="max-w-[80ch] text-[12px] leading-relaxed text-ink-3">
+        Each card below carries that name&rsquo;s own figures. A wrong call costs money and
+        brokerage while a skipped session only forgoes an edge that was never measurable,
+        which is why the gate is set to be paid for rather than to be busy — and why it is
+        frozen and cannot be lowered to make a quiet day look busier.
+      </p>
 
       <ul className="grid list-none grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {signals.map((signal) => (
