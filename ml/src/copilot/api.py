@@ -206,7 +206,19 @@ def health() -> dict[str, Any]:
             "calibrator": CALIBRATOR_PATH.exists(),
             "metrics": METRICS_PATH.exists(),
             "latest_signals": SIGNALS_PATH.exists(),
+            # The two heads added after the direction model was frozen. Reported so
+            # `npm run preflight` can say which surfaces will work, rather than a
+            # reviewer discovering a 503 on /magnitude during a recording.
+            "magnitude": MAGNITUDE_MODEL_PATH.exists() and MAGNITUDE_METRICS_PATH.exists(),
+            "confidence_tiers": (ARTIFACTS_DIR / "confidence_tiers.json").exists(),
         },
+        # The project's central claim, exposed where a readiness check can see it: the
+        # final holdout was read exactly once. A second authoritative read means the
+        # headline accuracy is no longer out-of-sample, and nothing else in the running
+        # system would say so.
+        "holdout_ledger": (
+            (state.metrics or {}).get("evaluation_design", {}).get("holdout_ledger", {})
+        ),
         "errors": state.load_errors,
         "cache": {
             "entries": len(state.cache),
