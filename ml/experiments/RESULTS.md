@@ -292,6 +292,75 @@ need them.
 
 ---
 
+## Stage 8 — two independent agents, and whether agreement is worth anything
+
+The original version of this project used two agents — a main one and a macro one — and
+resolved conflicts by confidence. Worth testing properly, because ensemble disagreement as
+an uncertainty estimate is a real technique, not just an architectural preference.
+
+Two models on **disjoint** features, same hyperparameters as the pooled model so any
+difference is attributable to the split:
+
+* **technical** — 34 features about the stock: returns, SMA deviations, RSI, MACD, realised
+  vol, volume, cross-sectional ranks, calendar, sentiment.
+* **macro** — 24 about the world: Nifty, Nifty Energy, India VIX, Brent, USD/INR, gold,
+  S&P 500, Nasdaq, relative strength vs market and sector.
+
+### Each agent alone
+
+| | selection folds | confirmation fold |
+|---|---|---|
+| technical | 51.76% | 52.46% |
+| **macro** | **54.02%** | 51.75% |
+| pooled (both) | 54.41% | 51.79% |
+
+**The macro agent beats the technical agent by 2.3 points on the selection folds.** For a
+model predicting one stock's next session, the world around it carries more signal than its
+own price history does. That vindicates the original instinct to build a macro agent, and it
+is the most interesting single result in this file.
+
+### Does agreement mean anything?
+
+They agree on about 53% of sessions.
+
+| | selection | confirmation |
+|---|---|---|
+| when they **agree** | 55.44% (53.1% of sessions) | 53.95% (53.3%) |
+| when they **disagree** | 53.44% (46.9%) | **49.44%** (46.7%) |
+
+Yes, and in the right direction — on the confirmation fold, disagreement drops the model to
+**below a coin flip**. Two models looking at disjoint data falling out is a genuine warning.
+
+### Can agreement plus confidence carry a 60% headline? No.
+
+Agreement *and* a combined conviction over 0.58, measured in every window:
+
+| window | coverage | n | accuracy |
+|---|---|---|---|
+| val 2022 | 10.46% | 441 | 59.86% |
+| val 2023 | 3.91% | 163 | **68.71%** |
+| val 2024 | 4.45% | 186 | **53.23%** |
+| val 2025 H1 | 7.08% | 148 | 64.86% |
+
+Median 62.36% — and a **15.5-point spread** on samples of 148 to 441 rows. Set against the
+other candidates measured the same way:
+
+| | median | spread | coverage |
+|---|---|---|---|
+| two agents agreeing + confident | 62.36% | **15.5 pts** | 4–10% |
+| direction at its frozen gate | 61.38% | 8.2 pts | 10–32% |
+| **magnitude head** | **60.20%** | **3.2 pts** | **42–50%** |
+
+The two-agent number is the highest median and the least trustworthy: a figure that swings
+from 53% to 69% between adjacent years is not a property of the model, it is the sample size.
+The magnitude head remains the only 60% here that holds still.
+
+**What is worth keeping** is the disagreement signal rather than the agreement headline:
+"these two models disagree, and historically that means coin-flip territory" is a real,
+stable thing to show a user, and it does not depend on a small subset.
+
+---
+
 ## What was not tried, and why
 
 **More tickers.** The most promising untried lever: 44,030 pre-holdout rows is small, and
