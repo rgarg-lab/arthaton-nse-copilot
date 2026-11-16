@@ -59,6 +59,26 @@
   --color-status-unrelated-soft: rgb(255 255 255 / 3%);
   --color-status-unrelated-line: var(--color-line);
 
+  /*
+   * The one colour added to the inherited shell, for a measured figure that clears the
+   * 60% bar. Added alongside the existing status tokens rather than changing any of them.
+   *
+   * The shell is monochrome: `status-acquired` is white and `--color-brand` is near-white,
+   * so there was no positive colour to reuse. `idea.config.ts` declares a green primary
+   * (#2f7d64) that was never wired to CSS and is too dark for text on this surface.
+   *
+   * #0ca30c is the standard "good" status step, measured rather than chosen: 6.07:1
+   * against this surface (#050506), well past the 4.5:1 text bar.
+   *
+   * It must NEVER carry meaning alone. The palette validator fails this green against the
+   * coral already used for below-coin-flip figures at ΔE 4.1 under deuteranopia — a
+   * red/green reader cannot tell them apart. Every use is paired with words, so the colour
+   * is reinforcement and the text is the signal.
+   */
+  --color-positive: #0ca30c;
+  --color-positive-soft: rgb(12 163 12 / 12%);
+  --color-positive-line: rgb(12 163 12 / 42%);
+
   /* semantic: skill-graph edge tiers (learner evidence, §9.3); amber marks a link under human review */
   --color-evidence-review: #f2b544;
   --color-evidence-review-soft: rgb(242 181 68 / 12%);

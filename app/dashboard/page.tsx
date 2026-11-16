@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { config } from "@/lib/config";
-import { cachedConfidence, cachedMetrics } from "@/lib/ml/cached";
+import { cachedConfidence, cachedMagnitude, cachedMetrics } from "@/lib/ml/cached";
 import { llmMode } from "@/lib/llm/router";
 import { DemoBanner } from "@/components/common/DemoBanner";
 import { Nav } from "@/components/shell/Nav";
 import { ConfidenceLadder } from "@/components/finance/ConfidenceLadder";
+import { HeadlineAccuracy } from "@/components/finance/HeadlineAccuracy";
 import { ModelCard } from "@/components/finance/ModelCard";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +29,11 @@ export const metadata: Metadata = {
  */
 export default async function ModelCardPage() {
   const idea = config();
-  const [result, confidence] = await Promise.all([cachedMetrics(), cachedConfidence()]);
+  const [result, confidence, magnitude] = await Promise.all([
+    cachedMetrics(),
+    cachedConfidence(),
+    cachedMagnitude(),
+  ]);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -52,6 +57,11 @@ export default async function ModelCardPage() {
           the first question a reader has after the headline, and it used to be answerable
           only by reading the coverage curve further down.
         */}
+        <HeadlineAccuracy
+          magnitude={magnitude.source === "service" ? magnitude.data : undefined}
+          confidence={confidence.source === "service" ? confidence.data : undefined}
+        />
+
         {confidence.source === "service" && <ConfidenceLadder data={confidence.data} />}
 
         <ModelCard result={result} />

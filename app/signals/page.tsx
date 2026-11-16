@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
-import { cachedMagnitude, cachedMetrics, cachedSignals } from "@/lib/ml/cached";
+import {
+  cachedConfidence,
+  cachedMagnitude,
+  cachedMetrics,
+  cachedSignals,
+} from "@/lib/ml/cached";
 import { config } from "@/lib/config";
 import { llmMode } from "@/lib/llm/router";
 import { DemoBanner } from "@/components/common/DemoBanner";
 import { Nav } from "@/components/shell/Nav";
+import { HeadlineAccuracy } from "@/components/finance/HeadlineAccuracy";
 import { RegimeNote } from "@/components/finance/RegimeNote";
 import { SignalsBoard } from "@/components/finance/SignalsBoard";
 import { magnitudeByTicker, perTickerAccuracy } from "@/components/finance/format";
@@ -26,10 +32,11 @@ export const dynamic = "force-dynamic";
 
 export default async function SignalsPage() {
   const idea = config();
-  const [result, metrics, magnitude] = await Promise.all([
+  const [result, metrics, magnitude, confidence] = await Promise.all([
     cachedSignals(),
     cachedMetrics(),
     cachedMagnitude(),
+    cachedConfidence(),
   ]);
 
   return (
@@ -48,6 +55,11 @@ export default async function SignalsPage() {
             evaluated model artifacts; none of it is computed in the browser.
           </p>
         </header>
+
+        <HeadlineAccuracy
+          magnitude={magnitude.source === "service" ? magnitude.data : undefined}
+          confidence={confidence.source === "service" ? confidence.data : undefined}
+        />
 
         {/*
           Today's regime against the model's measured accuracy in it. Rendered only when

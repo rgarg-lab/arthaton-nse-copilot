@@ -92,7 +92,7 @@ export function ConfidenceLadder({ data }: { data: ConfidencePayload }) {
 
       {/* The per-prediction bands: what tier a single call falls into. */}
       <div className="flex flex-col gap-1">
-        <div className="grid grid-cols-[7rem_1fr_5rem_5rem] items-center gap-x-3 text-[10px] text-ink-4">
+        <div className="hidden grid-cols-[7rem_1fr_5rem_5rem] items-center gap-x-3 text-[10px] text-ink-4 sm:grid">
           <span className="label-caps">Conviction</span>
           <span className="label-caps">What it means</span>
           <span className="label-caps text-right">Coverage</span>
@@ -103,8 +103,8 @@ export function ConfidenceLadder({ data }: { data: ConfidencePayload }) {
             key={`${band.from}-${band.to ?? "max"}`}
             className={
               band.calls
-                ? "grid grid-cols-[7rem_1fr_5rem_5rem] items-baseline gap-x-3 rounded-card bg-glass px-2 py-1.5 text-[12px]"
-                : "grid grid-cols-[7rem_1fr_5rem_5rem] items-baseline gap-x-3 px-2 py-1.5 text-[12px]"
+                ? "grid grid-cols-[1fr_4.5rem] items-baseline gap-x-3 gap-y-0.5 rounded-card bg-glass px-2 py-1.5 text-[12px] sm:grid-cols-[7rem_1fr_5rem_5rem]"
+                : "grid grid-cols-[1fr_4.5rem] items-baseline gap-x-3 gap-y-0.5 px-2 py-1.5 text-[12px] sm:grid-cols-[7rem_1fr_5rem_5rem]"
             }
           >
             <span className="font-mono text-ink-2">
@@ -115,7 +115,7 @@ export function ConfidenceLadder({ data }: { data: ConfidencePayload }) {
               <strong className="font-medium capitalize">{band.label}</strong>
               <span className="text-ink-4"> — {band.description}</span>
             </span>
-            <span className="text-right font-mono text-ink-3">
+            <span className="hidden text-right font-mono text-ink-3 sm:block">
               {percent(band.coverage, 1)}
             </span>
             <span

@@ -147,7 +147,7 @@ function BaselineBars({
         r.value === null || r.value === undefined ? null : (
           <div
             key={r.label}
-            className="grid grid-cols-[9.5rem_1fr_3.75rem] items-center gap-x-3 text-[11.5px]"
+            className="grid grid-cols-[6.5rem_1fr_3.5rem] items-center gap-x-2 text-[11.5px] sm:grid-cols-[9.5rem_1fr_3.75rem] sm:gap-x-3"
           >
             <span className={r.isModel ? "font-medium text-ink-1" : "text-ink-3"}>{r.label}</span>
             <span className="relative block h-2.5 rounded-pill bg-surface-2">
