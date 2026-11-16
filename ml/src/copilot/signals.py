@@ -121,7 +121,18 @@ def build_signals(panel: pd.DataFrame, bundle, calibrator) -> dict[str, object]:
             "ticker": str(row["ticker"]),
             "name": TICKER_NAMES.get(str(row["ticker"]), str(row["ticker"])),
             "as_of_session": str(pd.Timestamp(row["date"]).date()),
+            # Read as "predicts the session *after* this date" — the value is the last
+            # completed session, not the one being predicted. The next trading date is
+            # deliberately not computed: it depends on the NSE holiday calendar, which this
+            # project does not carry, and inventing it would be a guess printed as a fact.
+            #
+            # The name invited exactly the misreading it got: an assistant announced
+            # "tomorrow's trading session (2026-11-11)", which is the past. `predicts` says
+            # the same thing in words that cannot be mistaken for a target date.
             "predicts_session_after": str(pd.Timestamp(row["date"]).date()),
+            "predicts": (
+                f"the next NSE trading session after {pd.Timestamp(row['date']).date()}"
+            ),
             "abstain": abstains,
             "probability_up": round(float(p_cal[i]), 6),
             "conviction": round(float(conviction[i]), 6),
@@ -198,7 +209,16 @@ def build_signals(panel: pd.DataFrame, bundle, calibrator) -> dict[str, object]:
             "calibration": "isotonic regression on out-of-fold walk-forward predictions",
         },
         "data": data_freshness(panel),
-        "universe_size": len(UNIVERSE),
+        # What is actually covered today, not what is configured.
+        #
+        # These differ — the panel carries 17 of the 18 configured names, because
+        # TATAMOTORS is fetched as TMPV after the demerger and Yahoo has been refusing it.
+        # Reporting the configured number made an assistant tell a user the model had
+        # abstained on "all 18 large-cap stocks" when it had only ever seen 17. Both are
+        # now sent, so the gap is visible instead of papered over.
+        "universe_size": len(signals),
+        "universe_configured": len(UNIVERSE),
+        "universe_missing": sorted(set(UNIVERSE) - {str(s["ticker"]) for s in signals}),
         "summary": {
             "signals_emitted": len(emitted),
             "abstained": len(signals) - len(emitted),
