@@ -161,9 +161,49 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
 
 // An async `main`, matching the other scripts in this directory. Top-level await is not
 // available under the CJS output tsx produces here.
+/**
+ * Best-effort catch-up on the price panel, before the model service reads it.
+ *
+ * Runs here rather than on a schedule because this is the moment it matters: the service
+ * loads the panel once at startup and recomputes today's signals from its newest row, so a
+ * refresh after boot would not be visible until a restart anyway.
+ *
+ * **Never blocks the demo.** The fetch is incremental — `ingest._history_path` keys the
+ * cache on the start date alone, so a refresh asks for the few sessions since the last one
+ * on disk rather than re-downloading eleven years — but Yahoo throttles unpredictably and a
+ * dead data source must not stop the app from starting. It is given a bounded window, and
+ * whatever it achieves (including nothing) the boot continues. The board states its own
+ * freshness, so a failed catch-up degrades to a visible "N sessions behind" rather than to
+ * silence.
+ */
+async function refreshPanel(python: string, budgetMs = 120_000): Promise<void> {
+  log("demo", "catching the price panel up to today (best effort)…");
+  const child = run("data", python, [join("ml", "tasks.py"), "data"], { transient: true });
+
+  const finished = await Promise.race([
+    new Promise<number>((resolve) => child.on("exit", (code) => resolve(code ?? 1))),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), budgetMs)),
+  ]);
+
+  if (finished === null) {
+    child.kill();
+    log("demo", "data source is slow or throttled — starting with the committed panel");
+  } else if (finished !== 0) {
+    log("demo", "catch-up did not complete — starting with the committed panel");
+  } else {
+    log("demo", "panel is current");
+  }
+}
+
 async function main(): Promise<void> {
   const python = pythonExecutable();
   log("demo", `python: ${python}`);
+
+  // Before the service reads the panel, not after.
+  if (!process.argv.includes("--no-refresh")) {
+    await refreshPanel(python);
+  }
+
   run("ml", python, [join("ml", "tasks.py"), "serve"]);
 
   if (!(await waitForMl())) {

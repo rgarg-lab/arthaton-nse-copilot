@@ -17,6 +17,7 @@ from __future__ import annotations
 import os
 import time
 from datetime import date, datetime
+from pathlib import Path
 
 import pandas as pd
 
@@ -32,9 +33,53 @@ _MAX_ATTEMPTS = 5
 _BACKOFF_SECONDS = (5, 20, 60, 120)
 
 
-def _cache_path(symbol: str, start: str, end: str) -> "pd.io.common.os.PathLike[str] | object":
-    safe = symbol.replace("^", "idx_").replace("=", "_").replace(".", "_").replace("/", "_")
-    return RAW_DIR / f"{safe}__{start}__{end}.parquet"
+def _safe_name(symbol: str) -> str:
+    return symbol.replace("^", "idx_").replace("=", "_").replace(".", "_").replace("/", "_")
+
+
+def _cache_path(symbol: str, start: str, end: str) -> Path:
+    """Legacy cache path, keyed on the exact window that was requested.
+
+    Kept only so `_history_path` can adopt files written before the incremental cache
+    existed. Nothing writes this layout any more — see the note there.
+    """
+    return RAW_DIR / f"{_safe_name(symbol)}__{start}__{end}.parquet"
+
+
+def _history_path(symbol: str, start: str) -> Path:
+    """One rolling history file per symbol, keyed on the start date only.
+
+    ## Why the end date had to come out of the key
+
+    It used to be in there, which meant the filename changed every single day: a refresh on
+    the 16th looked for `…__2026-11-16.parquet`, found the 12th's file sitting beside it,
+    missed, and re-downloaded **eleven years of history for all twenty-five symbols**. Yahoo
+    rate-limits hard after a few dozen such calls, which is why every refresh attempt in
+    this project has failed and the panel has been stuck days behind.
+
+    Keyed on the start alone, the history is fetched once and then *extended* — a refresh
+    asks only for the sessions after the last one on disk, which is a handful of rows per
+    symbol instead of three thousand. That is the difference between a refresh that Yahoo
+    tolerates and one that it blocks.
+    """
+    return RAW_DIR / f"{_safe_name(symbol)}__{start}__history.parquet"
+
+
+def _adopt_legacy_cache(symbol: str, start: str) -> pd.DataFrame | None:
+    """Fold any pre-existing fixed-window cache file into the rolling history.
+
+    Those files hold years of data that Yahoo will not re-serve while it is throttling, so
+    they are migrated rather than orphaned: the newest window wins, and it is written to the
+    history path the first time this runs.
+    """
+    pattern = f"{_safe_name(symbol)}__{start}__*.parquet"
+    candidates = sorted(
+        p for p in RAW_DIR.glob(pattern) if not p.name.endswith("__history.parquet")
+    )
+    if not candidates:
+        return None
+    # Filenames end in the window's end date, so the last one sorts newest.
+    return pd.read_parquet(candidates[-1])
 
 
 def _flatten(df: pd.DataFrame) -> pd.DataFrame:
@@ -62,10 +107,30 @@ def fetch_symbol(
     than take the whole pipeline down.
     """
     end = end or date.today().isoformat()
-    path = _cache_path(symbol, start, end)
+    path = _history_path(symbol, start)
 
-    if use_cache and path.exists():
-        return pd.read_parquet(path)
+    # The rolling history: whatever is already on disk for this symbol, including a
+    # fixed-window file written before this cache existed.
+    history = pd.DataFrame(columns=["date", *OHLCV])
+    if path.exists():
+        history = pd.read_parquet(path)
+    elif use_cache:
+        adopted = _adopt_legacy_cache(symbol, start)
+        if adopted is not None:
+            history = adopted
+            history.to_parquet(path, index=False)
+
+    have_to = None
+    if len(history) > 0:
+        have_to = pd.to_datetime(history["date"]).max().normalize()
+
+    # Only the sessions after what is already held. `end` is exclusive in yfinance, so a
+    # history reaching yesterday and an `end` of today means there is nothing to ask for.
+    fetch_from = start
+    if have_to is not None:
+        if have_to >= pd.Timestamp(end).normalize() - pd.Timedelta(days=1):
+            return history.reset_index(drop=True)
+        fetch_from = (have_to + pd.Timedelta(days=1)).date().isoformat()
 
     import yfinance as yf  # imported lazily: nothing on the request path needs it
 
@@ -80,7 +145,7 @@ def fetch_symbol(
         try:
             raw = yf.download(
                 fetch_as,
-                start=start,
+                start=fetch_from,
                 end=end,
                 auto_adjust=True,  # split/dividend adjusted; returns are what we model
                 progress=False,
@@ -95,6 +160,13 @@ def fetch_symbol(
             if attempt < len(_BACKOFF_SECONDS):
                 time.sleep(_BACKOFF_SECONDS[attempt])
     else:
+        if len(history) > 0:
+            print(
+                f"    ! {symbol}: could not top up after {_MAX_ATTEMPTS} attempts "
+                f"({last_error}); keeping {len(history):,} cached rows to "
+                f"{str(have_to)[:10]}"
+            )
+            return history.reset_index(drop=True)
         print(f"    ! {symbol}: giving up after {_MAX_ATTEMPTS} attempts ({last_error})")
         return pd.DataFrame(columns=["date", *OHLCV])
 
@@ -107,6 +179,14 @@ def fetch_symbol(
     for c in missing:
         df[c] = pd.NA
     df = df[["date", *OHLCV]].dropna(subset=["close"]).sort_values("date").reset_index(drop=True)
+
+    if len(history) > 0:
+        df = (
+            pd.concat([history, df], ignore_index=True)
+            .drop_duplicates(subset=["date"], keep="last")
+            .sort_values("date")
+            .reset_index(drop=True)
+        )
 
     df.to_parquet(path, index=False)
     return df

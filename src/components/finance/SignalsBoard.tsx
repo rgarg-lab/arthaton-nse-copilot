@@ -44,7 +44,7 @@ function FreshnessNote({ data }: { data: SignalsPayload["data"] }) {
     <p className={stale ? "text-[12px] text-coral" : "text-[12px] text-ink-3"}>
       Latest session in the dataset: {sessionDate(data.last_session)}
       {data.sessions_behind > 0 && ` · ${data.sessions_behind} session(s) behind ${sessionDate(data.as_of)}`}
-      {stale && " — refresh with `make -C ml refresh` before relying on this."}
+      {stale && " — restart with `npm run demo`, which catches the panel up before the model reads it."}
     </p>
   );
 }
