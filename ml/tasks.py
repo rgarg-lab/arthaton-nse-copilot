@@ -54,6 +54,10 @@ TARGETS: dict[str, tuple[str, list[str]]] = {
         "data -> train -> eval -> signals, in order",
         None,  # composite, see run()
     ),
+    "catchup": (
+        "daily: top up prices and rewrite today's signals (never retrains)",
+        None,  # composite, see run()
+    ),
     "serve": (
         "run the FastAPI service on 127.0.0.1:8000",
         [
@@ -87,6 +91,17 @@ TARGETS: dict[str, tuple[str, list[str]]] = {
 }
 
 REFRESH_CHAIN = ["data", "train", "eval", "signals"]
+
+# The daily operation, and deliberately NOT `refresh`.
+#
+# `refresh` retrains and re-evaluates, which would refit a model §6.5 freezes and append a
+# second authoritative read to the holdout ledger — turning the headline accuracy from
+# out-of-sample into nothing at all. Nothing scheduled may ever do that.
+#
+# A catch-up only needs the two steps that have no bearing on the frozen artifacts: top the
+# price history up to today (incremental, so a handful of rows per symbol), then rewrite
+# today's signals from the model that already exists.
+CATCHUP_CHAIN = ["data", "signals"]
 
 
 def print_help() -> int:
@@ -153,11 +168,12 @@ def run_one(name: str) -> int:
 def main(argv: list[str]) -> int:
     targets = argv[1:] or ["help"]
     for name in targets:
-        if name == "refresh":
-            for sub in REFRESH_CHAIN:
+        if name in ("refresh", "catchup"):
+            chain = REFRESH_CHAIN if name == "refresh" else CATCHUP_CHAIN
+            for sub in chain:
                 code = run_one(sub)
                 if code != 0:
-                    print(f"ml/tasks.py: refresh stopped — {sub} exited {code}", file=sys.stderr)
+                    print(f"ml/tasks.py: {name} stopped — {sub} exited {code}", file=sys.stderr)
                     return code
             continue
         code = run_one(name)

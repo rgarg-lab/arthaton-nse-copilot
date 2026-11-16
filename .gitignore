@@ -75,3 +75,5 @@ __pycache__/
 # (§6.1 / §4.3: a fresh clone must run without yfinance cooperating).
 ml/data/raw/
 
+# Scheduled catch-up output; regenerated nightly, never source.
+/ml/data/logs/
