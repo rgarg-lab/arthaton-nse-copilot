@@ -2,9 +2,32 @@
 
 **Most stock tools always have an answer. This one tells you when it doesn't.**
 
-Calibrated next-session direction for a fixed basket of 18 NSE large-caps, with an
-explicit abstention when conviction is low, the closest historical sessions as evidence,
-and a measured track record the assistant will quote against itself.
+Two frozen models over a fixed basket of NSE large-caps, with an explicit abstention when
+conviction is low, the closest historical sessions as evidence, and a measured track record
+the assistant will quote against itself.
+
+**Judging this?** [`SUBMISSION.md`](./SUBMISSION.md) maps each criterion to the file that
+evidences it, and lists what is wrong with the project before you find it.
+
+### What it actually scores
+
+| | measured | on |
+|---|---|---|
+| **Will tomorrow be a big move?** | **60.20%** | the 42–50% of sessions it calls · median of 4 out-of-sample windows, range 58.46–61.64%, ≥60% in 3 of 4 |
+| **Which way will it move?** | **63.06%** | the 16.2% of sessions clearing its frozen gate · walk-forward validation |
+| *the same gate, on the final holdout* | *55.50%* | *7.57 points lower — validation flatters, and the app shows both* |
+| *direction, if forced to call every session* | *51.37%* | *final holdout, read exactly once* |
+
+The first row is the honest headline: **volatility clusters and direction does not**, so a
+model asked "how big?" beats the same features asked "which way?" by a wide margin — and it
+has something to say about nearly half the sessions rather than a tenth.
+
+The last row is the one most projects would bury. Next-session direction on liquid
+large-caps is close to a coin flip, and
+[29 configurations](./ml/experiments/RESULTS.md) failed to beat it. That number is the
+result of the work, not a shortfall in it — the previous version of this project reported
+58.15%, and [one line of splitting code](./README.md#what-i-got-wrong-and-what-this-is-a-reaction-to)
+explains the entire difference.
 
 Submission for **Arthaton 2026** — theme *AI for Finance*, track *Trading and market
 insights*. Solo entry.
