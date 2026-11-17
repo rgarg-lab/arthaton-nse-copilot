@@ -149,6 +149,11 @@ gh repo edit rgarg-lab/arthaton-nse-copilot --visibility public --accept-visibil
 
 ## 6. Deploy — optional, and *not* required for the score
 
+> **The step-by-step version now lives in [`DEPLOY.md`](./DEPLOY.md)**, with the Dockerfile
+> committed at `ml/Dockerfile` and its exact `CMD` verified against this machine. What
+> follows is the reasoning behind the shape of the deployment; `DEPLOY.md` is what to
+> actually run.
+
 **Status:** deliberately not attempted. §4.1 makes this build localhost-only and §9 says
 to score deploy-readiness rather than a live URL. The production build is verified
 (`npm run build` passes) and this is the complete runbook.
