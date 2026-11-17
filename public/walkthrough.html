@@ -1,0 +1,1020 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NSE Copilot — animated walkthrough</title>
+<meta name="description" content="A self-advancing 3D walkthrough of NSE Copilot, built for screen recording. Every figure is read from a committed artifact." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" />
+<style>
+/* ===========================================================================
+   NSE Copilot — animated walkthrough
+   ---------------------------------------------------------------------------
+   A standalone deck, meant to be opened fullscreen and screen-recorded.
+
+   Two things worth knowing before editing:
+
+   1. The stage is a `container-type: size` box locked to 16:9. Every dimension
+      below is in `cqw`/`cqh`, so the deck is identical at 1280x720 and at 4K
+      and the recording never needs a zoom level chosen for it.
+   2. Scenes are real planes in a `perspective` space. They arrive from
+      translateZ(-620px) and leave forward past the camera. That is the "3D" —
+      CSS transforms on composited layers, not a rendered animation.
+
+   Every figure on these slides is copied from a committed artifact under
+   ml/artifacts/ or ml/experiments/RESULTS.md. Nothing here is estimated.
+   =========================================================================== */
+
+:root {
+  --ink:        #050506;
+  --surface-1:  #0c0c0e;
+  --surface-2:  #131316;
+  --line:       rgb(255 255 255 / 11%);
+  --line-strong:rgb(255 255 255 / 26%);
+
+  --ink-1: #f5f5f7;
+  --ink-2: rgb(255 255 255 / 62%);
+  --ink-3: rgb(255 255 255 / 44%);
+  --ink-4: rgb(255 255 255 / 20%);
+
+  --violet:      #a78bfa;
+  --violet-2:    #7565ff;
+  --violet-soft: rgb(167 139 250 / 13%);
+  --violet-line: rgb(167 139 250 / 42%);
+
+  /* The app's --color-positive (#0ca30c) is 2.99:1 on this ground — fine as a
+     fill on a light surface, unreadable as text here. Brighter green for the
+     dark stage; same semantic role. */
+  --green:      #2fd87a;
+  --green-soft: rgb(47 216 122 / 12%);
+  --green-line: rgb(47 216 122 / 40%);
+
+  --coral:      #ff6b6b;
+  --coral-soft: rgb(255 107 107 / 11%);
+  --coral-line: rgb(255 107 107 / 42%);
+
+  /* Reserved for exactly one scene: the validation-optimism tax. */
+  --amber:      #f2b544;
+  --amber-soft: rgb(242 181 68 / 12%);
+  --amber-line: rgb(242 181 68 / 45%);
+
+  --sans: "Inter", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--ink);
+  color: var(--ink-1);
+  font-family: var(--sans);
+  overflow: hidden;
+}
+
+/* --- the letterboxed stage ------------------------------------------------ */
+
+.frame {
+  display: grid;
+  place-items: center;
+  width: 100vw;
+  height: 100vh;
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgb(117 101 255 / 9%), transparent 60%),
+    var(--ink);
+}
+
+.stage {
+  container-type: size;
+  position: relative;
+  width: min(100vw, calc(100vh * 16 / 9));
+  height: min(100vh, calc(100vw * 9 / 16));
+  perspective: 1400px;
+  perspective-origin: 50% 44%;
+  overflow: hidden;
+}
+
+/* An ambient grid, far back in Z, that drifts. It reads as a market terminal
+   floor and gives the Z-translations something to move against — without it
+   a plane flying forward has no parallax reference and looks like a fade. */
+.floor {
+  position: absolute;
+  inset: -30% -30% -60% -30%;
+  transform: rotateX(74deg) translateZ(-240px);
+  transform-origin: 50% 100%;
+  background-image:
+    linear-gradient(to right,  rgb(167 139 250 / 42%) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(167 139 250 / 42%) 1px, transparent 1px);
+  background-size: 7cqw 7cqw;
+  /* Fades out toward the horizon, not toward the viewer — the near edge is the
+     part that has to be visible for the Z-translations to read as depth. */
+  mask-image: linear-gradient(to top, #000 0%, rgb(0 0 0 / 55%) 28%, transparent 62%);
+  animation: floorDrift 24s linear infinite;
+  pointer-events: none;
+}
+@keyframes floorDrift { to { background-position: 0 7cqw; } }
+
+/* --- scenes -------------------------------------------------------------- */
+
+.scene {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  gap: 2.6cqh;
+  padding: 7cqh 8cqw;
+  transform-style: preserve-3d;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateZ(-620px) rotateY(16deg);
+  transition:
+    opacity 760ms var(--ease),
+    transform 980ms var(--ease),
+    visibility 0s linear 980ms;
+}
+.scene.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s, 0s, 0s;
+}
+.scene.is-out {
+  opacity: 0;
+  transform: translateZ(420px) rotateY(-9deg);
+}
+
+/* Children stagger on entry. --i is set in the markup, so the order is
+   authored rather than derived from DOM position. */
+.scene > * {
+  opacity: 0;
+  transform: translateY(2.4cqh);
+  transition: opacity 620ms var(--ease), transform 620ms var(--ease);
+  transition-delay: calc(var(--i, 0) * 110ms);
+}
+.scene.is-active > * { opacity: 1; transform: none; }
+
+/* --- typography ---------------------------------------------------------- */
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 1.45cqh;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--violet);
+}
+.eyebrow .dim { color: var(--ink-4); }
+
+h1 {
+  margin: 0;
+  font-size: 9.4cqh;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 0.94;
+  text-wrap: balance;
+}
+h2 {
+  margin: 0;
+  font-size: 5.6cqh;
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  line-height: 1.04;
+  text-wrap: balance;
+  max-width: 24ch;
+}
+.lede {
+  margin: 0;
+  font-size: 2.5cqh;
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 50ch;
+}
+.lede strong { color: var(--ink-1); font-weight: 500; }
+.note {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 1.55cqh;
+  line-height: 1.6;
+  color: var(--ink-3);
+  max-width: 76ch;
+}
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+.pos { color: var(--green); }
+.neg { color: var(--coral); }
+.warn { color: var(--amber); }
+.acc { color: var(--violet); }
+
+/* --- shared blocks ------------------------------------------------------- */
+
+/* preserve-3d so a .plane inside keeps its own rotation in the stage's 3D
+   space rather than being flattened into the wrapper's plane. */
+.row { display: flex; gap: 2cqw; align-items: flex-end; flex-wrap: wrap; transform-style: preserve-3d; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 4cqw; align-items: center; transform-style: preserve-3d; }
+
+.hero-figure {
+  display: flex;
+  align-items: baseline;
+  gap: 1.1cqw;
+}
+.hero-figure .v {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 17cqh;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 0.82;
+}
+.hero-figure .u {
+  font-family: var(--mono);
+  font-size: 4cqh;
+  font-weight: 400;
+  color: var(--ink-3);
+}
+
+.chips { display: flex; gap: 0.9cqw; flex-wrap: wrap; }
+.chip {
+  font-family: var(--mono);
+  font-size: 1.5cqh;
+  letter-spacing: 0.06em;
+  padding: 0.7cqh 1.1cqw;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink-2);
+  background: var(--surface-1);
+  white-space: nowrap;
+}
+.chip.on-violet { color: var(--violet); border-color: var(--violet-line); background: var(--violet-soft); }
+.chip.on-green  { color: var(--green);  border-color: var(--green-line);  background: var(--green-soft); }
+.chip.on-coral  { color: var(--coral);  border-color: var(--coral-line);  background: var(--coral-soft); }
+.chip.on-amber  { color: var(--amber);  border-color: var(--amber-line);  background: var(--amber-soft); }
+
+/* A plane: the recurring panel primitive. Tilted slightly in Y so it reads as
+   a surface in the space rather than a flat card pasted on the viewport. */
+.plane {
+  background: linear-gradient(160deg, var(--surface-2), var(--surface-1));
+  border: 1px solid var(--line);
+  border-radius: 1.4cqh;
+  padding: 3cqh 2.6cqw;
+  box-shadow: 0 2.6cqh 6cqh rgb(0 0 0 / 55%);
+  transform: rotateY(-7deg) rotateX(2deg);
+  transform-style: preserve-3d;
+}
+.plane.flat { transform: none; }
+
+/* --- data: the 3D bar field (scene: the honest result) ------------------- */
+
+/* Bars are drawn from zero at a fixed 0.52cqh per accuracy point, so the
+   near-equal heights are the honest picture — these numbers really are that
+   close together. The padding-bottom reserves the key-label row inside the
+   flex box, otherwise the labels overlap whatever follows the chart. */
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3.4cqw;
+  /* border-box: 44 total − 8 padding = 36cqh of drawing room, which clears the
+     tallest bar (30.23cqh) plus its value label. */
+  position: relative;
+  height: 44cqh;
+  padding-left: 1cqw;
+  padding-bottom: 8cqh;
+  transform: rotateY(-15deg) rotateX(5deg);
+  transform-style: preserve-3d;
+}
+/* --h and --c are declared on .bar, not on .col: .v and .coinflip are siblings
+   of .col and need to read --h too. Declared on the child, their calc() is
+   invalid at computed-value time and `bottom` silently resolves to auto. */
+.bar { position: relative; width: 7cqw; height: var(--h); transform-style: preserve-3d; }
+.bar .col {
+  position: relative;
+  height: 100%;
+  background: linear-gradient(180deg, var(--c), color-mix(in oklab, var(--c) 55%, #000));
+  border-radius: 0.5cqh 0.5cqh 0 0;
+  transform-style: preserve-3d;
+  transform-origin: 50% 100%;
+  transform: scaleY(0);
+  transition: transform 900ms var(--ease);
+  transition-delay: calc(260ms + var(--i, 0) * 150ms);
+}
+.scene.is-active .bar .col { transform: scaleY(1); }
+/* The extruded right face — this is what makes them solids, not rectangles. */
+.bar .col::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 1.5cqw;
+  background: color-mix(in oklab, var(--c) 34%, #000);
+  transform: rotateY(90deg);
+  transform-origin: 100% 50%;
+}
+.bar .col::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 1.5cqw;
+  background: color-mix(in oklab, var(--c) 78%, #fff);
+  transform: rotateX(90deg);
+  transform-origin: 50% 0%;
+}
+.bar .v {
+  position: absolute;
+  bottom: calc(100% + 1.4cqh);
+  left: 0;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 2.3cqh;
+  font-weight: 700;
+  color: var(--ink-1);
+  white-space: nowrap;
+}
+.bar .k {
+  position: absolute;
+  top: calc(100% + 1.2cqh);
+  left: 0;
+  width: 10cqw;
+  font-size: 1.5cqh;
+  line-height: 1.35;
+  color: var(--ink-3);
+}
+/* The coin-flip reference. A 50% line is the only thing that makes these
+   numbers mean anything, so it is drawn, not described. */
+.coinflip {
+  position: absolute;
+  left: -1cqw; right: -3cqw;
+  bottom: var(--at);
+  border-top: 1px dashed var(--line-strong);
+  pointer-events: none;
+}
+/* Below the line, not above it: above collides with the tallest value label. */
+.coinflip span {
+  position: absolute;
+  right: 0;
+  top: 0.7cqh;
+  font-family: var(--mono);
+  font-size: 1.35cqh;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+}
+
+/* --- data: receding planes (the leak post-mortem) ----------------------- */
+
+.deck { display: grid; gap: 1.5cqh; transform-style: preserve-3d; }
+.deck-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 2.4cqw;
+  padding: 2.2cqh 2.2cqw;
+  border: 1px solid var(--line);
+  border-radius: 1cqh;
+  background: var(--surface-1);
+  transform: rotateY(-11deg) translateZ(calc(var(--z, 0) * 1px));
+}
+.deck-row .lbl { font-size: 2cqh; color: var(--ink-2); }
+.deck-row .a {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 3cqh;
+  font-weight: 700;
+}
+/* An index is not a figure. Same column, deliberately quieter, so the row's
+   statement stays the thing you read first. */
+.deck-row .a.idx { font-size: 1.8cqh; font-weight: 500; color: var(--ink-4); }
+.deck-row .b {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.7cqh;
+  color: var(--ink-3);
+  width: 16ch;
+  text-align: right;
+}
+.deck-row.culprit {
+  border-color: var(--coral-line);
+  background: linear-gradient(100deg, var(--coral-soft), var(--surface-1));
+  box-shadow: 0 0 0 1px var(--coral-line), 0 2cqh 5cqh rgb(255 107 107 / 12%);
+}
+.deck-row.culprit .lbl { color: var(--ink-1); }
+
+/* --- data: the gate ----------------------------------------------------- */
+
+.gate { position: relative; height: 26cqh; transform-style: preserve-3d; transform: rotateX(8deg); }
+.gate-track {
+  position: absolute;
+  inset: auto 0 6cqh 0;
+  height: 1.1cqh;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--surface-2), var(--violet-soft));
+  border: 1px solid var(--line);
+}
+/* The axis is SESSION SHARE, not probability — every holdout session ordered by
+   confidence, left to right. So the split sits at 89.8%/10.2% and the band
+   widths are the percentages they are labelled with. Putting the divider at the
+   gate's 0.60 instead would draw a 40%-wide band for 10.2% of sessions. */
+.gate-line {
+  position: absolute;
+  left: 89.8%;
+  bottom: 3cqh;
+  width: 2px;
+  height: 20cqh;
+  background: linear-gradient(180deg, transparent, var(--violet));
+}
+.gate-line b {
+  position: absolute;
+  top: -0.4cqh;
+  right: 1cqw;              /* left of the line: at 89.8% there is no room right */
+  font-family: var(--mono);
+  font-size: 1.6cqh;
+  font-weight: 500;
+  color: var(--violet);
+  white-space: nowrap;
+}
+.gate-zone {
+  position: absolute;
+  bottom: 6cqh;
+  height: 10cqh;
+  border-radius: 0.6cqh;
+}
+.gate-zone.silent { left: 0; width: 89.8%; background: repeating-linear-gradient(135deg, rgb(255 255 255 / 4%) 0 6px, transparent 6px 12px); }
+.gate-zone.calls  { left: 89.8%; right: 0; background: var(--violet-soft); border: 1px solid var(--violet-line); }
+.gate-zone span {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--mono);
+  font-size: 1.5cqh;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+/* The calls band is only 10.2% wide — its label cannot sit inside it. */
+.gate-zone.calls span { color: var(--violet); top: calc(100% + 1.6cqh); left: auto; right: 0; transform: none; }
+.gate-axis {
+  position: absolute;
+  inset: auto 0 0 0;
+  font-family: var(--mono);
+  font-size: 1.35cqh;
+  letter-spacing: 0.1em;
+  color: var(--ink-4);
+}
+
+/* --- data: the range beam (magnitude head) ------------------------------ */
+
+.beam { position: relative; height: 16cqh; transform: rotateY(-10deg) rotateX(6deg); transform-style: preserve-3d; }
+.beam-band {
+  position: absolute;
+  top: 5cqh;
+  left: var(--from); right: calc(100% - var(--to));
+  height: 4cqh;
+  border-radius: 0.5cqh;
+  background: linear-gradient(90deg, var(--green-soft), rgb(47 216 122 / 26%));
+  border: 1px solid var(--green-line);
+}
+.beam-median { position: absolute; top: 2.4cqh; left: var(--at); width: 2px; height: 9.2cqh; background: var(--green); }
+.beam-median b {
+  position: absolute;
+  bottom: calc(100% + 0.8cqh);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 2.6cqh;
+  font-weight: 700;
+  color: var(--green);
+  white-space: nowrap;
+}
+.beam-tick { position: absolute; top: 9.6cqh; font-family: var(--mono); font-size: 1.5cqh; color: var(--ink-3); transform: translateX(-50%); }
+.beam-60 { position: absolute; top: 1.6cqh; left: var(--at); width: 1px; height: 11cqh; border-left: 1px dashed var(--line-strong); }
+.beam-60 b {
+  position: absolute;
+  top: calc(100% + 0.6cqh);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 1.35cqh;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+/* --- data: the ledger stamp -------------------------------------------- */
+
+.stamp {
+  display: inline-grid;
+  gap: 2.2cqh;
+  justify-items: center;
+  padding: 3cqh 3.4cqw;
+  border: 2px solid var(--green-line);
+  border-radius: 1.2cqh;
+  background: var(--green-soft);
+  transform: rotateY(-9deg) rotate(-2.2deg);
+}
+/* line-height below ~1 clips the box inside the glyph and the caption rides up
+   into the digit — the grid gap is measured from the box, not the ink. */
+.stamp .n { font-family: var(--mono); font-size: 11cqh; font-weight: 700; line-height: 1; color: var(--green); }
+.stamp .t { font-family: var(--mono); font-size: 1.5cqh; letter-spacing: 0.2em; text-transform: uppercase; color: var(--green); }
+
+/* --- data: the stack list ---------------------------------------------- */
+
+.stack { display: grid; gap: 1.1cqh; }
+.stack-item {
+  display: grid;
+  grid-template-columns: 13cqw 1fr;
+  gap: 2cqw;
+  align-items: baseline;
+  padding-bottom: 1.1cqh;
+  border-bottom: 1px solid var(--line);
+}
+.stack-item dt { font-family: var(--mono); font-size: 1.5cqh; letter-spacing: 0.1em; text-transform: uppercase; color: var(--violet); }
+.stack-item dd { margin: 0; font-size: 1.95cqh; color: var(--ink-2); line-height: 1.4; }
+.stack-item dd b { color: var(--ink-1); font-weight: 500; }
+
+/* --- the title card ----------------------------------------------------- */
+
+.title-card { align-content: center; justify-items: start; }
+.wordmark { display: grid; gap: 1.4cqh; }
+.wordmark .sub {
+  font-family: var(--mono);
+  font-size: 1.8cqh;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.thesis {
+  font-size: 3.1cqh;
+  font-weight: 300;
+  line-height: 1.42;
+  color: var(--ink-2);
+  max-width: 44ch;
+  margin: 0;
+  border-left: 2px solid var(--violet);
+  padding-left: 2cqw;
+}
+.thesis b { color: var(--ink-1); font-weight: 600; }
+
+/* --- chrome: progress rail + controls ---------------------------------- */
+
+.rail {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: 1.6cqw;
+  padding: 2.2cqh 8cqw;
+  font-family: var(--mono);
+  font-size: 1.35cqh;
+  color: var(--ink-3);
+  z-index: 5;
+}
+.rail .chapter { letter-spacing: 0.16em; text-transform: uppercase; white-space: nowrap; }
+.rail .ticks { display: flex; gap: 0.5cqw; flex: 1; }
+.rail .tick { flex: 1; height: 2px; background: var(--ink-4); border-radius: 2px; }
+.rail .tick.done { background: var(--ink-2); }
+.rail .tick.now { background: var(--violet); box-shadow: 0 0 1.4cqh var(--violet-line); }
+.rail .keys { letter-spacing: 0.1em; white-space: nowrap; color: var(--ink-4); }
+
+/* The start gate. Also serves a practical purpose: it waits for the webfonts,
+   so a recording never catches a font swap between the first two scenes. */
+.start {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-content: center;
+  gap: 2.4cqh;
+  justify-items: center;
+  text-align: center;
+  background: rgb(5 5 6 / 86%);
+  backdrop-filter: blur(6px);
+  transition: opacity 500ms var(--ease), visibility 0s linear 500ms;
+}
+.start.gone { opacity: 0; visibility: hidden; pointer-events: none; }
+.start h2 { font-size: 4.2cqh; max-width: none; }
+.start p { margin: 0; font-size: 2cqh; color: var(--ink-2); max-width: 54ch; line-height: 1.55; }
+.start .hint { font-family: var(--mono); font-size: 1.5cqh; color: var(--ink-3); line-height: 1.8; }
+.start button {
+  font-family: var(--mono);
+  font-size: 1.9cqh;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 1.6cqh 3.4cqw;
+  border-radius: 999px;
+  border: 1px solid var(--violet-line);
+  background: var(--violet-soft);
+  color: var(--ink-1);
+  cursor: pointer;
+  transition: background 200ms, border-color 200ms, transform 200ms;
+}
+.start button:hover:not(:disabled) { background: rgb(167 139 250 / 22%); border-color: var(--violet); transform: translateY(-2px); }
+.start button:disabled { opacity: 0.45; cursor: progress; }
+.start button:focus-visible,
+.stage:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; }
+
+.paused {
+  position: absolute;
+  top: 3cqh; right: 8cqw;
+  z-index: 6;
+  font-family: var(--mono);
+  font-size: 1.4cqh;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--amber);
+  opacity: 0;
+  transition: opacity 240ms;
+}
+.paused.on { opacity: 1; }
+
+/* --- reduced motion ----------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .scene { transform: none; transition: opacity 300ms linear, visibility 0s linear 300ms; }
+  .scene.is-out { transform: none; }
+  .scene > * { transform: none; transition: opacity 240ms linear; transition-delay: 0s; }
+  .floor { animation: none; }
+  .bar .col { transform: scaleY(1); transition: none; }
+  .plane, .bars, .deck-row, .beam, .gate, .stamp { transform: none; }
+}
+
+/* Below this the cqh type scale stops being legible on a phone; the deck is a
+   recording surface, so say so rather than reflowing it into something else. */
+@media (max-width: 640px) {
+  .small-screen { display: grid; }
+  .frame { display: none; }
+}
+.small-screen {
+  display: none;
+  place-content: center;
+  gap: 16px;
+  padding: 32px;
+  height: 100vh;
+  text-align: center;
+}
+.small-screen p { color: var(--ink-2); font-size: 15px; line-height: 1.6; margin: 0; }
+.small-screen code { font-family: var(--mono); color: var(--violet); }
+</style>
+</head>
+<body>
+
+<div class="small-screen">
+  <h2>Open this on a desktop</h2>
+  <p>This deck is a 16:9 recording surface — it is built to be opened fullscreen on a laptop and screen-recorded, not read on a phone.</p>
+  <p>The same figures, in text: <code>SUBMISSION.md</code></p>
+</div>
+
+<div class="frame">
+<main class="stage" id="stage" tabindex="0" aria-label="NSE Copilot walkthrough">
+  <div class="floor" aria-hidden="true"></div>
+
+  <!-- 1 · title ---------------------------------------------------------- -->
+  <section class="scene title-card" data-chapter="Title" data-dur="11000">
+    <div class="wordmark" style="--i:0">
+      <div class="eyebrow">Arthaton 2026 <span class="dim">/</span> AI for Finance <span class="dim">/</span> Trading &amp; market insights</div>
+      <h1>NSE&nbsp;Copilot</h1>
+      <div class="sub">A market model that tells you when it doesn't know</div>
+    </div>
+    <p class="thesis" style="--i:1">Every other stock tool always has an answer. This one <b>abstains</b> — and backs the refusal with numbers it measured on itself.</p>
+  </section>
+
+  <!-- 2 · the user ------------------------------------------------------- -->
+  <section class="scene" data-chapter="The user" data-dur="14000">
+    <div class="eyebrow" style="--i:0">Who it is for</div>
+    <h2 style="--i:1">One person, one decision.</h2>
+    <p class="lede" style="--i:2">A salaried investor holding <strong>₹2–5 lakh</strong> across <strong>6–8 NSE large-caps</strong>, checking in weekly, asking one question: <strong>is today a day to act, or a day to wait?</strong></p>
+    <div class="chips" style="--i:3">
+      <span class="chip on-coral">not intraday</span>
+      <span class="chip on-coral">not a tip service</span>
+      <span class="chip on-coral">no execution</span>
+      <span class="chip on-coral">not advice</span>
+      <span class="chip on-coral">no price targets</span>
+    </div>
+    <p class="note" style="--i:4">MODEL_CARD.md §1 — naming the limits is what makes the remaining claim usable.</p>
+  </section>
+
+  <!-- 3 · the data ------------------------------------------------------- -->
+  <section class="scene" data-chapter="The data" data-dur="14000">
+    <div class="eyebrow" style="--i:0">What it learns from</div>
+    <h2 style="--i:1">49,759 sessions of NSE large-caps.</h2>
+    <div class="row" style="--i:2">
+      <div class="plane">
+        <div class="stack">
+          <div class="stack-item"><dt>Universe</dt><dd><b>17</b> names — one of 18 refused by the source, named in <code>universe_missing</code></dd></div>
+          <div class="stack-item"><dt>Rows</dt><dd><b>49,759</b> daily sessions in the panel</dd></div>
+          <div class="stack-item"><dt>Features</dt><dd><b>58</b>, every one scale-free — ratios, z-scores and ranks, never a raw rupee price</dd></div>
+          <div class="stack-item"><dt>Holdout</dt><dd><b>5,729</b> rows carved off at the start and not touched again</dd></div>
+        </div>
+      </div>
+    </div>
+    <p class="note" style="--i:3">Scale-free on purpose: a model given raw closes learns the ticker, not the market.</p>
+  </section>
+
+  <!-- 4 · the method ----------------------------------------------------- -->
+  <section class="scene" data-chapter="The method" data-dur="15000">
+    <div class="eyebrow" style="--i:0">How it is validated</div>
+    <h2 style="--i:1">Purged walk-forward, with a 5-session embargo.</h2>
+    <div class="deck" style="--i:2">
+      <div class="deck-row" style="--z:40"><span class="lbl">Splits are by <b>date</b>, never by row</span><span class="a idx">1</span><span class="b">no session straddles</span></div>
+      <div class="deck-row" style="--z:20"><span class="lbl">A <b>5-session embargo</b> between train and test</span><span class="a idx">2</span><span class="b">label horizon purged</span></div>
+      <div class="deck-row" style="--z:0"><span class="lbl">Folds <b>1–3 select</b>; fold <b>4 confirms</b></span><span class="a idx">3</span><span class="b">search can't see the judge</span></div>
+      <div class="deck-row" style="--z:-20"><span class="lbl">The final holdout is read <b>exactly once, ever</b></span><span class="a idx">4</span><span class="b">ledgered, hash-checked</span></div>
+    </div>
+    <p class="note" style="--i:3">The selection/confirmation split is the part that earns the rest. A search harness raises on any frame that reaches the holdout start date — <code>ml/experiments/search.py</code>.</p>
+  </section>
+
+  <!-- 5 · the honest result ---------------------------------------------- -->
+  <section class="scene" data-chapter="The result" data-dur="17000">
+    <div class="eyebrow" style="--i:0">Direction, every session, final holdout</div>
+    <div class="cols" style="--i:1">
+      <div>
+        <div class="bars">
+          <div class="coinflip" style="--at:34cqh"><span>COIN FLIP · 50%</span></div>
+          <div class="bar" style="--i:0;--h:26.71cqh;--c:var(--violet)"><div class="col"></div><span class="v acc">51.37%</span><span class="k">this model</span></div>
+          <div class="bar" style="--i:1;--h:25.43cqh;--c:#4a4a52"><div class="col"></div><span class="v">48.91%</span><span class="k">always&nbsp;up</span></div>
+          <div class="bar" style="--i:2;--h:25.24cqh;--c:#4a4a52"><div class="col"></div><span class="v">48.54%</span><span class="k">repeat yesterday</span></div>
+          <div class="bar" style="--i:3;--h:25.26cqh;--c:#4a4a52"><div class="col"></div><span class="v">48.58%</span><span class="k">plain logistic</span></div>
+        </div>
+      </div>
+      <div>
+        <h2 style="margin-bottom:2.4cqh">Next-session direction is close to a coin flip, and the honest number says so.</h2>
+        <div class="chips">
+          <span class="chip">AUC <b class="num">0.5254</b></span>
+          <span class="chip">Brier <b class="num">0.2507</b></span>
+          <span class="chip">ECE <b class="num">0.0307</b></span>
+          <span class="chip">R² <b class="num">−0.0011</b></span>
+        </div>
+      </div>
+    </div>
+    <p class="note" style="--i:2">+2.5 points over the best naive baseline. Small, real, and the only version of this number that survived 29 configurations.</p>
+  </section>
+
+  <!-- 6 · the leak post-mortem ------------------------------------------- -->
+  <section class="scene" data-chapter="Post-mortem" data-dur="19000">
+    <div class="eyebrow" style="--i:0">Why the earlier version reported 58%</div>
+    <h2 style="--i:1">I reproduced my own leak to find out which part was lying.</h2>
+    <div class="deck" style="--i:2">
+      <div class="deck-row" style="--z:30"><span class="lbl">Honest — date split, no raw prices</span><span class="a">55.03%</span><span class="b">@0.70 → 63.46%</span></div>
+      <div class="deck-row" style="--z:10"><span class="lbl">+ raw prices and 30 close lags</span><span class="a">54.64%</span><span class="b">@0.70 → 61.39%</span></div>
+      <div class="deck-row culprit" style="--z:-10"><span class="lbl">+ a <b>row-wise random split</b></span><span class="a neg">64.23%</span><span class="b">@0.70 → 82.78%</span></div>
+    </div>
+    <p class="lede" style="--i:3">The random split was worth <strong class="neg">+9.2 points on its own</strong>. The raw price features that everyone blames were worth <strong>nothing</strong> — they made it slightly <em>worse</em>.</p>
+    <p class="note" style="--i:4"><code>ml/experiments/why_58.py</code> reruns all three. The README originally blamed the price features; that was wrong, and it has been corrected.</p>
+  </section>
+
+  <!-- 7 · abstention ----------------------------------------------------- -->
+  <section class="scene" data-chapter="Abstention" data-dur="17000">
+    <div class="eyebrow" style="--i:0">What it does with a coin flip</div>
+    <h2 style="--i:1">It refuses — and the API omits the field entirely.</h2>
+    <div class="gate" style="--i:2" aria-hidden="true">
+      <div class="gate-zone silent"><span>abstains · 89.8% of sessions</span></div>
+      <div class="gate-zone calls"><span>calls · 10.2%</span></div>
+      <div class="gate-track"></div>
+      <div class="gate-line"><b>frozen gate · 0.60</b></div>
+      <div class="gate-axis">5,729 holdout sessions, ordered by confidence →</div>
+    </div>
+    <div class="chips" style="--i:3">
+      <span class="chip on-violet">coverage <b class="num">10.2%</b></span>
+      <span class="chip on-green">accuracy on calls <b class="num">55.50%</b></span>
+      <span class="chip on-coral">today: <b class="num">0</b> of 17 called on direction</span>
+    </div>
+    <p class="note" style="--i:4">Below the gate the response has no <code>direction</code> key, so a client cannot render a call it was never given. A Python test, the rules layer and a browser test each enforce that independently. A board of refusals is the product working.</p>
+  </section>
+
+  <!-- 8 · the validation-optimism tax ------------------------------------ -->
+  <section class="scene" data-chapter="The tax" data-dur="17000">
+    <div class="eyebrow" style="--i:0">The number I am not putting at the top of the page</div>
+    <h2 style="--i:1">Validation said 63.06%. The holdout said 55.50%.</h2>
+    <div class="row" style="--i:2">
+      <div class="plane">
+        <div class="stack">
+          <div class="stack-item"><dt>Validation</dt><dd><b class="num">63.06%</b> above the gate, 16.2% coverage — walk-forward, the number a search optimises</dd></div>
+          <div class="stack-item"><dt>Holdout</dt><dd><b class="num">55.50%</b> above the same frozen gate — the number that is true</dd></div>
+          <div class="stack-item"><dt>The gap</dt><dd><b class="num warn">7.57 points</b> of validation optimism, printed beside the figure everywhere it appears</dd></div>
+        </div>
+      </div>
+    </div>
+    <p class="note" style="--i:3">Measured again across the 29 searched configurations: a 2.6–4.6 point tax even with the selection folds walled off. <code>confidence_tiers.json</code> cannot be written without this block.</p>
+  </section>
+
+  <!-- 9 · the second question -------------------------------------------- -->
+  <section class="scene" data-chapter="Magnitude" data-dur="18000">
+    <div class="eyebrow" style="--i:0">So ask a question it can actually answer</div>
+    <h2 style="--i:1">Not <em>which way</em> — <em>how big</em>.</h2>
+    <p class="lede" style="--i:2">A second frozen model, one question: <strong>will tomorrow's move be bigger or quieter than this name's recent normal?</strong></p>
+    <div class="beam" style="--i:3" aria-hidden="true">
+      <!-- One linear axis at 20.126% per accuracy point: 58.46%→12%, 61.64%→76%.
+           The median and the 60% reference are placed on that same scale. -->
+      <div class="beam-band" style="--from:12%;--to:76%"></div>
+      <div class="beam-60" style="--at:43%"><b>60%</b></div>
+      <div class="beam-median" style="--at:47%"><b>60.20%</b></div>
+      <div class="beam-tick" style="left:12%">58.46%</div>
+      <div class="beam-tick" style="left:76%">61.64%</div>
+    </div>
+    <div class="chips" style="--i:4">
+      <span class="chip on-green">median of 4 windows <b class="num">60.20%</b></span>
+      <span class="chip on-green">≥60% in <b class="num">3 of 4</b></span>
+      <span class="chip">spread <b class="num">3.18 pts</b></span>
+      <span class="chip">covers <b class="num">42–50%</b> of sessions</span>
+    </div>
+    <p class="note" style="--i:5">Stated with its weakness: this head has <b>never touched the final holdout</b> — its evidence is stability across four walk-forward windows, which is weaker than a holdout read, and <code>magnitude_metrics.json</code> says so.</p>
+  </section>
+
+  <!-- 10 · regimes -------------------------------------------------------- -->
+  <section class="scene" data-chapter="Regimes" data-dur="15000">
+    <div class="eyebrow" style="--i:0">Where it is worse than a coin flip</div>
+    <h2 style="--i:1">On screen, not in a footnote.</h2>
+    <div class="cols" style="--i:2">
+      <div class="bars">
+        <div class="coinflip" style="--at:34cqh"><span>COIN FLIP · 50%</span></div>
+        <div class="bar" style="--i:0;--h:26.27cqh;--c:#4a4a52"><div class="col"></div><span class="v">50.51%</span><span class="k">calm tercile</span></div>
+        <div class="bar" style="--i:1;--h:25.05cqh;--c:var(--coral)"><div class="col"></div><span class="v neg">48.18%</span><span class="k">normal tercile</span></div>
+        <div class="bar" style="--i:2;--h:30.23cqh;--c:var(--green)"><div class="col"></div><span class="v pos">58.13%</span><span class="k">stressed tercile</span></div>
+      </div>
+      <div>
+        <p class="lede">The edge lives almost entirely in <strong>stressed</strong> volatility. In the normal tercile the model is <strong class="neg">below a coin flip</strong> — and the dashboard renders that in red rather than hiding it in an average.</p>
+        <p class="note" style="margin-top:2.4cqh">Same on individual names: <b>four of seventeen</b> are below 50% on their own holdout slice, and each card says so.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 · the stack ------------------------------------------------------ -->
+  <section class="scene" data-chapter="The build" data-dur="16000">
+    <div class="eyebrow" style="--i:0">What it is made of</div>
+    <h2 style="--i:1">Two frozen models, twelve tools, one rule.</h2>
+    <div class="plane flat" style="--i:2">
+      <div class="stack">
+        <div class="stack-item"><dt>Direction</dt><dd>Pooled <b>LightGBM</b> + <b>isotonic calibration</b>, purged walk-forward, 58 features</dd></div>
+        <div class="stack-item"><dt>Magnitude</dt><dd>A second frozen model on whether the move exceeds recent normal</dd></div>
+        <div class="stack-item"><dt>Agent</dt><dd><b>Gemini 2.5 Flash</b>, 12 tools — every number it says comes from a tool call</dd></div>
+        <div class="stack-item"><dt>Rules</dt><dd>Independently blocks a directional claim with <b>no model call behind it</b></dd></div>
+        <div class="stack-item"><dt>Sentiment</dt><dd><b>FinBERT</b> on headlines, ported from the earlier project</dd></div>
+        <div class="stack-item"><dt>App</dt><dd>Next.js 16 · React 19 · Drizzle + Postgres · FastAPI model service</dd></div>
+      </div>
+    </div>
+    <p class="note" style="--i:3">The request path does no fitting and no fetching. The scheduled job that touches data runs <code>catchup</code>, which can never call <code>train</code> or <code>eval</code>.</p>
+  </section>
+
+  <!-- 12 · the guarantee -------------------------------------------------- -->
+  <section class="scene" data-chapter="The guarantee" data-dur="16000">
+    <div class="eyebrow" style="--i:0">The claim that makes the rest checkable</div>
+    <div class="cols" style="--i:1">
+      <div><div class="stamp"><span class="n">1</span><span class="t">authoritative holdout read</span></div></div>
+      <div>
+        <h2 style="margin-bottom:2.4cqh">Read once, ever — and three things fail if that stops being true.</h2>
+        <div class="chips">
+          <span class="chip on-green">ledger with content hashes</span>
+          <span class="chip on-green"><code>test_artifacts.py</code> fails on a second read</span>
+          <span class="chip on-green"><code>npm run preflight</code> checks it at runtime</span>
+        </div>
+        <p class="note" style="margin-top:2.4cqh">Plus <b>238</b> TypeScript tests, <b>104</b> Python tests, <b>7</b> browser tests — and a test that fails the build if any figure in the prose disagrees with the artifact it came from.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 · close ---------------------------------------------------------- -->
+  <section class="scene title-card" data-chapter="End" data-dur="15000">
+    <div class="eyebrow" style="--i:0">NSE Copilot <span class="dim">/</span> Arthaton 2026</div>
+    <h1 style="--i:1;font-size:7.2cqh;max-width:34ch">The useful part isn't the <span class="acc">51.37%</span>.<br />It's that the number is the real one.</h1>
+    <p class="lede" style="--i:2">Historical and paper data only — there is no broker path anywhere in the codebase. Every figure in this deck is read from a committed artifact, and <strong>29 configurations that failed are still in the repository.</strong></p>
+    <div class="chips" style="--i:3">
+      <span class="chip on-violet">github.com/rgarg-lab/arthaton-nse-copilot</span>
+      <span class="chip">SUBMISSION.md</span>
+      <span class="chip">MODEL_CARD.md</span>
+      <span class="chip">ml/experiments/RESULTS.md</span>
+    </div>
+  </section>
+
+  <!-- chrome ------------------------------------------------------------- -->
+  <div class="paused" id="pausedFlag">paused</div>
+
+  <footer class="rail">
+    <span class="chapter" id="railChapter">Title</span>
+    <span class="ticks" id="railTicks"></span>
+    <span class="keys">space play/pause · ←→ step · f fullscreen</span>
+  </footer>
+
+  <div class="start" id="start">
+    <h2>A walkthrough built to be recorded</h2>
+    <p>Thirteen scenes, about three and a half minutes, advancing on their own. Press <b>f</b> for fullscreen, start your screen recorder, then press Start.</p>
+    <button id="startBtn" type="button" disabled>Loading fonts…</button>
+    <p class="hint">space — pause and hold a scene for narration<br />← → — step back and forward</p>
+  </div>
+</main>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const stage   = document.getElementById("stage");
+  const scenes  = Array.from(stage.querySelectorAll(".scene"));
+  const ticksEl = document.getElementById("railTicks");
+  const chapEl  = document.getElementById("railChapter");
+  const startEl = document.getElementById("start");
+  const startBtn= document.getElementById("startBtn");
+  const pausedEl= document.getElementById("pausedFlag");
+
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // One tick per scene, so the rail says how much is left without a timer.
+  const ticks = scenes.map(() => {
+    const t = document.createElement("span");
+    t.className = "tick";
+    ticksEl.append(t);
+    return t;
+  });
+
+  let index = -1;
+  let timer = null;
+  let paused = false;
+  let started = false;
+
+  function show(next) {
+    if (next < 0 || next >= scenes.length) return;
+    if (index >= 0) {
+      const prev = scenes[index];
+      prev.classList.remove("is-active");
+      prev.classList.add("is-out");
+      // Park it back behind the camera once it has flown past, so stepping
+      // backwards re-enters from depth rather than from nowhere.
+      setTimeout(() => prev.classList.remove("is-out"), 1000);
+    }
+    index = next;
+    const scene = scenes[index];
+    scene.classList.remove("is-out");
+    // Force a frame so the enter transition runs even on an immediate re-show.
+    void scene.offsetWidth;
+    scene.classList.add("is-active");
+
+    chapEl.textContent = scene.dataset.chapter || "";
+    ticks.forEach((t, i) => {
+      t.classList.toggle("done", i < index);
+      t.classList.toggle("now", i === index);
+    });
+
+    schedule();
+  }
+
+  function schedule() {
+    clearTimeout(timer);
+    if (paused || index < 0) return;
+    if (index === scenes.length - 1) return;   // hold the closing card
+    const dur = Number(scenes[index].dataset.dur) || 14000;
+    timer = setTimeout(() => show(index + 1), reduced ? Math.min(dur, 9000) : dur);
+  }
+
+  function setPaused(value) {
+    paused = value;
+    pausedEl.classList.toggle("on", paused);
+    if (paused) clearTimeout(timer); else schedule();
+  }
+
+  function step(delta) {
+    const next = index + delta;
+    if (next < 0 || next >= scenes.length) return;
+    setPaused(true);          // a manual step means the operator is driving
+    show(next);
+  }
+
+  function begin() {
+    if (started) return;
+    started = true;
+    startEl.classList.add("gone");
+    stage.focus();
+    show(0);
+  }
+
+  startBtn.addEventListener("click", begin);
+
+  addEventListener("keydown", (event) => {
+    if (event.key === "f" || event.key === "F") {
+      event.preventDefault();
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen?.();
+      return;
+    }
+    if (!started) {
+      if (event.key === " " || event.key === "Enter") { event.preventDefault(); begin(); }
+      return;
+    }
+    if (event.key === " ") { event.preventDefault(); setPaused(!paused); }
+    else if (event.key === "ArrowRight") { event.preventDefault(); step(1); }
+    else if (event.key === "ArrowLeft")  { event.preventDefault(); step(-1); }
+  });
+
+  // Gate Start on the webfonts. A font swap caught between scene 1 and scene 2
+  // is the one defect a re-record cannot fix, and this removes it.
+  const ready = document.fonts ? document.fonts.ready : Promise.resolve();
+  const enable = () => { startBtn.disabled = false; startBtn.textContent = "Start walkthrough"; };
+  ready.then(enable);
+  // Google Fonts can be unreachable (offline, or a blocked network). Fall back
+  // to the system stack rather than leaving the button dead.
+  setTimeout(enable, 3000);
+})();
+</script>
+</body>
+</html>

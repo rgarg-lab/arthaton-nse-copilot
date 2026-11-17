@@ -738,3 +738,42 @@ Re-run in full at `9211387`, the tip after the 90-point rounds — including mig
 | ML service | ✅ `status: ok`, 49,776 rows, `trains_on_request: false` |
 | `/metrics` | ✅ accuracy `0.513702`, `headline_authoritative: true`, **1 authoritative holdout read** |
 | paper trading | ✅ realistic scenario `0.100756` over 337 sessions |
+
+---
+
+## 2026-11-17 · `public/walkthrough.html` — the animated walkthrough deck
+
+**Mine (specified), generated code.** Asked for "a 3D animated video going through the
+whole project". I cannot render a video file — no engine, no renderer, no MP4 out — so
+what this is instead is the thing you *record*: a self-advancing 13-scene deck in a
+`perspective` space, locked to 16:9, paced for a screen capture. The "3D" is real CSS
+transforms on composited planes, not a rendered animation.
+
+Decisions worth keeping:
+
+- **The stage is a `container-type: size` box** and every dimension is `cqw`/`cqh`, so the
+  deck is identical at 720p and 4K and the recording needs no chosen zoom level.
+- **Start is gated on `document.fonts.ready`** (with a 3s fallback for an offline
+  machine). A font swap caught between scene 1 and 2 is the one defect a re-record
+  cannot fix.
+- **Figures are transcribed from the artifacts, then verified against them.** Every number
+  was re-read from `metrics.json`, `confidence_tiers.json`, `magnitude_metrics.json`,
+  `holdout_ledger.json` and `latest_signals.json` before commit.
+
+Three defects I introduced and fixed, all found by screenshotting rather than by reading
+the source:
+
+1. **`--h` was declared on `.col` but read by its sibling `.v`** — the `calc()` is invalid
+   at computed-value time, `bottom` silently resolved to `auto`, and every bar's value
+   label collapsed onto its key label. Moved the custom properties up to `.bar`.
+2. **The magnitude range beam put 60.20% and the 60% reference at the wrong x.** On the
+   axis the band establishes (20.126% per point) they belong at 47% and 43%, not 51% and
+   40%. A mispositioned median on a linear axis is the exact failure this project exists
+   to avoid.
+3. **The abstention chart drew the "calls" band at 40% of the width for 10.2% of
+   sessions** — probability on one scale, coverage on the other, in one figure. Re-cut the
+   axis as session share, so 89.8/10.2 are the widths they are labelled with.
+
+Verified: 238 vitest · 104 pytest + 1 xfail · lint 0 errors · all 13 scenes render with no
+content crossing the stage edge, no console errors, and autoplay working under both
+`prefers-reduced-motion` settings.
