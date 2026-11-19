@@ -894,7 +894,7 @@ h2 {
   <footer class="rail">
     <span class="chapter" id="railChapter">Title</span>
     <span class="ticks" id="railTicks"></span>
-    <span class="keys">space play/pause · ←→ step · f fullscreen</span>
+    <span class="keys" id="railKeys">space play/pause · ←→ step · f fullscreen</span>
   </footer>
 
   <div class="start" id="start">
@@ -920,6 +920,13 @@ h2 {
 
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  // Offline render mode (?render=1). Capturing a screen recording in real time
+  // is what produces judder: the recorder races the compositor, drops frames and
+  // pads them back as duplicates. In render mode nothing races — the renderer
+  // drives a virtual clock through window.__deck, one exact frame at a time, so
+  // every frame is a true sample and the output is smooth by construction.
+  const RENDER = new URLSearchParams(location.search).has("render");
+
   // One tick per scene, so the rail says how much is left without a timer.
   const ticks = scenes.map(() => {
     const t = document.createElement("span");
@@ -940,8 +947,9 @@ h2 {
       prev.classList.remove("is-active");
       prev.classList.add("is-out");
       // Park it back behind the camera once it has flown past, so stepping
-      // backwards re-enters from depth rather than from nowhere.
-      setTimeout(() => prev.classList.remove("is-out"), 1000);
+      // backwards re-enters from depth rather than from nowhere. In render mode
+      // wall-clock time is meaningless — the renderer clears it explicitly.
+      if (!RENDER) setTimeout(() => prev.classList.remove("is-out"), 1000);
     }
     index = next;
     const scene = scenes[index];
@@ -961,7 +969,7 @@ h2 {
 
   function schedule() {
     clearTimeout(timer);
-    if (paused || index < 0) return;
+    if (RENDER || paused || index < 0) return;
     if (index === scenes.length - 1) return;   // hold the closing card
     const dur = Number(scenes[index].dataset.dur) || 14000;
     timer = setTimeout(() => show(index + 1), reduced ? Math.min(dur, 9000) : dur);
@@ -1005,6 +1013,57 @@ h2 {
     else if (event.key === "ArrowRight") { event.preventDefault(); step(1); }
     else if (event.key === "ArrowLeft")  { event.preventDefault(); step(-1); }
   });
+
+  if (RENDER) {
+    // The keyboard hint is operator chrome; it must not be baked into a video.
+    document.getElementById("railKeys").remove();
+
+    // Every CSS transition and animation on the page is reachable through
+    // getAnimations(). Pausing them all hands the renderer a seekable timeline:
+    // it sets currentTime to an exact frame boundary, screenshots, and repeats.
+    // No wall clock is involved, so capture speed cannot affect the result.
+    window.__deck = {
+      count: scenes.length,
+      durations: scenes.map((s) => Number(s.dataset.dur) || 14000),
+
+      begin() {
+        startEl.classList.add("gone");
+        startEl.remove();
+      },
+
+      // Activate scene i and hand back how long its motion lasts.
+      //
+      // Two clocks, deliberately: scene transitions restart at 0 on every cut,
+      // but the floor's infinite drift must not — resetting it would snap the
+      // grid back to its start thirteen times. Finite animations get the scene
+      // clock, infinite ones get the global one.
+      cue(i) {
+        for (const s of scenes) s.classList.remove("is-out");
+        show(i);
+        let motion = 0;
+        for (const a of document.getAnimations()) {
+          a.pause();
+          const t = a.effect && a.effect.getComputedTiming();
+          const infinite = !t || !Number.isFinite(t.activeDuration);
+          if (infinite) continue;
+          a.currentTime = 0;
+          const end = (t.delay || 0) + t.activeDuration;
+          if (end > motion) motion = end;
+        }
+        return Math.ceil(motion);
+      },
+
+      // t = ms into this scene, globalT = ms since the deck began.
+      seek(t, globalT) {
+        for (const a of document.getAnimations()) {
+          const timing = a.effect && a.effect.getComputedTiming();
+          const infinite = !timing || !Number.isFinite(timing.activeDuration);
+          a.currentTime = infinite ? globalT : t;
+        }
+      },
+    };
+    return;
+  }
 
   // Gate Start on the webfonts. A font swap caught between scene 1 and scene 2
   // is the one defect a re-record cannot fix, and this removes it.
