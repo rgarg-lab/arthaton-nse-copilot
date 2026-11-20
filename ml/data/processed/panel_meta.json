@@ -1,6 +1,6 @@
 {
-  "rows": 49776,
-  "tickers": 17,
+  "rows": 52812,
+  "tickers": 18,
   "feature_count": 57,
   "feature_columns": [
     "ret_1",
@@ -63,20 +63,20 @@
   ],
   "date_range": [
     "2015-01-01",
-    "2026-11-11"
+    "2026-11-19"
   ],
   "freshness": {
-    "last_session": "2026-11-11",
-    "as_of": "2026-11-12",
+    "last_session": "2026-11-19",
+    "as_of": "2026-11-20",
     "calendar_days_behind": 1,
     "sessions_behind": 1
   },
   "labels": {
     "horizon_sessions": 1,
-    "labelled_rows": 49759,
-    "unlabelled_rows": 17,
-    "up_rate": 0.507084,
-    "mean_abs_return": 0.011996
+    "labelled_rows": 52794,
+    "unlabelled_rows": 18,
+    "up_rate": 0.506383,
+    "mean_abs_return": 0.012309
   },
-  "nan_fraction_overall": 0.004883
+  "nan_fraction_overall": 0.004873
 }

@@ -47,9 +47,23 @@ const data = {
   valAcc: pct(hc.validation_accuracy),
   gap: `${(hc.gap * 100).toFixed(2)} pts`,
 
-  // Magnitude head.
+  // Magnitude head — the question this model actually answers well.
   magMedian: pct(mag.summary.accuracy_when_calling_median),
   magWindows: `${mag.summary.windows_at_or_above_60pct} of ${mag.summary.windows_total}`,
+  magMin: pct(mag.summary.accuracy_when_calling_min),
+  magMax: pct(mag.summary.accuracy_when_calling_max),
+  magCovMin: pct(mag.summary.coverage_min, 0),
+  magCovMax: pct(mag.summary.coverage_max, 0),
+  // Each walk-forward window, worst first — the film shows all four rather than a
+  // summary, because "we quote our worst one" is only a claim you can check if the
+  // worst one is on screen.
+  magFolds: mag.windows
+    .map((w) => ({
+      label: w.window.replace(/^fold\d+_val/, ''),
+      acc: pct(w.accuracy_when_calling),
+      accNum: w.accuracy_when_calling,
+    }))
+    .sort((a, b) => a.accNum - b.accNum),
 
   // Provenance.
   rows: int(prov.panel_rows ?? 0),
@@ -70,4 +84,20 @@ export const D = ${JSON.stringify(data, null, 2)};
 mkdirSync(resolve(HERE, "..", "src"), { recursive: true });
 writeFileSync(resolve(HERE, "..", "src", "data.generated.js"), out);
 console.log("wrote src/data.generated.js");
-for (const [k, v] of Object.entries(data)) console.log(`  ${k.padEnd(16)} ${v}`);
+for (const [k, v] of Object.entries(data)) {
+  console.log(`  ${k.padEnd(16)} ${typeof v === "object" ? JSON.stringify(v) : v}`);
+}
+
+// Guard: this cut leads on the magnitude head, and every percentage it puts on screen
+// must clear 58. If an artifact changes so that stops being true, fail loudly here
+// rather than let the film quietly make a claim the numbers no longer support.
+const onScreen = [data.magMedian, data.magMin, data.magMax, ...data.magFolds.map((f) => f.acc)];
+const weak = onScreen.filter((p) => parseFloat(p) < 58);
+if (weak.length) {
+  console.error(`
+REFUSING: these on-screen figures are below 58% — ${weak.join(", ")}`);
+  console.error("The film's framing assumes they are not. Re-cut the pages, do not hide them.");
+  process.exit(1);
+}
+console.log(`
+all ${onScreen.length} on-screen figures >= 58%  ok`);

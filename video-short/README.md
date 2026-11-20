@@ -46,16 +46,46 @@ REAL APP · FROZEN MODEL · EVERY FIGURE READ FROM ml/artifacts/ · PAPER TRADIN
 
 ---
 
+## What this cut leads on, and what it leaves out
+
+**The hero figure is the magnitude head: 60.20%**, the median of four walk-forward
+windows on *move size* — will tomorrow's move be bigger or quieter than this name's own
+recent normal. Every window clears 58: **58.46 / 60.17 / 60.23 / 61.64**.
+
+**The direction head's 51.37% is not on screen.** That is a scope choice, not a hiding
+place: the figure leads the README, `MODEL_CARD.md` and `SUBMISSION.md`, and the film says
+in plain words that next-session direction is close to a coin flip — it just doesn't make
+a weak number the hero of a one-minute pitch. The film is about the question this model
+answers well.
+
+Two labels are load-bearing and must not be edited out:
+
+1. the figure is **move size, never direction** — it is on the title tile in as many words;
+2. this head has **not** been evaluated on the final holdout
+   (`magnitude_metrics.json` → `holdout_note`); its evidence is stability across four
+   windows, which is weaker, and page 3 says so.
+
+Drop either and 60.20% reads as an out-of-sample direction claim, which it is not — and
+the repository would contradict the video on its own front page.
+
+`scripts/build-data.mjs` **fails the build** if any figure destined for the screen falls
+below 58%, so a future artifact change cannot quietly leave the film making a claim the
+numbers no longer support. The fix then is to re-cut the pages, not to hide the figure.
+
 ## The six pages
 
 | # | Page | Carries |
 |---|---|---|
-| 1 | Title | the thesis, and the holdout figure in the accent tile |
-| 2 | The problem | every tool always answers; direction is near a coin flip |
-| 3 | The solution | the frozen gate, what it abstains on, what it gets when it calls |
-| 4 | Why this is different | validation vs holdout, and the gap between them |
+| 1 | Title | the question it answers, and 60.20% in the accent tile |
+| 2 | The problem | everyone answers the unanswerable question; so we stopped asking it |
+| 3 | The solution | the magnitude head, its coverage, and its holdout caveat |
+| 4 | Why this is different | all four windows as a dot plot, weakest first and highlighted |
 | 5 | The AI/ML | two frozen heads, and how they were validated |
 | 6 | Close | the thesis as a full-bleed serif card |
+
+The page-4 chart is a **dot plot, not bars**. The interesting range is 58–62%: a
+zero-baseline bar hides the differences entirely, and a bar on a truncated axis overstates
+them. The axis bounds are drawn so the truncation is declared.
 
 Re-pace the whole film by editing `PAGE` and `TRANS` in `src/timeline.js`. No shot
 contains a literal time.
