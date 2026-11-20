@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "nse-copilot-explainer",
+  "description": "A 1-minute silent explainer for NSE Copilot, rendered from code. Deliberately isolated: no dependencies, no entry in the root package.json.",
+  "scripts": {
+    "data": "node scripts/build-data.mjs",
+    "film": "npm run data && node render/render.mjs --no-audio --name nse-copilot-60s --crf 14",
+    "stills": "node scripts/build-data.mjs && node render/render.mjs --no-audio --stills 4,13,22,31,40,51 --still-scale 0.5",
+    "preview": "npx serve ."
+  }
+}

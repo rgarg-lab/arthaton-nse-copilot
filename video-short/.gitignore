@@ -1,0 +1,7 @@
+# Rendered output. The MP4 is a build artifact of this directory; `npm run film`
+# rebuilds it in a few minutes from committed sources.
+out/
+
+# Generated from ml/artifacts/ by scripts/build-data.mjs. Committed deliberately would
+# be a second copy of the numbers; `npm run film` regenerates it before every render.
+src/data.generated.js
