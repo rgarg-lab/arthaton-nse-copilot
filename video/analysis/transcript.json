@@ -1,0 +1,1958 @@
+{
+  "source": "C:\\Users\\Riyan Garg\\Downloads\\WhatsApp Video 2026-11-17 at 7.12.51 PM.mp4",
+  "model": "base",
+  "language": "en",
+  "language_probability": 0.998,
+  "duration_s": 168.0,
+  "segment_count": 35,
+  "word_count": 334,
+  "voiced_s": 122.16,
+  "voiced_share": 0.727,
+  "wpm_over_voiced": 164.0,
+  "wpm_over_runtime": 119.3,
+  "mean_segment_logprob": -0.134,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 9.44,
+      "text": "Friday, November 13th, Alex has $2,540, and the camera he wants is $18.99. Easy, right?",
+      "avg_logprob": -0.196,
+      "no_speech_prob": 0.126
+    },
+    {
+      "start": 10.76,
+      "end": 17.2,
+      "text": "Not quite. Most of that money is already spoken for, bills, a laptop he's still paying off,",
+      "avg_logprob": -0.196,
+      "no_speech_prob": 0.126
+    },
+    {
+      "start": 17.54,
+      "end": 23.78,
+      "text": "everyday spending until payday, and a cushion he never touches. What's really his to spend?",
+      "avg_logprob": -0.196,
+      "no_speech_prob": 0.126
+    },
+    {
+      "start": 25.68,
+      "end": 26.32,
+      "text": "$872.",
+      "avg_logprob": -0.179,
+      "no_speech_prob": 0.162
+    },
+    {
+      "start": 28.12,
+      "end": 34.22,
+      "text": "So before he pays, Alex does one thing. Right there on the Paypal button is worth.",
+      "avg_logprob": -0.179,
+      "no_speech_prob": 0.162
+    },
+    {
+      "start": 35.18,
+      "end": 36.22,
+      "text": "One swipe.",
+      "avg_logprob": -0.179,
+      "no_speech_prob": 0.162
+    },
+    {
+      "start": 38.18,
+      "end": 41.52,
+      "text": "Worth asks for just one thing. Connect Paypal.",
+      "avg_logprob": -0.179,
+      "no_speech_prob": 0.162
+    },
+    {
+      "start": 42.12,
+      "end": 47.4,
+      "text": "He signs in on Paypal's own page once. No spreadsheets, no typing in bills.",
+      "avg_logprob": -0.179,
+      "no_speech_prob": 0.162
+    },
+    {
+      "start": 47.4,
+      "end": 53.32,
+      "text": "Through Paypal's MCP server, Worth reads his activity and finds what a balance can't show.",
+      "avg_logprob": -0.111,
+      "no_speech_prob": 0.049
+    },
+    {
+      "start": 54.2,
+      "end": 58.7,
+      "text": "Rent on the first. Three payments left on a laptop he split with pay in four.",
+      "avg_logprob": -0.111,
+      "no_speech_prob": 0.049
+    },
+    {
+      "start": 59.46,
+      "end": 62.1,
+      "text": "And a payday that's still 17 days away.",
+      "avg_logprob": -0.111,
+      "no_speech_prob": 0.049
+    },
+    {
+      "start": 63.46,
+      "end": 67.88,
+      "text": "So of that $25.40, $872 is safe to spend today.",
+      "avg_logprob": -0.111,
+      "no_speech_prob": 0.049
+    },
+    {
+      "start": 68.64,
+      "end": 71.56,
+      "text": "And Worth keeps that number currently, quietly, read only.",
+      "avg_logprob": -0.111,
+      "no_speech_prob": 0.049
+    },
+    {
+      "start": 72.94,
+      "end": 75.4,
+      "text": "And the camera? Not today.",
+      "avg_logprob": -0.138,
+      "no_speech_prob": 0.25
+    },
+    {
+      "start": 76.4,
+      "end": 81.1,
+      "text": "Buy it now and he's overdrawn in a week, $726 under by Payday.",
+      "avg_logprob": -0.138,
+      "no_speech_prob": 0.25
+    },
+    {
+      "start": 82.2,
+      "end": 87.64,
+      "text": "But wait until Tuesday, December 15th, the day after a client pays his invoice, and it fits.",
+      "avg_logprob": -0.138,
+      "no_speech_prob": 0.25
+    },
+    {
+      "start": 88.44,
+      "end": 89.3,
+      "text": "Cushion intact.",
+      "avg_logprob": -0.138,
+      "no_speech_prob": 0.25
+    },
+    {
+      "start": 90.98,
+      "end": 97.6,
+      "text": "What about payin' for? Worth lays all four payments on the calendar, right in between the laptops.",
+      "avg_logprob": -0.138,
+      "no_speech_prob": 0.25
+    },
+    {
+      "start": 97.6,
+      "end": 103.04,
+      "text": "The second, lands three days before payday, and his balance dips under the cushion.",
+      "avg_logprob": -0.107,
+      "no_speech_prob": 0.47
+    },
+    {
+      "start": 104.54,
+      "end": 108.3,
+      "text": "Worth doesn't push either way. It shows where each payment lands.",
+      "avg_logprob": -0.107,
+      "no_speech_prob": 0.47
+    },
+    {
+      "start": 109.7,
+      "end": 114.06,
+      "text": "And it isn't only for big purchases. Ask Worth anything about your money.",
+      "avg_logprob": -0.107,
+      "no_speech_prob": 0.47
+    },
+    {
+      "start": 114.82,
+      "end": 117.56,
+      "text": "Too much coffee? $94.50 since mid-October.",
+      "avg_logprob": -0.107,
+      "no_speech_prob": 0.47
+    },
+    {
+      "start": 118.26,
+      "end": 120.24,
+      "text": "Next payday? November 30th.",
+      "avg_logprob": -0.107,
+      "no_speech_prob": 0.47
+    },
+    {
+      "start": 121.02,
+      "end": 124.66,
+      "text": "Ask what happens if he buys today, and Worth works the chart for you.",
+      "avg_logprob": -0.107,
+      "no_speech_prob": 0.47
+    },
+    {
+      "start": 125.52,
+      "end": 128.36,
+      "text": "Claude reads the question, Worth's engine does the math.",
+      "avg_logprob": -0.129,
+      "no_speech_prob": 0.062
+    },
+    {
+      "start": 128.84,
+      "end": 131.7,
+      "text": "And every sentence is checked before he sees it.",
+      "avg_logprob": -0.129,
+      "no_speech_prob": 0.062
+    },
+    {
+      "start": 132.82,
+      "end": 134.84,
+      "text": "So Alex saves it for the 15th.",
+      "avg_logprob": -0.129,
+      "no_speech_prob": 0.062
+    },
+    {
+      "start": 137.08,
+      "end": 139.2,
+      "text": "And when the day comes, Worth checks again.",
+      "avg_logprob": -0.129,
+      "no_speech_prob": 0.062
+    },
+    {
+      "start": 140.44,
+      "end": 141.4,
+      "text": "It fits.",
+      "avg_logprob": -0.129,
+      "no_speech_prob": 0.062
+    },
+    {
+      "start": 142.82,
+      "end": 143.86,
+      "text": "So he pays.",
+      "avg_logprob": -0.129,
+      "no_speech_prob": 0.062
+    },
+    {
+      "start": 148.0,
+      "end": 148.86,
+      "text": "With PayPal.",
+      "avg_logprob": -0.129,
+      "no_speech_prob": 0.062
+    },
+    {
+      "start": 153.44,
+      "end": 154.74,
+      "text": "PayPal knows what you've spent.",
+      "avg_logprob": -0.104,
+      "no_speech_prob": 0.059
+    },
+    {
+      "start": 155.36,
+      "end": 157.36,
+      "text": "Worth turns that into the day you can buy.",
+      "avg_logprob": -0.104,
+      "no_speech_prob": 0.059
+    },
+    {
+      "start": 158.16,
+      "end": 159.68,
+      "text": "One swipe before you pay.",
+      "avg_logprob": -0.104,
+      "no_speech_prob": 0.059
+    },
+    {
+      "start": 160.84,
+      "end": 164.56,
+      "text": "Your balance says you can. Worth tells you the day you actually can.",
+      "avg_logprob": -0.104,
+      "no_speech_prob": 0.059
+    }
+  ],
+  "words": [
+    {
+      "start": 0.0,
+      "end": 0.94,
+      "word": "Friday,"
+    },
+    {
+      "start": 1.2,
+      "end": 1.46,
+      "word": "November"
+    },
+    {
+      "start": 1.46,
+      "end": 3.02,
+      "word": "13th,"
+    },
+    {
+      "start": 3.02,
+      "end": 3.26,
+      "word": "Alex"
+    },
+    {
+      "start": 3.26,
+      "end": 3.56,
+      "word": "has"
+    },
+    {
+      "start": 3.56,
+      "end": 3.92,
+      "word": "$2"
+    },
+    {
+      "start": 3.92,
+      "end": 5.56,
+      "word": ",540,"
+    },
+    {
+      "start": 6.1,
+      "end": 6.42,
+      "word": "and"
+    },
+    {
+      "start": 6.42,
+      "end": 6.5,
+      "word": "the"
+    },
+    {
+      "start": 6.5,
+      "end": 6.76,
+      "word": "camera"
+    },
+    {
+      "start": 6.76,
+      "end": 6.9,
+      "word": "he"
+    },
+    {
+      "start": 6.9,
+      "end": 7.06,
+      "word": "wants"
+    },
+    {
+      "start": 7.06,
+      "end": 7.24,
+      "word": "is"
+    },
+    {
+      "start": 7.24,
+      "end": 7.52,
+      "word": "$18"
+    },
+    {
+      "start": 7.52,
+      "end": 8.08,
+      "word": ".99."
+    },
+    {
+      "start": 8.68,
+      "end": 8.94,
+      "word": "Easy,"
+    },
+    {
+      "start": 9.24,
+      "end": 9.44,
+      "word": "right?"
+    },
+    {
+      "start": 10.76,
+      "end": 11.12,
+      "word": "Not"
+    },
+    {
+      "start": 11.12,
+      "end": 11.5,
+      "word": "quite."
+    },
+    {
+      "start": 12.5,
+      "end": 12.88,
+      "word": "Most"
+    },
+    {
+      "start": 12.88,
+      "end": 13.04,
+      "word": "of"
+    },
+    {
+      "start": 13.04,
+      "end": 13.16,
+      "word": "that"
+    },
+    {
+      "start": 13.16,
+      "end": 13.36,
+      "word": "money"
+    },
+    {
+      "start": 13.36,
+      "end": 13.52,
+      "word": "is"
+    },
+    {
+      "start": 13.52,
+      "end": 13.84,
+      "word": "already"
+    },
+    {
+      "start": 13.84,
+      "end": 14.16,
+      "word": "spoken"
+    },
+    {
+      "start": 14.16,
+      "end": 14.48,
+      "word": "for,"
+    },
+    {
+      "start": 14.96,
+      "end": 15.2,
+      "word": "bills,"
+    },
+    {
+      "start": 15.86,
+      "end": 15.96,
+      "word": "a"
+    },
+    {
+      "start": 15.96,
+      "end": 16.22,
+      "word": "laptop"
+    },
+    {
+      "start": 16.22,
+      "end": 16.52,
+      "word": "he's"
+    },
+    {
+      "start": 16.52,
+      "end": 16.66,
+      "word": "still"
+    },
+    {
+      "start": 16.66,
+      "end": 16.86,
+      "word": "paying"
+    },
+    {
+      "start": 16.86,
+      "end": 17.2,
+      "word": "off,"
+    },
+    {
+      "start": 17.54,
+      "end": 18.2,
+      "word": "everyday"
+    },
+    {
+      "start": 18.2,
+      "end": 18.54,
+      "word": "spending"
+    },
+    {
+      "start": 18.54,
+      "end": 18.84,
+      "word": "until"
+    },
+    {
+      "start": 18.84,
+      "end": 19.22,
+      "word": "payday,"
+    },
+    {
+      "start": 19.52,
+      "end": 20.28,
+      "word": "and"
+    },
+    {
+      "start": 20.28,
+      "end": 20.42,
+      "word": "a"
+    },
+    {
+      "start": 20.42,
+      "end": 20.7,
+      "word": "cushion"
+    },
+    {
+      "start": 20.7,
+      "end": 20.96,
+      "word": "he"
+    },
+    {
+      "start": 20.96,
+      "end": 21.22,
+      "word": "never"
+    },
+    {
+      "start": 21.22,
+      "end": 21.56,
+      "word": "touches."
+    },
+    {
+      "start": 22.52,
+      "end": 22.86,
+      "word": "What's"
+    },
+    {
+      "start": 22.86,
+      "end": 23.06,
+      "word": "really"
+    },
+    {
+      "start": 23.06,
+      "end": 23.3,
+      "word": "his"
+    },
+    {
+      "start": 23.3,
+      "end": 23.5,
+      "word": "to"
+    },
+    {
+      "start": 23.5,
+      "end": 23.78,
+      "word": "spend?"
+    },
+    {
+      "start": 25.68,
+      "end": 26.32,
+      "word": "$872."
+    },
+    {
+      "start": 28.12,
+      "end": 28.76,
+      "word": "So"
+    },
+    {
+      "start": 28.76,
+      "end": 28.96,
+      "word": "before"
+    },
+    {
+      "start": 28.96,
+      "end": 29.18,
+      "word": "he"
+    },
+    {
+      "start": 29.18,
+      "end": 29.44,
+      "word": "pays,"
+    },
+    {
+      "start": 29.92,
+      "end": 30.04,
+      "word": "Alex"
+    },
+    {
+      "start": 30.04,
+      "end": 30.3,
+      "word": "does"
+    },
+    {
+      "start": 30.3,
+      "end": 30.86,
+      "word": "one"
+    },
+    {
+      "start": 30.86,
+      "end": 31.48,
+      "word": "thing."
+    },
+    {
+      "start": 31.86,
+      "end": 32.36,
+      "word": "Right"
+    },
+    {
+      "start": 32.36,
+      "end": 32.58,
+      "word": "there"
+    },
+    {
+      "start": 32.58,
+      "end": 32.76,
+      "word": "on"
+    },
+    {
+      "start": 32.76,
+      "end": 32.86,
+      "word": "the"
+    },
+    {
+      "start": 32.86,
+      "end": 33.18,
+      "word": "Paypal"
+    },
+    {
+      "start": 33.18,
+      "end": 33.46,
+      "word": "button"
+    },
+    {
+      "start": 33.46,
+      "end": 33.96,
+      "word": "is"
+    },
+    {
+      "start": 33.96,
+      "end": 34.22,
+      "word": "worth."
+    },
+    {
+      "start": 35.18,
+      "end": 35.52,
+      "word": "One"
+    },
+    {
+      "start": 35.52,
+      "end": 36.22,
+      "word": "swipe."
+    },
+    {
+      "start": 38.18,
+      "end": 38.66,
+      "word": "Worth"
+    },
+    {
+      "start": 38.66,
+      "end": 39.04,
+      "word": "asks"
+    },
+    {
+      "start": 39.04,
+      "end": 39.26,
+      "word": "for"
+    },
+    {
+      "start": 39.26,
+      "end": 39.42,
+      "word": "just"
+    },
+    {
+      "start": 39.42,
+      "end": 39.76,
+      "word": "one"
+    },
+    {
+      "start": 39.76,
+      "end": 40.06,
+      "word": "thing."
+    },
+    {
+      "start": 40.56,
+      "end": 40.78,
+      "word": "Connect"
+    },
+    {
+      "start": 40.78,
+      "end": 41.52,
+      "word": "Paypal."
+    },
+    {
+      "start": 42.12,
+      "end": 42.52,
+      "word": "He"
+    },
+    {
+      "start": 42.52,
+      "end": 42.74,
+      "word": "signs"
+    },
+    {
+      "start": 42.74,
+      "end": 42.94,
+      "word": "in"
+    },
+    {
+      "start": 42.94,
+      "end": 43.1,
+      "word": "on"
+    },
+    {
+      "start": 43.1,
+      "end": 43.5,
+      "word": "Paypal's"
+    },
+    {
+      "start": 43.5,
+      "end": 43.64,
+      "word": "own"
+    },
+    {
+      "start": 43.64,
+      "end": 43.96,
+      "word": "page"
+    },
+    {
+      "start": 43.96,
+      "end": 44.6,
+      "word": "once."
+    },
+    {
+      "start": 45.52,
+      "end": 45.78,
+      "word": "No"
+    },
+    {
+      "start": 45.78,
+      "end": 46.34,
+      "word": "spreadsheets,"
+    },
+    {
+      "start": 46.64,
+      "end": 46.8,
+      "word": "no"
+    },
+    {
+      "start": 46.8,
+      "end": 47.06,
+      "word": "typing"
+    },
+    {
+      "start": 47.06,
+      "end": 47.24,
+      "word": "in"
+    },
+    {
+      "start": 47.24,
+      "end": 47.4,
+      "word": "bills."
+    },
+    {
+      "start": 47.4,
+      "end": 48.5,
+      "word": "Through"
+    },
+    {
+      "start": 48.5,
+      "end": 49.0,
+      "word": "Paypal's"
+    },
+    {
+      "start": 49.0,
+      "end": 49.52,
+      "word": "MCP"
+    },
+    {
+      "start": 49.52,
+      "end": 49.9,
+      "word": "server,"
+    },
+    {
+      "start": 50.36,
+      "end": 50.5,
+      "word": "Worth"
+    },
+    {
+      "start": 50.5,
+      "end": 50.74,
+      "word": "reads"
+    },
+    {
+      "start": 50.74,
+      "end": 50.92,
+      "word": "his"
+    },
+    {
+      "start": 50.92,
+      "end": 51.3,
+      "word": "activity"
+    },
+    {
+      "start": 51.3,
+      "end": 51.6,
+      "word": "and"
+    },
+    {
+      "start": 51.6,
+      "end": 51.9,
+      "word": "finds"
+    },
+    {
+      "start": 51.9,
+      "end": 52.1,
+      "word": "what"
+    },
+    {
+      "start": 52.1,
+      "end": 52.18,
+      "word": "a"
+    },
+    {
+      "start": 52.18,
+      "end": 52.48,
+      "word": "balance"
+    },
+    {
+      "start": 52.48,
+      "end": 53.0,
+      "word": "can't"
+    },
+    {
+      "start": 53.0,
+      "end": 53.32,
+      "word": "show."
+    },
+    {
+      "start": 54.2,
+      "end": 54.62,
+      "word": "Rent"
+    },
+    {
+      "start": 54.62,
+      "end": 54.86,
+      "word": "on"
+    },
+    {
+      "start": 54.86,
+      "end": 54.96,
+      "word": "the"
+    },
+    {
+      "start": 54.96,
+      "end": 55.22,
+      "word": "first."
+    },
+    {
+      "start": 55.86,
+      "end": 56.18,
+      "word": "Three"
+    },
+    {
+      "start": 56.18,
+      "end": 56.48,
+      "word": "payments"
+    },
+    {
+      "start": 56.48,
+      "end": 56.74,
+      "word": "left"
+    },
+    {
+      "start": 56.74,
+      "end": 56.94,
+      "word": "on"
+    },
+    {
+      "start": 56.94,
+      "end": 57.02,
+      "word": "a"
+    },
+    {
+      "start": 57.02,
+      "end": 57.32,
+      "word": "laptop"
+    },
+    {
+      "start": 57.32,
+      "end": 57.6,
+      "word": "he"
+    },
+    {
+      "start": 57.6,
+      "end": 57.84,
+      "word": "split"
+    },
+    {
+      "start": 57.84,
+      "end": 58.04,
+      "word": "with"
+    },
+    {
+      "start": 58.04,
+      "end": 58.2,
+      "word": "pay"
+    },
+    {
+      "start": 58.2,
+      "end": 58.42,
+      "word": "in"
+    },
+    {
+      "start": 58.42,
+      "end": 58.7,
+      "word": "four."
+    },
+    {
+      "start": 59.46,
+      "end": 59.82,
+      "word": "And"
+    },
+    {
+      "start": 59.82,
+      "end": 59.92,
+      "word": "a"
+    },
+    {
+      "start": 59.92,
+      "end": 60.26,
+      "word": "payday"
+    },
+    {
+      "start": 60.26,
+      "end": 60.72,
+      "word": "that's"
+    },
+    {
+      "start": 60.72,
+      "end": 60.9,
+      "word": "still"
+    },
+    {
+      "start": 60.9,
+      "end": 61.34,
+      "word": "17"
+    },
+    {
+      "start": 61.34,
+      "end": 61.7,
+      "word": "days"
+    },
+    {
+      "start": 61.7,
+      "end": 62.1,
+      "word": "away."
+    },
+    {
+      "start": 63.46,
+      "end": 64.06,
+      "word": "So"
+    },
+    {
+      "start": 64.06,
+      "end": 64.26,
+      "word": "of"
+    },
+    {
+      "start": 64.26,
+      "end": 64.38,
+      "word": "that"
+    },
+    {
+      "start": 64.38,
+      "end": 64.78,
+      "word": "$25"
+    },
+    {
+      "start": 64.78,
+      "end": 65.24,
+      "word": ".40,"
+    },
+    {
+      "start": 65.6,
+      "end": 66.42,
+      "word": "$872"
+    },
+    {
+      "start": 66.42,
+      "end": 66.7,
+      "word": "is"
+    },
+    {
+      "start": 66.7,
+      "end": 66.98,
+      "word": "safe"
+    },
+    {
+      "start": 66.98,
+      "end": 67.18,
+      "word": "to"
+    },
+    {
+      "start": 67.18,
+      "end": 67.42,
+      "word": "spend"
+    },
+    {
+      "start": 67.42,
+      "end": 67.88,
+      "word": "today."
+    },
+    {
+      "start": 68.64,
+      "end": 68.92,
+      "word": "And"
+    },
+    {
+      "start": 68.92,
+      "end": 69.12,
+      "word": "Worth"
+    },
+    {
+      "start": 69.12,
+      "end": 69.36,
+      "word": "keeps"
+    },
+    {
+      "start": 69.36,
+      "end": 69.54,
+      "word": "that"
+    },
+    {
+      "start": 69.54,
+      "end": 69.74,
+      "word": "number"
+    },
+    {
+      "start": 69.74,
+      "end": 70.16,
+      "word": "currently,"
+    },
+    {
+      "start": 70.44,
+      "end": 70.8,
+      "word": "quietly,"
+    },
+    {
+      "start": 71.18,
+      "end": 71.32,
+      "word": "read"
+    },
+    {
+      "start": 71.32,
+      "end": 71.56,
+      "word": "only."
+    },
+    {
+      "start": 72.94,
+      "end": 73.5,
+      "word": "And"
+    },
+    {
+      "start": 73.5,
+      "end": 73.58,
+      "word": "the"
+    },
+    {
+      "start": 73.58,
+      "end": 73.9,
+      "word": "camera?"
+    },
+    {
+      "start": 74.66,
+      "end": 75.1,
+      "word": "Not"
+    },
+    {
+      "start": 75.1,
+      "end": 75.4,
+      "word": "today."
+    },
+    {
+      "start": 76.4,
+      "end": 76.6,
+      "word": "Buy"
+    },
+    {
+      "start": 76.6,
+      "end": 76.74,
+      "word": "it"
+    },
+    {
+      "start": 76.74,
+      "end": 76.9,
+      "word": "now"
+    },
+    {
+      "start": 76.9,
+      "end": 77.12,
+      "word": "and"
+    },
+    {
+      "start": 77.12,
+      "end": 77.34,
+      "word": "he's"
+    },
+    {
+      "start": 77.34,
+      "end": 77.8,
+      "word": "overdrawn"
+    },
+    {
+      "start": 77.8,
+      "end": 78.02,
+      "word": "in"
+    },
+    {
+      "start": 78.02,
+      "end": 78.1,
+      "word": "a"
+    },
+    {
+      "start": 78.1,
+      "end": 78.3,
+      "word": "week,"
+    },
+    {
+      "start": 78.76,
+      "end": 80.0,
+      "word": "$726"
+    },
+    {
+      "start": 80.0,
+      "end": 80.54,
+      "word": "under"
+    },
+    {
+      "start": 80.54,
+      "end": 80.74,
+      "word": "by"
+    },
+    {
+      "start": 80.74,
+      "end": 81.1,
+      "word": "Payday."
+    },
+    {
+      "start": 82.2,
+      "end": 82.56,
+      "word": "But"
+    },
+    {
+      "start": 82.56,
+      "end": 82.74,
+      "word": "wait"
+    },
+    {
+      "start": 82.74,
+      "end": 82.96,
+      "word": "until"
+    },
+    {
+      "start": 82.96,
+      "end": 83.34,
+      "word": "Tuesday,"
+    },
+    {
+      "start": 83.48,
+      "end": 83.78,
+      "word": "December"
+    },
+    {
+      "start": 83.78,
+      "end": 84.56,
+      "word": "15th,"
+    },
+    {
+      "start": 84.6,
+      "end": 84.62,
+      "word": "the"
+    },
+    {
+      "start": 84.62,
+      "end": 84.8,
+      "word": "day"
+    },
+    {
+      "start": 84.8,
+      "end": 85.32,
+      "word": "after"
+    },
+    {
+      "start": 85.32,
+      "end": 85.5,
+      "word": "a"
+    },
+    {
+      "start": 85.5,
+      "end": 85.7,
+      "word": "client"
+    },
+    {
+      "start": 85.7,
+      "end": 85.88,
+      "word": "pays"
+    },
+    {
+      "start": 85.88,
+      "end": 86.02,
+      "word": "his"
+    },
+    {
+      "start": 86.02,
+      "end": 86.28,
+      "word": "invoice,"
+    },
+    {
+      "start": 86.84,
+      "end": 87.26,
+      "word": "and"
+    },
+    {
+      "start": 87.26,
+      "end": 87.36,
+      "word": "it"
+    },
+    {
+      "start": 87.36,
+      "end": 87.64,
+      "word": "fits."
+    },
+    {
+      "start": 88.44,
+      "end": 88.84,
+      "word": "Cushion"
+    },
+    {
+      "start": 88.84,
+      "end": 89.3,
+      "word": "intact."
+    },
+    {
+      "start": 90.98,
+      "end": 91.54,
+      "word": "What"
+    },
+    {
+      "start": 91.54,
+      "end": 91.76,
+      "word": "about"
+    },
+    {
+      "start": 91.76,
+      "end": 92.26,
+      "word": "payin'"
+    },
+    {
+      "start": 92.32,
+      "end": 92.44,
+      "word": "for?"
+    },
+    {
+      "start": 93.52,
+      "end": 93.9,
+      "word": "Worth"
+    },
+    {
+      "start": 93.9,
+      "end": 94.1,
+      "word": "lays"
+    },
+    {
+      "start": 94.1,
+      "end": 94.48,
+      "word": "all"
+    },
+    {
+      "start": 94.48,
+      "end": 94.8,
+      "word": "four"
+    },
+    {
+      "start": 94.8,
+      "end": 95.08,
+      "word": "payments"
+    },
+    {
+      "start": 95.08,
+      "end": 95.36,
+      "word": "on"
+    },
+    {
+      "start": 95.36,
+      "end": 95.48,
+      "word": "the"
+    },
+    {
+      "start": 95.48,
+      "end": 95.78,
+      "word": "calendar,"
+    },
+    {
+      "start": 96.32,
+      "end": 96.52,
+      "word": "right"
+    },
+    {
+      "start": 96.52,
+      "end": 96.76,
+      "word": "in"
+    },
+    {
+      "start": 96.76,
+      "end": 97.02,
+      "word": "between"
+    },
+    {
+      "start": 97.02,
+      "end": 97.34,
+      "word": "the"
+    },
+    {
+      "start": 97.34,
+      "end": 97.6,
+      "word": "laptops."
+    },
+    {
+      "start": 97.6,
+      "end": 98.6,
+      "word": "The"
+    },
+    {
+      "start": 98.6,
+      "end": 98.96,
+      "word": "second,"
+    },
+    {
+      "start": 99.32,
+      "end": 99.44,
+      "word": "lands"
+    },
+    {
+      "start": 99.44,
+      "end": 99.84,
+      "word": "three"
+    },
+    {
+      "start": 99.84,
+      "end": 100.08,
+      "word": "days"
+    },
+    {
+      "start": 100.08,
+      "end": 100.4,
+      "word": "before"
+    },
+    {
+      "start": 100.4,
+      "end": 100.88,
+      "word": "payday,"
+    },
+    {
+      "start": 101.32,
+      "end": 101.44,
+      "word": "and"
+    },
+    {
+      "start": 101.44,
+      "end": 101.58,
+      "word": "his"
+    },
+    {
+      "start": 101.58,
+      "end": 101.84,
+      "word": "balance"
+    },
+    {
+      "start": 101.84,
+      "end": 102.18,
+      "word": "dips"
+    },
+    {
+      "start": 102.18,
+      "end": 102.64,
+      "word": "under"
+    },
+    {
+      "start": 102.64,
+      "end": 102.78,
+      "word": "the"
+    },
+    {
+      "start": 102.78,
+      "end": 103.04,
+      "word": "cushion."
+    },
+    {
+      "start": 104.54,
+      "end": 104.64,
+      "word": "Worth"
+    },
+    {
+      "start": 104.64,
+      "end": 105.1,
+      "word": "doesn't"
+    },
+    {
+      "start": 105.1,
+      "end": 105.3,
+      "word": "push"
+    },
+    {
+      "start": 105.3,
+      "end": 105.68,
+      "word": "either"
+    },
+    {
+      "start": 105.68,
+      "end": 105.9,
+      "word": "way."
+    },
+    {
+      "start": 106.26,
+      "end": 106.62,
+      "word": "It"
+    },
+    {
+      "start": 106.62,
+      "end": 106.84,
+      "word": "shows"
+    },
+    {
+      "start": 106.84,
+      "end": 107.1,
+      "word": "where"
+    },
+    {
+      "start": 107.1,
+      "end": 107.44,
+      "word": "each"
+    },
+    {
+      "start": 107.44,
+      "end": 107.82,
+      "word": "payment"
+    },
+    {
+      "start": 107.82,
+      "end": 108.3,
+      "word": "lands."
+    },
+    {
+      "start": 109.7,
+      "end": 110.02,
+      "word": "And"
+    },
+    {
+      "start": 110.02,
+      "end": 110.1,
+      "word": "it"
+    },
+    {
+      "start": 110.1,
+      "end": 110.36,
+      "word": "isn't"
+    },
+    {
+      "start": 110.36,
+      "end": 110.6,
+      "word": "only"
+    },
+    {
+      "start": 110.6,
+      "end": 110.76,
+      "word": "for"
+    },
+    {
+      "start": 110.76,
+      "end": 110.94,
+      "word": "big"
+    },
+    {
+      "start": 110.94,
+      "end": 111.36,
+      "word": "purchases."
+    },
+    {
+      "start": 112.04,
+      "end": 112.26,
+      "word": "Ask"
+    },
+    {
+      "start": 112.26,
+      "end": 112.48,
+      "word": "Worth"
+    },
+    {
+      "start": 112.48,
+      "end": 113.2,
+      "word": "anything"
+    },
+    {
+      "start": 113.2,
+      "end": 113.64,
+      "word": "about"
+    },
+    {
+      "start": 113.64,
+      "end": 113.8,
+      "word": "your"
+    },
+    {
+      "start": 113.8,
+      "end": 114.06,
+      "word": "money."
+    },
+    {
+      "start": 114.82,
+      "end": 114.94,
+      "word": "Too"
+    },
+    {
+      "start": 114.94,
+      "end": 115.04,
+      "word": "much"
+    },
+    {
+      "start": 115.04,
+      "end": 115.32,
+      "word": "coffee?"
+    },
+    {
+      "start": 115.84,
+      "end": 116.16,
+      "word": "$94"
+    },
+    {
+      "start": 116.16,
+      "end": 116.72,
+      "word": ".50"
+    },
+    {
+      "start": 116.72,
+      "end": 116.98,
+      "word": "since"
+    },
+    {
+      "start": 116.98,
+      "end": 117.16,
+      "word": "mid"
+    },
+    {
+      "start": 117.16,
+      "end": 117.56,
+      "word": "-October."
+    },
+    {
+      "start": 118.26,
+      "end": 118.46,
+      "word": "Next"
+    },
+    {
+      "start": 118.46,
+      "end": 118.92,
+      "word": "payday?"
+    },
+    {
+      "start": 119.34,
+      "end": 119.52,
+      "word": "November"
+    },
+    {
+      "start": 119.52,
+      "end": 120.24,
+      "word": "30th."
+    },
+    {
+      "start": 121.02,
+      "end": 121.26,
+      "word": "Ask"
+    },
+    {
+      "start": 121.26,
+      "end": 121.38,
+      "word": "what"
+    },
+    {
+      "start": 121.38,
+      "end": 121.6,
+      "word": "happens"
+    },
+    {
+      "start": 121.6,
+      "end": 121.76,
+      "word": "if"
+    },
+    {
+      "start": 121.76,
+      "end": 121.84,
+      "word": "he"
+    },
+    {
+      "start": 121.84,
+      "end": 122.0,
+      "word": "buys"
+    },
+    {
+      "start": 122.0,
+      "end": 122.4,
+      "word": "today,"
+    },
+    {
+      "start": 122.76,
+      "end": 122.94,
+      "word": "and"
+    },
+    {
+      "start": 122.94,
+      "end": 123.2,
+      "word": "Worth"
+    },
+    {
+      "start": 123.2,
+      "end": 123.68,
+      "word": "works"
+    },
+    {
+      "start": 123.68,
+      "end": 123.84,
+      "word": "the"
+    },
+    {
+      "start": 123.84,
+      "end": 124.04,
+      "word": "chart"
+    },
+    {
+      "start": 124.04,
+      "end": 124.38,
+      "word": "for"
+    },
+    {
+      "start": 124.38,
+      "end": 124.66,
+      "word": "you."
+    },
+    {
+      "start": 125.52,
+      "end": 126.12,
+      "word": "Claude"
+    },
+    {
+      "start": 126.12,
+      "end": 126.26,
+      "word": "reads"
+    },
+    {
+      "start": 126.26,
+      "end": 126.38,
+      "word": "the"
+    },
+    {
+      "start": 126.38,
+      "end": 126.78,
+      "word": "question,"
+    },
+    {
+      "start": 127.08,
+      "end": 127.48,
+      "word": "Worth's"
+    },
+    {
+      "start": 127.48,
+      "end": 127.7,
+      "word": "engine"
+    },
+    {
+      "start": 127.7,
+      "end": 127.98,
+      "word": "does"
+    },
+    {
+      "start": 127.98,
+      "end": 128.18,
+      "word": "the"
+    },
+    {
+      "start": 128.18,
+      "end": 128.36,
+      "word": "math."
+    },
+    {
+      "start": 128.84,
+      "end": 129.08,
+      "word": "And"
+    },
+    {
+      "start": 129.08,
+      "end": 129.38,
+      "word": "every"
+    },
+    {
+      "start": 129.38,
+      "end": 129.74,
+      "word": "sentence"
+    },
+    {
+      "start": 129.74,
+      "end": 129.98,
+      "word": "is"
+    },
+    {
+      "start": 129.98,
+      "end": 130.28,
+      "word": "checked"
+    },
+    {
+      "start": 130.28,
+      "end": 130.84,
+      "word": "before"
+    },
+    {
+      "start": 130.84,
+      "end": 131.18,
+      "word": "he"
+    },
+    {
+      "start": 131.18,
+      "end": 131.4,
+      "word": "sees"
+    },
+    {
+      "start": 131.4,
+      "end": 131.7,
+      "word": "it."
+    },
+    {
+      "start": 132.82,
+      "end": 133.28,
+      "word": "So"
+    },
+    {
+      "start": 133.28,
+      "end": 133.48,
+      "word": "Alex"
+    },
+    {
+      "start": 133.48,
+      "end": 133.8,
+      "word": "saves"
+    },
+    {
+      "start": 133.8,
+      "end": 133.94,
+      "word": "it"
+    },
+    {
+      "start": 133.94,
+      "end": 134.1,
+      "word": "for"
+    },
+    {
+      "start": 134.1,
+      "end": 134.18,
+      "word": "the"
+    },
+    {
+      "start": 134.18,
+      "end": 134.84,
+      "word": "15th."
+    },
+    {
+      "start": 137.08,
+      "end": 137.56,
+      "word": "And"
+    },
+    {
+      "start": 137.56,
+      "end": 137.66,
+      "word": "when"
+    },
+    {
+      "start": 137.66,
+      "end": 137.76,
+      "word": "the"
+    },
+    {
+      "start": 137.76,
+      "end": 137.86,
+      "word": "day"
+    },
+    {
+      "start": 137.86,
+      "end": 138.16,
+      "word": "comes,"
+    },
+    {
+      "start": 138.58,
+      "end": 138.7,
+      "word": "Worth"
+    },
+    {
+      "start": 138.7,
+      "end": 138.92,
+      "word": "checks"
+    },
+    {
+      "start": 138.92,
+      "end": 139.2,
+      "word": "again."
+    },
+    {
+      "start": 140.44,
+      "end": 141.04,
+      "word": "It"
+    },
+    {
+      "start": 141.04,
+      "end": 141.4,
+      "word": "fits."
+    },
+    {
+      "start": 142.82,
+      "end": 143.42,
+      "word": "So"
+    },
+    {
+      "start": 143.42,
+      "end": 143.54,
+      "word": "he"
+    },
+    {
+      "start": 143.54,
+      "end": 143.86,
+      "word": "pays."
+    },
+    {
+      "start": 148.0,
+      "end": 148.6,
+      "word": "With"
+    },
+    {
+      "start": 148.6,
+      "end": 148.86,
+      "word": "PayPal."
+    },
+    {
+      "start": 153.44,
+      "end": 153.92,
+      "word": "PayPal"
+    },
+    {
+      "start": 153.92,
+      "end": 154.16,
+      "word": "knows"
+    },
+    {
+      "start": 154.16,
+      "end": 154.34,
+      "word": "what"
+    },
+    {
+      "start": 154.34,
+      "end": 154.5,
+      "word": "you've"
+    },
+    {
+      "start": 154.5,
+      "end": 154.74,
+      "word": "spent."
+    },
+    {
+      "start": 155.36,
+      "end": 155.48,
+      "word": "Worth"
+    },
+    {
+      "start": 155.48,
+      "end": 155.96,
+      "word": "turns"
+    },
+    {
+      "start": 155.96,
+      "end": 156.24,
+      "word": "that"
+    },
+    {
+      "start": 156.24,
+      "end": 156.46,
+      "word": "into"
+    },
+    {
+      "start": 156.46,
+      "end": 156.62,
+      "word": "the"
+    },
+    {
+      "start": 156.62,
+      "end": 156.82,
+      "word": "day"
+    },
+    {
+      "start": 156.82,
+      "end": 157.02,
+      "word": "you"
+    },
+    {
+      "start": 157.02,
+      "end": 157.16,
+      "word": "can"
+    },
+    {
+      "start": 157.16,
+      "end": 157.36,
+      "word": "buy."
+    },
+    {
+      "start": 158.16,
+      "end": 158.48,
+      "word": "One"
+    },
+    {
+      "start": 158.48,
+      "end": 158.78,
+      "word": "swipe"
+    },
+    {
+      "start": 158.78,
+      "end": 159.24,
+      "word": "before"
+    },
+    {
+      "start": 159.24,
+      "end": 159.48,
+      "word": "you"
+    },
+    {
+      "start": 159.48,
+      "end": 159.68,
+      "word": "pay."
+    },
+    {
+      "start": 160.84,
+      "end": 161.04,
+      "word": "Your"
+    },
+    {
+      "start": 161.04,
+      "end": 161.36,
+      "word": "balance"
+    },
+    {
+      "start": 161.36,
+      "end": 161.74,
+      "word": "says"
+    },
+    {
+      "start": 161.74,
+      "end": 161.9,
+      "word": "you"
+    },
+    {
+      "start": 161.9,
+      "end": 162.08,
+      "word": "can."
+    },
+    {
+      "start": 162.66,
+      "end": 162.82,
+      "word": "Worth"
+    },
+    {
+      "start": 162.82,
+      "end": 163.06,
+      "word": "tells"
+    },
+    {
+      "start": 163.06,
+      "end": 163.18,
+      "word": "you"
+    },
+    {
+      "start": 163.18,
+      "end": 163.26,
+      "word": "the"
+    },
+    {
+      "start": 163.26,
+      "end": 163.46,
+      "word": "day"
+    },
+    {
+      "start": 163.46,
+      "end": 163.7,
+      "word": "you"
+    },
+    {
+      "start": 163.7,
+      "end": 164.28,
+      "word": "actually"
+    },
+    {
+      "start": 164.28,
+      "end": 164.56,
+      "word": "can."
+    }
+  ]
+}

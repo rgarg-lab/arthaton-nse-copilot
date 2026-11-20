@@ -89,8 +89,16 @@ Three things here are not in the other entries:
 
 ### Quality of the demo
 
-[`DEMO_SCRIPT.md`](./DEMO_SCRIPT.md) — three beats, 3 minutes, with the questions a finance
-judge will ask and the honest answers to them.
+| | |
+|---|---|
+| **The video** | 3 minutes, **rendered from code** — Remotion + real Three.js, compositing genuine Playwright recordings of the running app. [`video/`](./video/) |
+| **Its figures** | read from `ml/artifacts/*.json` **at render time**; `video/src/honesty.test.ts` fails the build if a metric-shaped literal appears in a scene |
+| **Live narration** | [`DEMO_SCRIPT.md`](./DEMO_SCRIPT.md) — three beats, with the questions a finance judge will ask and the honest answers |
+| **Walkthrough deck** | [`public/walkthrough.html`](./public/walkthrough.html) — 13 self-advancing scenes; `/walkthrough.html` on a deployed instance |
+
+A video is where the honesty rule normally breaks: people say "sixty percent accurate" on
+camera and nobody diffs a video against an artifact. Here the figures on screen and the
+figures in this document come from the same files, and a test enforces it.
 
 ---
 
@@ -126,6 +134,11 @@ Stated here rather than discovered by a judge.
 - **Localhost, not serverless.** PGlite is per-process and the model service is a
   long-running Python process; [`HUMAN_TASKS.md`](./HUMAN_TASKS.md) §6 is the deployment
   runbook.
+- **One eight-second stretch of the video judders.** Beat 4.6, 1:28–1:36. The capture
+  beats are realtime screen recordings composited into a 60 fps timeline, and
+  `abstention-payload` was recorded at **29.6 fps**, so every frame shows twice. It is not
+  an encoding fault — the file measures **SSIM 0.9948** against its own source frames. The
+  measurement and the fix are in the [README](./README.md#the-video-and-the-walkthrough-deck).
 
 ---
 

@@ -399,11 +399,21 @@ src/
   components/     finance/ alongside the inherited shell; the shell is unchanged
 ml/
   src/copilot/    config, ingest, features, sentiment, labels, validation,
-                  train, evaluate, neighbors, signals, api
-  artifacts/      COMMITTED: model.pkl, calibrator.pkl, metrics.json,
+                  train, evaluate, magnitude, confidence, neighbors, signals, api
+  artifacts/      COMMITTED: model.pkl, calibrator.pkl, magnitude_model.pkl,
+                  metrics.json, magnitude_metrics.json, confidence_tiers.json,
                   latest_signals.json, feature_importance.json, holdout_ledger.json
   data/processed/ COMMITTED: panel.parquet
-  tests/          38 tests, including leakage and purge
+  experiments/    the accuracy search — RESULTS.md, search.py, why_58.py, two_agents.py
+  tests/          10 files, 104 tests, including leakage and purge
+  Dockerfile      the model service as a container (see DEPLOY.md)
+tests/            20 files, 238 TypeScript tests; e2e/ is the Playwright smoke test
+evals/            scored agent transcripts
+scripts/          preflight, demo, migrate, seed, eval, cache-clear,
+                  schedule-catchup.ps1, render-walkthrough.mjs
+public/
+  walkthrough.html  a self-advancing 13-scene deck of the whole project (see below)
+video/            the submission video — its own project, own lockfile (see below)
 ```
 
 **Python owns all modelling, evaluation and finance maths. TypeScript owns the UI, the
@@ -429,6 +439,80 @@ rule that fires appears in the trace where a judge can watch it work:
    rewritten: hiding a guardrail firing is the wrong trade in a build whose argument is that
    the guardrails are visible.
 4. **The disclaimer is attached to any answer containing a signal.**
+
+---
+
+## The video, and the walkthrough deck
+
+Two separate things, for two separate jobs.
+
+### `video/` — the submission video
+
+A 3-minute video **rendered from code**: Remotion (React → frame-accurate MP4) with
+`@remotion/three` for real Three.js, compositing genuine Playwright recordings of the
+running app. Deterministic and re-renderable; not generative video.
+
+```bash
+cd video && npm ci && npm run render     # -> out/arthaton-submission.mp4
+```
+
+It has its own dependency tree, its own lockfile and no entry in the root
+`package.json`, so it cannot affect the app build.
+
+**The honesty rule extends to it.** Every figure on screen is read from
+`ml/artifacts/*.json` at render time through `video/src/data.ts`; `video/src/honesty.test.ts`
+fails the build if a metric-shaped literal appears in any scene. That matters more here than
+in the app — a video is where this normally breaks, because people say "60% accurate" on
+camera and nobody diffs a video against an artifact.
+
+Its own docs: [`video/README.md`](./video/README.md),
+[`STYLE_SPEC.md`](./video/STYLE_SPEC.md) (measured style contract),
+[`SCRIPT.md`](./video/SCRIPT.md) (the 25-beat timing table),
+[`CREDITS.md`](./video/CREDITS.md).
+
+**Two known defects, stated rather than discovered:**
+
+- **The voice is a synthetic scratch track** (Windows SAPI) and must be replaced with a
+  real recording before submission. `video/HUMAN_TASKS.md` task 1.
+- **Beat 4.6 (1:28–1:36) judders.** The capture beats are realtime Playwright recordings
+  composited into a 60 fps timeline, and realtime recording cannot hold a locked 60.
+  Measured unique frames per second of source footage:
+
+  | capture | real fps |
+  |---|---|
+  | `abstention-payload` | **29.6** |
+  | `signals-threshold` | 49.2 |
+  | `signals-board` | 50.4 |
+  | `evidence` | 51.8 |
+  | `abstention-card`, `signals-tiles` | 55.8 |
+
+  `abstention-payload` was recorded at ~30 fps and extracted to 60, so every frame shows
+  twice for eight seconds. The fix is to re-capture by frame-stepping rather than
+  recording in realtime; it is not an encoding problem — the shipped MP4 measures
+  **SSIM 0.9948** against its own source frames.
+
+Large derived artifacts are not committed: `video/out/` (the MP4 and ~2.5 GB of
+intermediate frames), `video/public/frames/` (~290 MB of extracted capture sequences) and
+`video/audio/*.wav` (~104 MB). All three regenerate from committed sources —
+`captures/originals/` **is** committed, because the recordings cannot be reproduced without
+the stack running.
+
+### `public/walkthrough.html` — the walkthrough deck
+
+A self-contained, self-advancing 13-scene deck covering the whole project: the honest
+51.37%, the leak post-mortem, abstention, the validation-optimism tax, the magnitude head.
+Open it, press `f`, press Start; space pauses a scene for narration.
+
+It is served by the app, so on a deployed instance it is at `/walkthrough.html`.
+
+```bash
+node scripts/render-walkthrough.mjs --fps 30   # -> dist/walkthrough.webm
+```
+
+That renderer is worth a line because it is the technique the video's captures need:
+`?render=1` pauses every CSS transition on the page and exposes `window.__deck`, so frames
+are produced by seeking to an exact timestamp rather than by racing a clock. Capture speed
+cannot affect the output, so there is no judder by construction.
 
 ---
 

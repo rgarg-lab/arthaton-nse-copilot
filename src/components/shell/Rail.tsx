@@ -69,7 +69,10 @@ function RailButton({
 }
 
 /** The icon rail: mark, "new learner", and the signed-in user pinned at the end (§19). */
-export function Rail({ learnerId, displayName, user, learners, onOpenProfile, onSignOut, children }: RailProps) {
+// `learnerId`, `displayName` and `learners` stay on RailProps because callers still
+// pass them, but the rail itself renders none of them — it is icons, the mark and the
+// account button. Destructuring them here only made them look used.
+export function Rail({ user, onOpenProfile, onSignOut, children }: RailProps) {
   const userLabel = user.name ?? user.email ?? "Account";
   return (
     <nav className={styles.rail} aria-label="Workspace">

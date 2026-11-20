@@ -54,6 +54,9 @@ yarn-error.log*
 /.pglite/
 /.pglite-prod/
 /.pglite-test/
+# A hard kill mid-write can leave the embedded database unreadable; db:migrate
+# rebuilds it and moves the old one aside. Those copies are never wanted here.
+/.pglite.corrupt-backup-*/
 
 # typescript
 *.tsbuildinfo

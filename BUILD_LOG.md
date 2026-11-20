@@ -777,3 +777,75 @@ the source:
 Verified: 238 vitest · 104 pytest + 1 xfail · lint 0 errors · all 13 scenes render with no
 content crossing the stage edge, no console errors, and autoplay working under both
 `prefers-reduced-motion` settings.
+
+---
+
+## 2026-11-20 · Cleanup, the video diagnosis, and bringing the docs level
+
+**Mine (specified), generated code.** No behaviour changed in the app. Two days out from
+submission with everything green, a structural refactor is the wrong risk; this is dead
+code, honest ignores, and documentation that had fallen behind the repository.
+
+### Lint: 16 warnings → 0
+
+Four were the codebase's own `^_` convention for a deliberately-discarded binding
+(`const { $schema: _schema, ...rest }`), which the config never knew about — so the
+convention read as noise and real dead code hid in it. `eslint.config.mjs` now declares the
+pattern. The rest were genuinely dead and are gone:
+
+| | |
+|---|---|
+| `src/lib/landingData.ts` | `prov` — assigned, never read |
+| `src/components/shell/Rail.tsx` | `learnerId`, `displayName`, `learners` destructured but never rendered; they stay on `RailProps` because callers pass them |
+| `video/scripts/capture.mjs` | six `p = await glide(...)` where nothing read `p` again |
+| `video/src/three/UniverseGrid.tsx` | `present` |
+| `video/src/three/WalkForward.tsx` | `durationInFrames`, and the `useVideoConfig` import with it |
+
+### `video/` is now in the repository — 450 MB of it is not
+
+`git add video/` would have committed **450 MB**. 394 MB of that is derived: the extracted
+capture frame sequences (290 MB) and the WAV mix and stems (104 MB), both regenerating from
+committed sources in one command. Those are ignored. **`captures/originals/` is committed**
+(49 MB) because the recordings genuinely cannot be reproduced without the whole stack
+running, and `public/frames/` is derived from them. Net: 56 MB, 84 files.
+
+Checked before committing, because the repository goes public: the only video files
+committed are recordings of this project's own app. The style reference is the author's own
+prior hackathon video, as `video/CREDITS.md` already recorded.
+
+### The judder, diagnosed — and a wrong turn, recorded
+
+The first cut was reported as laggy. I was confident the cause was the intermediate
+`--jpeg-quality=90`, re-rendered all 10,800 frames at 95, and **it changed almost nothing**:
+duplicate frames 37.0% → 35.2%. The error was procedural — I measured q95, q100 and PNG on
+frames 3600-3719 and never measured **q90 on that same span**, inferring its rate from the
+whole-video figure instead. I ran three careful controls and skipped the actual one.
+
+What the measurements did establish:
+
+- **The encode was never at fault**: SSIM **0.9948** against its own source frames.
+- Most duplicate frames are intentional holds. The longest frozen run — 316 frames, 5.3 s
+  at t=165.7 s — is the legal disclaimer card.
+- **The real defect is in the source footage.** Unique frames per second of each capture:
+  `abstention-payload` **29.6**, `signals-threshold` 49.2, `signals-board` 50.4,
+  `evidence` 51.8, `abstention-card` and `signals-tiles` 55.8 — all composited into a
+  60 fps timeline. Playwright's `recordVideo` is a realtime recorder and cannot hold 60.
+  `abstention-payload` is beat 4.6, which is exactly the stretch that reads as laggy.
+
+The fix is to frame-step the captures instead of recording them in realtime — the technique
+`scripts/render-walkthrough.mjs` already uses. Not done; it needs the stack up.
+
+Kept from the wrong turn, because both are real: the render now writes a `.jpeg-quality`
+stamp, so a quality change can no longer be silently ignored by the resume logic (without
+it a quality fix "succeeds" in thirty seconds and changes nothing), and `NO_AUDIO=1`
+renders picture-only for a voice-over added by hand.
+
+### Docs
+
+`README.md` claimed `ml/tests/ 38 tests`; it is 104. The repository map omitted
+`experiments/`, `tests/`, `evals/`, `scripts/`, the magnitude and confidence artifacts,
+`video/` and the walkthrough deck. All corrected, and both the scratch voice-over and the
+beat 4.6 judder are now stated in the README and in `SUBMISSION.md` rather than left for a
+judge to find.
+
+Verified: `npm run build` ✅ · 238 vitest ✅ · 104 pytest + 1 xfail ✅ · lint **0 problems** ✅

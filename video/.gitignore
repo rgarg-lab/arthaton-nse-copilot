@@ -1,0 +1,32 @@
+# Dependencies and build caches
+node_modules/
+.capture-raw/
+.tts/
+__pycache__/
+
+# Stage 0 analysis intermediates. The *results* are committed — cuts.json,
+# transcript.json, audio_profile.json, palette.json, comparison.json and the
+# montages — but the decoded wavs and the 129 extracted frames are large and
+# regenerate from the scripts in one command.
+analysis/frames/
+analysis/frames_render/
+analysis/*.wav
+
+# Rendered output. The submission MP4 is a build artifact of this directory;
+# re-render it with `npm run render`.
+out/
+# Intermediate JPEG sequence (~2.5 GB); regenerate with `npm run render`.
+out/frames/
+# Supervisor logs
+*.log
+
+# Extracted capture frame sequences (~290 MB). Derived from captures/originals/
+# by `node scripts/extract-capture-frames.mjs`; the recordings themselves are
+# committed, so this regenerates in one command.
+public/frames/
+
+# The audio mix and its stems (~104 MB of WAV). Rebuilt by `npm run audio`
+# from scripts/build_audio.py. audio_build.json and VO_SCRIPT.md are committed
+# because they are the record of what the mix is.
+audio/*.wav
+audio/stems/

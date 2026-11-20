@@ -1,0 +1,33 @@
+{
+  "name": "arthaton-submission-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Code-rendered 3-minute Arthaton 2026 submission video for NSE Copilot. Deliberately isolated from the app: its own dependency tree, its own lockfile, no entry in the root package.json.",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "node scripts/render-supervised.mjs 300",
+    "render:single": "remotion render MainComposition out/arthaton-submission.mp4 --codec=h264 --crf=18 --concurrency=3",
+    "poster": "remotion still MainComposition out/poster.png --frame=8460",
+    "test": "vitest run && node scripts/check-captures.mjs",
+    "typecheck": "tsc --noEmit",
+    "capture": "node scripts/capture.mjs && node scripts/normalise-captures.mjs",
+    "audio": "python scripts/build_audio.py && python scripts/build_vo_script.py",
+    "compare": "python analysis/compare.py",
+    "verify": "npm run typecheck && npm test && node scripts/verify-binding.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.374",
+    "@remotion/media-utils": "4.0.374",
+    "@remotion/three": "4.0.374",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "remotion": "4.0.374",
+    "three": "0.171.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.0.0",
+    "@types/three": "0.171.0",
+    "typescript": "5.7.3",
+    "vitest": "2.1.8"
+  }
+}

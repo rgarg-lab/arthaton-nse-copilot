@@ -90,7 +90,6 @@ async function build(): Promise<LandingData | null> {
   const d = m.direction;
   const abst = m.abstention;
   const base = m.baselines;
-  const prov = m.provenance;
   if (!d || !abst || !base) return null;
 
   const cm = d.confusion_matrix;

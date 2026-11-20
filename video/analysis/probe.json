@@ -1,0 +1,30 @@
+{
+  "source": "C:\\Users\\Riyan Garg\\Downloads\\WhatsApp Video 2026-11-17 at 7.12.51 PM.mp4",
+  "raw_banner": [
+    "Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'C:\\Users\\Riyan Garg\\Downloads\\WhatsApp Video 2026-11-17 at 7.12.51 PM.mp4':",
+    "  Metadata:",
+    "    major_brand     : mp42",
+    "    minor_version   : 0",
+    "    compatible_brands: mp42isom",
+    "  Duration: 00:02:48.00, start: 0.000000, bitrate: 711 kb/s",
+    "  Stream #0:0[0x1](und): Video: h264 (Baseline) (avc1 / 0x31637661), yuv420p(tv, bt709, progressive), 1024x576, 646 kb/s, 30 fps, 30 tbr, 600 tbn (default)",
+    "  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, stereo, fltp, 62 kb/s (default)",
+    "At least one output file must be specified"
+  ],
+  "duration_s": 168.0,
+  "bitrate_kbps": 711,
+  "video": {
+    "codec": "h264",
+    "pix_fmt": "progressive",
+    "width": 1024,
+    "height": 576,
+    "bitrate_kbps": 646,
+    "fps": 30.0
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate_hz": 44100,
+    "channel_layout": "stereo",
+    "bitrate_kbps": 62
+  }
+}
