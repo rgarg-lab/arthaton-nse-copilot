@@ -448,13 +448,19 @@ Two separate things, for two separate jobs.
 
 ### `video/` — the submission video
 
-A 3-minute video **rendered from code**: Remotion (React → frame-accurate MP4) with
+A 3 min 47 s video **rendered from code**: Remotion (React → frame-accurate MP4) with
 `@remotion/three` for real Three.js, compositing genuine Playwright recordings of the
 running app. Deterministic and re-renderable; not generative video.
 
 ```bash
 cd video && npm ci && npm run render     # -> out/arthaton-submission.mp4
 ```
+
+The centre of it is a **live demo**, not a slideshow: a real question typed into the
+real chat, the trace panel firing `get_signal` and `get_model_metrics`, and the model
+declining to call Bajaj Finance today — the same name the film has just shown it was
+right about in April 2022, because today's conviction sits under the same frozen gate.
+The voice-over is the author's own, recorded in one take.
 
 It has its own dependency tree, its own lockfile and no entry in the root
 `package.json`, so it cannot affect the app build.
@@ -467,7 +473,7 @@ camera and nobody diffs a video against an artifact.
 
 Its own docs: [`video/README.md`](./video/README.md),
 [`STYLE_SPEC.md`](./video/STYLE_SPEC.md) (measured style contract),
-[`SCRIPT.md`](./video/SCRIPT.md) (the 25-beat timing table),
+[`SCRIPT.md`](./video/SCRIPT.md) (the 28-beat timing table),
 [`CREDITS.md`](./video/CREDITS.md).
 
 **Two known defects, stated rather than discovered:**
