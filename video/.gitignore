@@ -30,3 +30,16 @@ public/frames/
 # because they are the record of what the mix is.
 audio/*.wav
 audio/stems/
+
+# Playwright writes WebM; `scripts/normalise-captures.mjs` converts each one to
+# the MP4 that is actually committed and read by the extractor. Keeping both is
+# 20 MB of exact duplication.
+captures/originals/*.webm
+
+# The rejected synthesised mix, left behind by the old audio path. The film
+# ships silent (BUILD_LOG D8.3) and this is 33 MB of WAV nobody plays.
+public/audio/*.wav
+
+# Review stills pulled out of a render to read at full size. Regenerate from
+# the MP4 whenever a cut needs checking; they are not inputs to anything.
+analysis/vcheck/

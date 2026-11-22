@@ -84,3 +84,10 @@ ml/data/raw/
 # Rendered walkthrough video — 20MB binary, reproducible with
 # `node scripts/render-walkthrough.mjs`. Not a repo artifact.
 dist/
+
+# Scratch logs from detached runs during the v6 build (renders, captures, the
+# data catch-up, the live evals). Diagnostics, not source.
+/capture-*.log
+/catchup.log
+/catchup.err
+/eval-live*.log
