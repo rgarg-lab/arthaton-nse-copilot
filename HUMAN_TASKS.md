@@ -257,3 +257,62 @@ make -C ml help
   full queue → approve → delivered journey the demo shows.
 - **No auth setup.** The app runs signed out on purpose; a demo should not open with a
   login wall.
+
+---
+
+## Chat does not render the model's markdown — visible in the demo video
+
+**Status: open. App-side, cosmetic, left alone deliberately.**
+
+`gemini-2.5-flash` returns markdown emphasis, and `ChatPanel` renders it as literal
+text. On screen that reads:
+
+> …the model predicts a `**down**` direction with a calibrated probability of `**39.06%**`.
+
+The asterisks are visible in the v6 submission video, in beats 4.3 and 4.4 — the
+workspace chat demo. Everything *said* is correct; it is only the emphasis that
+leaks through unrendered.
+
+Not fixed here for two reasons: the video build is scoped not to touch the app, and
+this surfaced on submission day with a render already running. The honest-looking
+alternatives were both worse — stripping the asterisks in the capture would have
+meant editing what the model said, and re-recording cost Gemini quota that was
+already rate-limited.
+
+The fix is in `src/components/chat/ChatPanel.tsx`: run assistant turns through the
+markdown renderer the rest of the app already uses, or have the system prompt ask
+for plain prose. The first is better; the model's emphasis is usually on the number
+that matters.
+
+---
+
+## Live eval: 6/7. The one failure is real, and the test is right
+
+**Status: open. A behaviour gap, not a harness artifact. Deliberately not "fixed".**
+
+`npm run eval -- --live` against `gemini-2.5-flash`, clean run, no rate limiting and
+no mock fallback: **6 of 7 applicable cases pass.**
+
+The failure is `queues-rather-than-acting`. Asked to queue a task, the model replied:
+
+> "I can create a task to review today's abstentions. What due date would you like
+> for this task?"
+
+— and called no tool. It is a reasonable-sounding sentence and it is still a miss:
+nothing was queued, so there is nothing in the approvals tray, and the user has to
+answer a question before anything happens.
+
+`dueDate` in `CreateTaskInput` (`src/lib/tools/actions.ts`) is `.optional()`. The
+model did not need to ask. The likely nudge is the field's own description —
+"Compute it with `calculate`, do not work it out yourself" — which reads as *this
+field matters*, so a conservative model goes looking for it.
+
+**Three earlier failures in this suite were harness bugs and were fixed** (the
+scorer asserted tool names appeared in the prose; one case demanded the model claim
+to be a mock while running live). This one is not. The honest response is to leave
+the test failing and report 6/7, rather than soften an assertion until the number
+reads better.
+
+Worth trying, in order: reword the `dueDate` description so it reads as optional;
+or add to the system prompt that a queued action with missing optional fields should
+be queued anyway and refined on approval. Re-run the eval after either.
