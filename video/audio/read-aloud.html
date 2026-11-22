@@ -1,0 +1,286 @@
+<meta charset="utf-8">
+<title>NSE Copilot — voice-over script</title>
+<style>
+  /* Page margins live in scripts/build_script_pdf.mjs, NOT here.
+     Declaring them in both places is what cropped the right edge of page 1:
+     Playwright passes format A4 with its own margins, Chromium lays the content
+     out for the full 210mm sheet, and then this margin box clipped it. One
+     source of truth. */
+  @page { size: A4; }
+
+  /* Nothing may exceed the printable width, whatever the content. */
+  body { max-width: 100%; overflow-wrap: break-word; }
+  table, pre { max-width: 100%; }
+
+  :root {
+    --ink: #1b1c20;
+    --navy: #182868;
+    --amber: #B4761A;
+    --rule: #d8d8d4;
+    --mute: #6a6b70;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: "Georgia", "Cambria", serif;
+    color: var(--ink);
+    font-size: 11.6pt;
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  h1 {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 20pt;
+    letter-spacing: -0.015em;
+    margin: 0 0 2mm;
+    color: var(--navy);
+  }
+
+  .sub {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 9pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin: 0 0 6mm;
+  }
+
+  .rules {
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--navy);
+    padding: 4mm 5mm;
+    margin: 0 0 7mm;
+    font-size: 10.4pt;
+    background: #fafaf8;
+  }
+  .rules p { margin: 0 0 2.5mm; }
+  .rules p:last-child { margin-bottom: 0; }
+  .rules b { color: var(--navy); }
+
+  /* A spoken line: timecode in the margin, words to the right. */
+  .line {
+    display: grid;
+    grid-template-columns: 17mm 1fr;
+    column-gap: 4mm;
+    margin: 0 0 4.5mm;
+    break-inside: avoid;
+  }
+
+  .tc {
+    font-family: "Consolas", "Menlo", monospace;
+    font-size: 10pt;
+    font-weight: 700;
+    color: var(--navy);
+    padding-top: 0.6mm;
+  }
+
+  .say { font-size: 12.4pt; line-height: 1.5; }
+
+  .note {
+    grid-column: 2;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 8.8pt;
+    color: var(--mute);
+    font-style: italic;
+    margin-top: 1.2mm;
+  }
+
+  /* A pacing checkpoint. Not script — do not read these aloud. */
+  .check {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 9.6pt;
+    font-weight: 700;
+    color: var(--amber);
+    border-top: 1px solid var(--amber);
+    border-bottom: 1px solid var(--amber);
+    padding: 1.8mm 0;
+    margin: 5mm 0 5.5mm;
+    letter-spacing: 0.01em;
+    break-inside: avoid;
+  }
+  .check span { font-weight: 400; color: var(--mute); }
+
+  .stop {
+    border: 2px solid var(--navy);
+    background: #f2f4fb;
+    padding: 4mm 5mm;
+    margin: 4mm 0 6mm;
+    break-inside: avoid;
+  }
+  .stop h2 {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 13pt;
+    margin: 0 0 1.5mm;
+    color: var(--navy);
+  }
+  .stop p {
+    margin: 0;
+    font-size: 10.2pt;
+    color: var(--ink);
+  }
+
+  h3 {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 11pt;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin: 0 0 3mm;
+    padding-bottom: 1.5mm;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  table { border-collapse: collapse; width: 100%; font-size: 10pt; }
+  td { padding: 1.6mm 2mm; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  td:first-child { width: 34%; font-family: "Consolas", monospace; color: var(--mute); }
+  td:last-child { color: var(--navy); }
+
+  .page-break { break-before: page; }
+
+  code {
+    font-family: "Consolas", monospace;
+    font-size: 9.6pt;
+    background: #f1f1ee;
+    padding: 0.4mm 1mm;
+  }
+</style>
+
+<h1>NSE Copilot — voice-over script</h1>
+<p class="sub">3:47 &nbsp;·&nbsp; 29 lines &nbsp;·&nbsp; 421 words
+&nbsp;·&nbsp; record straight through to vo-take.wav</p>
+
+<div class="rules">
+  <p><b>The amber bars are the clock, not the script.</b> When you reach one, your
+  stopwatch should read that time. Ahead of it, you're rushing; behind it, cut the
+  pause — never the words.</p>
+  <p><b>Pause between lines, not inside them.</b> The windows already include the
+  silence. The film is only about three-quarters voiced.</p>
+  <p><b>Where a block says stop, stop.</b> The silences are written into the edit;
+  filling one puts you ahead of the picture for the rest of the film.</p>
+  <p><b>The opening is the slowest part of the film.</b> Let 0:00–0:14 breathe.</p>
+</div>
+
+<div class="line"><div class="tc">0:00</div><div class="say">Most stock tools always have an answer.
+</div></div>
+<div class="line"><div class="tc">0:04</div><div class="say">This one tells you when it doesn't.
+</div></div>
+<div class="line"><div class="tc">0:09</div><div class="say">And it shows you the measurement that earns the refusal.
+</div></div>
+<div class="line"><div class="tc">0:14</div><div class="say">This is it, running. Eighteen NSE large caps.
+<div class="note">8 words in 7 seconds. There is room here; don't rush it.</div>
+</div></div>
+<div class="check">⏱ 0:20 &nbsp; <span>— you should be around “Eighteen NSE large caps.”</span></div>
+<div class="line"><div class="tc">0:21</div><div class="say">One question each — and a refusal when conviction is low.
+<div class="note">10 words in 7 seconds. There is room here; don't rush it.</div>
+</div></div>
+<div class="line"><div class="tc">0:28</div><div class="say">Open any retail equity app in India and there is always a number. A target price. A buy badge. A confidence score.
+<div class="note">22 words in 5 seconds — the fastest line in the film. It should sound like a list being rattled off.</div>
+</div></div>
+<div class="line"><div class="tc">0:33</div><div class="say">It is there whether or not anything about tomorrow is actually knowable.
+<div class="note">12 words in 4 seconds. Quick — keep it crisp, don't swallow the ends.</div>
+</div></div>
+<div class="line"><div class="tc">0:37</div><div class="say">Next-session direction on large caps is close to a coin flip.
+<div class="note">11 words in 7 seconds. There is room here; don't rush it.</div>
+</div></div>
+<div class="check">⏱ 0:40 &nbsp; <span>— you should be around “on large caps is close”</span></div>
+<div class="line"><div class="tc">0:44</div><div class="say">NSE Copilot runs two independent heads over a fixed basket of large caps — one asks which way tomorrow goes, the other asks how big the move will be. They are never merged.
+<div class="note">32 words in 11 seconds. Quick — keep it crisp, don't swallow the ends.</div>
+</div></div>
+<div class="line"><div class="tc">0:55</div><div class="say">One real call. April twenty-sixth, twenty twenty-two: Bajaj Finance, called down at sixty point nine percent. Next session it fell seven point two seven. Not luck — that band was calibrated.
+</div></div>
+<div class="check">⏱ 1:00 &nbsp; <span>— you should be around “Bajaj Finance, called down at”</span></div>
+<div class="line"><div class="tc">1:12</div><div class="say">This is the real thing. The Copilot, its working, and the panes it reads from.
+</div></div>
+<div class="check">⏱ 1:20 &nbsp; <span>— you should be around “it reads from.”</span></div>
+<div class="line"><div class="tc">1:20</div><div class="say">So let's ask it about Bajaj Finance — the name it just got right — and watch which tools it reaches for.
+<div class="note">20 words in 13 seconds. There is room here; don't rush it.</div>
+</div></div>
+<div class="line"><div class="tc">1:33</div><div class="say">And it says no. Same name, same model — today's conviction sits under the same frozen gate. Being right once does not buy it an answer every time.
+</div></div>
+<div class="check">⏱ 1:40 &nbsp; <span>— you should be around “same frozen gate. Being right”</span></div>
+<div class="line"><div class="tc">1:45</div><div class="say">Ask about one that clears the gate, and it answers, with the number attached.
+<div class="note">14 words in 11 seconds. There is room here; don't rush it.</div>
+</div></div>
+<div class="line"><div class="tc">1:56</div><div class="say">That is the refusal, in full.
+</div></div>
+<div class="stop"><h2>⏸ Now stop. 4 seconds of silence — 1:59 to 2:03.</h2><p>Count it out. It will feel much longer than it is. Don't clear your throat, don't breathe into the mic, and don't start early.</p></div>
+<div class="line"><div class="tc">2:03</div><div class="say">Beside the chat: today's board, the closest historical sessions, and the model card it quotes against itself.
+<div class="note">17 words with 16 seconds to say them — the slowest line after the opening. Take the pauses; this is slower than it reads.</div>
+</div></div>
+<div class="line"><div class="tc">2:19</div><div class="say">Your own names, each one called or declined.
+<div class="note">8 words in 7 seconds. There is room here; don't rush it.</div>
+</div></div>
+<div class="check">⏱ 2:20 &nbsp; <span>— you should be around “Your own names, each”</span></div>
+<div class="line"><div class="tc">2:26</div><div class="say">What it remembers, and what it retrieved to answer you.
+</div></div>
+<div class="line"><div class="tc">2:32</div><div class="say">Every figure on the model card is read from one committed artifact — accuracy by confidence, and what each band costs in coverage.
+<div class="note">22 words in 8 seconds. Quick — keep it crisp, don't swallow the ends.</div>
+</div></div>
+<div class="check">⏱ 2:40 &nbsp; <span>— you should be around “costs in coverage.”</span></div>
+<div class="line"><div class="tc">2:40</div><div class="say">And nothing is ever sent without an approval.
+<div class="note">8 words in 7 seconds. There is room here; don't rush it.</div>
+</div></div>
+<div class="line"><div class="tc">2:47</div><div class="say">Why believe any of it. Four expanding training windows, split on dates, with a five-session embargo — because the label for today is tomorrow's move.
+</div></div>
+<div class="line"><div class="tc">2:57</div><div class="say">Then one final holdout, read exactly once, with a committed ledger.
+<div class="note">11 words in 4 seconds. Quick — keep it crisp, don't swallow the ends.</div>
+</div></div>
+<div class="check">⏱ 3:00 &nbsp; <span>— you should be around “once, with a committed ledger.”</span></div>
+<div class="line"><div class="tc">3:01</div><div class="say">Isotonic calibration is what makes this a probability at all.
+<div class="note">10 words in 7 seconds. There is room here; don't rush it.</div>
+</div></div>
+<div class="line"><div class="tc">3:08</div><div class="say">And here is what it beats — four baselines, on the identical split.
+<div class="note">12 words in 4 seconds. Quick — keep it crisp, don't swallow the ends.</div>
+</div></div>
+<div class="line"><div class="tc">3:12</div><div class="say">Forced to call every session, it is right half the time. That is the honest floor.
+</div></div>
+<div class="line"><div class="tc">3:19</div><div class="say">Every configuration in the published search failed to beat it.
+</div></div>
+<div class="check">⏱ 3:20 &nbsp; <span>— you should be around “Every configuration in the”</span></div>
+<div class="line"><div class="tc">3:25</div><div class="say">The usable product is the accuracy on the sessions where conviction clears the gate — and knowing which sessions those are.
+</div></div>
+<div class="line"><div class="tc">3:35</div><div class="say">Paper trading and historical analysis only. Not investment advice.
+</div></div>
+<div class="check">⏱ 3:40 &nbsp; <span>— you should be around “Not investment advice.”</span></div>
+<div class="line"><div class="tc">3:40</div><div class="say">I would rather tell you that than show you a number I invented.
+</div></div>
+<div class="check">⏱ 3:47 &nbsp; <span>— end. Hold two seconds of room tone before you stop recording.</span></div>
+
+<div class="page-break"></div>
+
+<h3>Say it this way</h3>
+<table>
+  <tr><td>60.20%</td><td>sixty point two percent</td></tr>
+  <tr><td>60.9%</td><td>sixty point nine percent</td></tr>
+  <tr><td>−7.27%</td><td>seven point two seven &nbsp;— the word “fell” already carries the minus</td></tr>
+  <tr><td>26 April 2022</td><td>April twenty-sixth, twenty twenty-two</td></tr>
+  <tr><td>NSE</td><td>the letters — N, S, E</td></tr>
+  <tr><td>Isotonic</td><td>eye-so-TON-ic</td></tr>
+  <tr><td>SEBI</td><td>SEE-bee</td></tr>
+  <tr><td>Bajaj Finance</td><td>BAH-jahj</td></tr>
+</table>
+
+<br>
+<h3>Recording it</h3>
+<p>One continuous take, straight through, to <code>video/audio/vo-take.wav</code> — 48 kHz,
+mono is fine. Don't stop and restart between lines; a single take is far easier to align
+to the picture than 29 fragments.</p>
+<p>A quiet room matters more than an expensive microphone. Phone voice-memo held a hand's
+width away, off-axis so you aren't breathing straight into it, is enough. If you fluff a
+line, pause for three full seconds, then say the whole line again from the start — the
+clean retake is easy to find and splice.</p>
+
+<br>
+<h3>What happens after</h3>
+<p>Hand the file over and <code>scripts/build_voice_mix.py</code> normalises it to the
+reference's measured loudness, peak-limits it, fits it to the 3:47 timeline and
+muxes it in. Only a re-encode is needed — the frames are already on disk, so the film is
+not re-rendered and nothing in the edit moves. The captions come from
+<code>src/vo.ts</code> and the beat boundaries from <code>src/Main.tsx</code>; neither is
+touched by audio, so your take cannot knock them out of sync.</p>
+<p><b>This document is generated from the timeline</b>
+(<code>scripts/build_read_aloud.py</code>). If the edit changes, regenerate it rather than
+editing it by hand — an earlier hand-written copy went stale after a retime and described
+a film that no longer existed.</p>

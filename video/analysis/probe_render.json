@@ -7,8 +7,8 @@
     "    minor_version   : 512",
     "    compatible_brands: isomiso2avc1mp41",
     "    encoder         : Lavf63.1.102",
-    "  Duration: 00:03:00.00, start: 0.000000, bitrate: 933 kb/s",
-    "  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuvj420p(pc, bt470bg/unknown/unknown, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 731 kb/s, 60 fps, 60 tbr, 15360 tbn (default)",
+    "  Duration: 00:03:00.00, start: 0.000000, bitrate: 1190 kb/s",
+    "  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuvj420p(pc, bt470bg/unknown/unknown, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 988 kb/s, 60 fps, 60 tbr, 15360 tbn (default)",
     "    Metadata:",
     "      handler_name    : VideoHandler",
     "      encoder         : Lavc63.1.102 libx264",
@@ -20,13 +20,13 @@
     "At least one output file must be specified"
   ],
   "duration_s": 180.0,
-  "bitrate_kbps": 933,
+  "bitrate_kbps": 1190,
   "video": {
     "codec": "h264",
     "pix_fmt": "progressive",
     "width": 1920,
     "height": 1080,
-    "bitrate_kbps": 731,
+    "bitrate_kbps": 988,
     "fps": 60.0
   },
   "audio": {

@@ -19,6 +19,7 @@ deterministic and the same loudness analysis that measured the reference can
 measure the result.
 """
 import json
+import os
 import re
 import subprocess
 import sys
@@ -54,6 +55,17 @@ TARGET_LUFS = PROFILE["loudness"]["integrated_lufs"]
 TARGET_TRUE_PEAK_DB = -1.6
 # Not measurable from a mixed track (STYLE_SPEC.md §6.3). Chosen, and logged.
 DUCK_DB = -9.0
+
+# --- the shipped mix has no voice ------------------------------------------
+# An earlier cut layered a Windows-SAPI scratch voice under the bed. Two
+# problems, both reported by the author watching it back: the synthesised speech
+# was not clear, and with the bed underneath it the result read as "two audios"
+# fighting rather than one mix. Captions carry the words instead.
+#
+# Set WITH_VOICE=1 to rebuild with a voice track — use that once a real take
+# exists at audio/vo-take.wav. The ducking, timings and loudness targets below
+# all still apply when it does.
+WITH_VOICE = os.environ.get("WITH_VOICE") == "1"
 
 
 def read_vo_lines() -> list[dict]:
@@ -320,13 +332,28 @@ def main():
     lines = read_vo_lines()
     print(f"{len(lines)} VO lines parsed from src/vo.ts")
 
-    vo, report, tts_ok = build_vo(lines)
-    if not tts_ok:
+    if WITH_VOICE:
+        vo, report, tts_ok = build_vo(lines)
+    else:
+        vo, report, tts_ok = np.zeros(int(DURATION_S * SR)), [], False
+        print("building bed only (no voice) — set WITH_VOICE=1 to include one")
+    if WITH_VOICE and not tts_ok:
         print("WARNING: no TTS produced; VO track will be silent", file=sys.stderr)
 
     bed = build_bed()
     bed *= 10 ** ((BED_RMS_DB - rms_db(bed)) / 20.0)   # hit the measured level
-    bed = duck(bed, vo, lines)
+    if WITH_VOICE and tts_ok:
+        bed = duck(bed, vo, lines)
+    else:
+        # Nothing to duck under. Keep only the deliberate silence at the
+        # abstention beat, which is sound design rather than ducking.
+        hold_a, hold_b = int(84.0 * SR), int(87.6 * SR)
+        fade = int(0.35 * SR)
+        g = np.ones(bed.size)
+        g[hold_a:hold_b] = 0.0
+        g[max(hold_a - fade, 0):hold_a] *= np.linspace(1, 0, min(fade, hold_a))
+        g[hold_b:hold_b + fade] *= np.linspace(0, 1, fade)
+        bed = bed * g
 
     # Voice sits above the bed; the bed was already placed at the measured
     # music-only level, so only the voice is trimmed to reach target loudness.

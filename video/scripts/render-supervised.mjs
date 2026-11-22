@@ -32,8 +32,20 @@ const ROOT = join(HERE, "..");
 const OUT = join(ROOT, "out");
 const FRAMES = join(OUT, "frames");
 
-const TOTAL = 10800;
-const FPS = 60;
+/**
+ * Frame count is read from `src/theme.ts`, never restated here.
+ *
+ * It was a literal `10800` once. The retime to 190 s moved `DURATION_S` and
+ * this did not follow, so the renderer cheerfully produced a complete, valid,
+ * correctly-encoded film that stopped ten seconds early and dropped the close.
+ * Nothing failed; it just quietly made the wrong movie. Third instance of this
+ * exact bug in one pass (see also `honesty.test.ts` and `check_script.py`).
+ */
+const THEME = readFileSync(join(ROOT, "src", "theme.ts"), "utf8");
+const FPS = Number(/export const FPS = (\d+)/.exec(THEME)?.[1]);
+const DURATION_S = Number(/export const DURATION_S = (\d+)/.exec(THEME)?.[1]);
+if (!FPS || !DURATION_S) throw new Error("could not read FPS/DURATION_S from src/theme.ts");
+const TOTAL = DURATION_S * FPS;
 const CHUNK = Number(process.argv[2] ?? 300);
 const CONCURRENCY = process.env.RENDER_CONCURRENCY ?? "2";
 /** Kill and retry if no new frame lands for this long. */
@@ -71,7 +83,9 @@ const JPEG_QUALITY = Number(process.env.JPEG_QUALITY ?? 95);
 const DEST = join(OUT, "arthaton-submission.mp4");
 const MIX = join(ROOT, "audio", "mix.wav");
 /** NO_AUDIO=1 renders the picture only, for a voice-over added later by hand. */
-const NO_AUDIO = process.env.NO_AUDIO === "1" || !existsSync(MIX);
+// The film ships silent — see src/audio.manifest.ts. Set NO_AUDIO=0 and
+// provide audio/mix.wav to re-enable a soundtrack.
+const NO_AUDIO = process.env.NO_AUDIO !== "0" || !existsSync(MIX);
 
 const resolveFfmpeg = () => {
   if (process.env.FFMPEG) return process.env.FFMPEG;

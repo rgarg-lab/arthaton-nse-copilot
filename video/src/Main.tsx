@@ -3,29 +3,42 @@ import { AbsoluteFill, Sequence } from "remotion";
 import { Capture } from "./components/Capture";
 import { Captions } from "./components/Captions";
 import { Chrome } from "./components/Chrome";
-import { ReFrame } from "./components/ReFrame";
-import { plan, type ReframePlan } from "./reframePlan";
+import { OVERLAP, StagePanel, type Transition } from "./components/StagePanel";
 import { Soundtrack } from "./components/Soundtrack";
+import { BotStage } from "./three/BotStage";
 import { CloseCard, DisclaimerCard } from "./scenes/Close";
 import { Baselines, FailedSearch, HonestNumber } from "./scenes/Evidence";
-import { HookOne, HookTitle, HookTwo } from "./scenes/Hook";
-import { CoinFlip, ProblemWall } from "./scenes/Problem";
+import { HookTitle } from "./scenes/Hook";
+import { ProblemWall } from "./scenes/Problem";
+import { AppSlabs } from "./three/props/AppSlabs";
+import { CoinFlip3D } from "./three/props/CoinFlip3D";
+import { TwoHeads } from "./three/props/TwoHeads";
+import { AbstentionReadout } from "./three/props/AbstentionReadout";
+import { WorkedExample } from "./three/props/WorkedExample";
 import { board, headline } from "./data";
-import { color, sec } from "./theme";
-import { Abstention } from "./three/Abstention";
+import { color, sec, semantic } from "./theme";
 import { CalibrationRibbon } from "./three/CalibrationRibbon";
 import { ConfidenceLadder } from "./three/ConfidenceLadder";
-import { UniverseGrid } from "./three/UniverseGrid";
 import { WalkForward } from "./three/WalkForward";
 
 /**
- * The submission timeline. Every row here is a row of `SCRIPT.md`, in order,
- * with the same in/out points — `analysis/check_script.py` validates that table
- * and this file is its implementation.
+ * The submission timeline. Every row is a row of `SCRIPT.md`, in order, with
+ * the same in/out points — `analysis/check_script.py` validates that table and
+ * this file is its implementation.
  *
- * The reference cuts hard and animates inside shots (STYLE_SPEC.md §4), so
- * these are bare `<Sequence>` boundaries with no transition components between
- * them. That is deliberate, not an omission.
+ * ## The picture holds still
+ *
+ * An earlier cut wrapped most beats in a `<ReFrame>` that jumped the crop and
+ * zoom on a schedule, to raise the detected cut count toward the reference's
+ * measured 1.91 s mean shot. It worked as a metric and failed as a film: the
+ * frame appeared to zoom in and out at random, which is the first thing a
+ * viewer noticed. It is gone (BUILD_LOG D8.1).
+ *
+ * The cut rate now comes from **real content changes** — twenty-three beats
+ * across eight distinct application pages and five 3D set pieces — rather than
+ * from moving the camera over a still one. That reads as a slower film than the
+ * reference, and `COMPARISON.md` records exactly how much. A stable frame is
+ * worth more than a matched statistic.
  */
 
 type Beat = {
@@ -33,15 +46,10 @@ type Beat = {
   from: number;
   to: number;
   el: React.ReactNode;
-  /**
-   * Seconds within the beat at which to re-frame. See `<ReFrame>`: a long shot
-   * that has to stay continuous for its own sake (a 3D camera move, a capture
-   * scroll) is split into several framings of itself, which is how the
-   * reference reaches a 1.91 s mean shot without cutting away from an idea.
-   */
-  reframe?: number[];
-  scales?: number[];
-  origins?: string[];
+  /** How this beat arrives. Defaults to a swipe. */
+  enter?: Transition;
+  /** How it leaves, under the next beat. Defaults to a swipe. */
+  exit?: Transition;
 };
 
 const B = (
@@ -49,185 +57,140 @@ const B = (
   from: number,
   to: number,
   el: React.ReactNode,
-  p?: ReframePlan,
-): Beat => ({
-  id,
-  from,
-  to,
-  el,
-  reframe: p?.at,
-  scales: p?.scales,
-  origins: p?.origins,
-});
+  enter: Transition = "swipe",
+  exit: Transition = "swipe",
+): Beat => ({ id, from, to, el, enter, exit });
 
 export const Main: React.FC = () => {
   const beats: Beat[] = [
     // 1. HOOK
-    B("1.1", 0, 4, <HookOne />),
-    B("1.2", 4, 9, <HookTwo />),
     B(
-      "1.3",
-      9,
-      15,
-      <HookTitle />,
-      plan(6, 4, 1),
+      "1.1",
+      0,
+      4,
+      <AppSlabs lines={["Most stock tools", "always have an answer."]} />,
+      "hold",
+      "rise",
     ),
+    B(
+      "1.2",
+      4,
+      9,
+      <AppSlabs
+        blanked
+        lines={["This one tells you", "when it doesn't."]}
+        tone={semantic.abstain}
+      />,
+      "rise",
+      "collapse",
+    ),
+    B("1.3", 9, 14, <HookTitle />, "collapse", "swipe"),
+
+    // 1.4 / 1.5 — the landing page. Added in v5: it is the best-designed
+    // screen in the product and was absent from the first four cuts. Both are
+    // genuine recordings of `/` — the hero with the Copilot panel working, then
+    // the eighteen-name deck in perspective.
+    B(
+      "1.4",
+      14,
+      21,
+      <Capture name="landing-hero" caption="the product, stating its own thesis" />, "swipe", "swipe"),
+    B(
+      "1.5",
+      21,
+      28,
+      <Capture name="landing-deck" caption="/ · the full universe, one question each" />, "swipe", "collapse"),
 
     // 2. PROBLEM
-    B(
-      "2.1",
-      15,
-      21,
-      <ProblemWall />,
-      plan(6, 5, 2),
-    ),
-    B(
-      "2.2",
-      21,
-      27,
-      <ProblemWall dropAway />,
-      plan(6, 5, 5),
-    ),
-    B(
-      "2.3",
-      27,
-      35,
-      <CoinFlip />,
-      plan(8, 6, 3),
-    ),
+    B("2.1", 28, 33, <ProblemWall />, "swipe", "scatter"),
+    B("2.2", 33, 37, <ProblemWall dropAway />, "scatter", "rise"),
+    B("2.3", 37, 44, <CoinFlip3D />, "rise", "collapse"),
 
-    // 3. WHAT IT IS — one continuous 3D move across three beats, so the
-    // camera is not restarted at each cut. Re-framed six times so a 20 s
-    // continuous move still cuts at the reference's rhythm.
-    B(
-      "3",
-      35,
-      55,
-      <UniverseGrid />,
-      plan(20, 13, 0),
-    ),
+    // 3. WHAT IT IS — one continuous 3D camera move, uninterrupted.
+    B("3", 44, 55, <TwoHeads />, "collapse", "flip"),
 
-    // 4. DEMO — the real app
+    // 3.5 — one real call, start to finish. The film explained how the product
+    // works but never showed it being right about anything. Every figure here
+    // is queried from the committed walk-forward predictions by
+    // `scripts/build_example.py`; none of it is authored.
+    B("3.5", 55, 72, <WorkedExample />, "flip", "collapse"),
+
+    // 4. THE DEMO — the product being used, as one journey.
+    //
+    // v5 showed eight disconnected page views and never once showed the agent
+    // doing anything; /workspace, where the chat and the trace panel live, had
+    // never been filmed. Beats 4.1-4.4 are four slices of a single continuous
+    // recording of one real conversation.
     B(
       "4.1",
-      55,
-      62,
-      <Capture
-        name="signals-board"
-        caption={`/signals · ${board.count} names · ${board.abstained} abstentions`}
-      />,
-      plan(7, 4, 4),
-    ),
+      72,
+      80,
+      <Capture name="ws-open" caption="/workspace · the Copilot, its trace, and four panes" />, "collapse", "hold"),
+
+    // The callback. Beat 3.5 has just proved it was right about this name in
+    // April 2022; asked about it today it declines, because today's conviction
+    // is below the same frozen gate. Being right once does not license an
+    // answer every time — which is the whole argument of the film, happening
+    // live rather than asserted.
     B(
       "4.2",
-      62,
-      69,
-      <Capture
-        name="signals-tiles"
-        caption={`calls today ${board.signalsEmitted} · abstentions ${board.abstained}`}
-      />,
-      plan(7, 4, 7),
-    ),
+      80,
+      93,
+      <Capture name="ws-ask" caption="a real question, and the tools firing" />, "hold", "hold"),
     B(
       "4.3",
-      69,
-      75,
-      <Capture
-        name="signals-threshold"
-        caption={`frozen threshold ${headline.direction.qualifier}`}
-      />,
-      plan(6, 5, 2),
-    ),
+      93,
+      105,
+      <Capture name="ws-refusal" caption="the same name it was right about — declined today" />, "hold", "hold"),
     B(
       "4.4",
-      75,
-      81,
-      <Capture name="abstention-card" caption="one card it declined" />,
-      plan(6, 4, 6),
-    ),
+      105,
+      116,
+      <Capture name="ws-call" caption="and one it will call, with the number" />, "hold", "collapse"),
 
-    // 4.5 — THE ABSTENTION. The longest hold in the film, and the only long
-    // beat with no re-framing at all: the whole point is that nothing moves.
-    B("4.5", 81, 88, <Abstention />),
+    // 4.5 — the 3D card. No longer the reveal: it explains the refusal the
+    // viewer has just watched happen in the chat.
+    B("4.5", 116, 123, <AbstentionReadout />, "collapse", "rise"),
 
     B(
       "4.6",
-      88,
-      96,
-      <Capture
-        name="abstention-payload"
-        caption="the API payload — no `direction` key at all"
-      />,
-      plan(8, 5, 1),
-    ),
+      123,
+      139,
+      <Capture name="workspace-tabs" caption="Signals · Evidence · Model card" />, "rise", "swipe"),
     B(
       "4.7",
-      96,
-      110,
-      <Capture
-        name="evidence"
-        caption="/evidence · real dates, real subsequent returns"
-      />,
-      plan(14, 9, 3),
-    ),
+      139,
+      146,
+      <Capture name="watchlist" caption="/watchlist · your names, called or declined" />, "swipe", "collapse"),
+    B(
+      "4.8",
+      146,
+      152,
+      <Capture name="memory" caption="/memory · what it recalls, and why" />, "collapse", "swipe"),
+    B(
+      "4.9",
+      152,
+      160,
+      <Capture name="dashboard" caption="/dashboard · every figure read from one artifact" />, "swipe", "scatter"),
+    B(
+      "4.10",
+      160,
+      167,
+      <Capture name="outbox" caption="/outbox · nothing is sent without an approval" />, "scatter", "rise"),
 
-    // 5. HOW IT WORKS — the money shot, then the ledger, then calibration.
-    // The vault opens at 12 s into this beat; the re-frames stay off it either
-    // side so the reveal lands on a held frame rather than through a cut.
-    B(
-      "5.1+5.2",
-      110,
-      130,
-      <WalkForward />,
-      plan(20, 12, 5),
-    ),
-    B(
-      "5.3",
-      130,
-      136,
-      <CalibrationRibbon />,
-      plan(6, 4, 8),
-    ),
-    B(
-      "5.4",
-      136,
-      140,
-      <Baselines />,
-      plan(4, 2, 2),
-    ),
+    // 5. HOW IT WORKS
+    B("5.1+5.2", 167, 181, <WalkForward />, "rise", "collapse"),
+    B("5.3", 181, 188, <CalibrationRibbon />, "collapse", "swipe"),
+    B("5.4", 188, 192, <Baselines />, "swipe", "scatter"),
 
     // 6. HONESTY
-    B(
-      "6.1",
-      140,
-      147,
-      <HonestNumber />,
-      plan(7, 4, 1),
-    ),
-    B(
-      "6.2",
-      147,
-      153,
-      <FailedSearch />,
-      plan(6, 4, 4),
-    ),
-    B(
-      "6.3",
-      153,
-      165,
-      <ConfidenceLadder />,
-      plan(12, 8, 6),
-    ),
+    B("6.1", 192, 199, <HonestNumber />, "scatter", "swipe"),
+    B("6.2", 199, 205, <FailedSearch />, "swipe", "rise"),
+    B("6.3", 205, 215, <ConfidenceLadder />, "rise", "collapse"),
 
     // 7. CLOSE
-    B("7.1", 165, 171, <DisclaimerCard />),
-    B(
-      "7.2",
-      171,
-      180,
-      <CloseCard />,
-      plan(9, 4, 2),
-    ),
+    B("7.1", 215, 220, <DisclaimerCard />, "collapse", "swipe"),
+    B("7.2", 220, 227, <CloseCard />, "swipe", "hold"),
   ];
 
   return (
@@ -237,25 +200,32 @@ export const Main: React.FC = () => {
           key={b.id}
           name={b.id}
           from={sec(b.from)}
-          durationInFrames={sec(b.to - b.from)}
+          // Extended by the overlap so this beat is still mounted, underneath,
+          // while the next one arrives. StagePanel animates the handoff.
+          durationInFrames={sec(b.to - b.from + OVERLAP)}
         >
-          {b.reframe ? (
-            <ReFrame at={b.reframe} scales={b.scales} origins={b.origins}>
-              {b.el}
-            </ReFrame>
-          ) : (
-            b.el
-          )}
+          <StagePanel
+            durationS={b.to - b.from}
+            enter={b.enter ?? "swipe"}
+            exit={b.exit ?? "swipe"}
+          >
+            {b.el}
+          </StagePanel>
         </Sequence>
       ))}
+
+      {/* The Copilot. One canvas for the whole film, above the beat content
+          and below the chrome, so the character is continuous across every
+          cut instead of being rebuilt per beat. */}
+      <BotStage />
 
       {/* Persistent chrome, over everything, for the whole runtime. */}
       <Chrome />
 
-      {/* Open captions — judges often watch muted. */}
+      {/* Open captions — judges often watch muted, and the shipped mix has no
+          voice track, so these carry the words. */}
       <Captions />
 
-      {/* VO scratch track + bed. Swapping in the real take is one file. */}
       <Soundtrack />
     </AbsoluteFill>
   );

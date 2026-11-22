@@ -1,0 +1,80 @@
+NSE COPILOT - VOICE-OVER SCRIPT
+3:47  |  29 lines  |  record straight through to vo-take.wav
+
+The (*) lines are the clock, not the script - do not read them.
+Ahead of one, you're rushing. Behind it, cut the pause, never the words.
+========================================================================
+
+[0:00]  Most stock tools always have an answer.
+
+[0:04]  This one tells you when it doesn't.
+
+[0:09]  And it shows you the measurement that earns the refusal.
+
+[0:14]  This is it, running. Eighteen NSE large caps.
+         (*) 0:20 - you should be about here
+
+[0:21]  One question each — and a refusal when conviction is low.
+
+[0:28]  Open any retail equity app in India and there is always a number. A target price. A buy badge. A confidence score.
+
+[0:33]  It is there whether or not anything about tomorrow is actually knowable.
+
+[0:37]  Next-session direction on large caps is close to a coin flip.
+         (*) 0:40 - you should be about here
+
+[0:44]  NSE Copilot runs two independent heads over a fixed basket of large caps — one asks which way tomorrow goes, the other asks how big the move will be. They are never merged.
+
+[0:55]  One real call. April twenty-sixth, twenty twenty-two: Bajaj Finance, called down at sixty point nine percent. Next session it fell seven point two seven. Not luck — that band was calibrated.
+         (*) 1:00 - you should be about here
+
+[1:12]  This is the real thing. The Copilot, its working, and the panes it reads from.
+         (*) 1:20 - you should be about here
+
+[1:20]  So let's ask it about Bajaj Finance — the name it just got right — and watch which tools it reaches for.
+
+[1:33]  And it says no. Same name, same model — today's conviction sits under the same frozen gate. Being right once does not buy it an answer every time.
+         (*) 1:40 - you should be about here
+
+[1:45]  Ask about one that clears the gate, and it answers, with the number attached.
+
+[1:56]  That is the refusal, in full.
+
+   >>> STOP. 4 SECONDS OF SILENCE - 1:59 to 2:03.
+       Count it out. Do not fill it.
+
+
+[2:03]  Beside the chat: today's board, the closest historical sessions, and the model card it quotes against itself.
+
+[2:19]  Your own names, each one called or declined.
+         (*) 2:20 - you should be about here
+
+[2:26]  What it remembers, and what it retrieved to answer you.
+
+[2:32]  Every figure on the model card is read from one committed artifact — accuracy by confidence, and what each band costs in coverage.
+         (*) 2:40 - you should be about here
+
+[2:40]  And nothing is ever sent without an approval.
+
+[2:47]  Why believe any of it. Four expanding training windows, split on dates, with a five-session embargo — because the label for today is tomorrow's move.
+
+[2:57]  Then one final holdout, read exactly once, with a committed ledger.
+         (*) 3:00 - you should be about here
+
+[3:01]  Isotonic calibration is what makes this a probability at all.
+
+[3:08]  And here is what it beats — four baselines, on the identical split.
+
+[3:12]  Forced to call every session, it is right half the time. That is the honest floor.
+
+[3:19]  Every configuration in the published search failed to beat it.
+         (*) 3:20 - you should be about here
+
+[3:25]  The usable product is the accuracy on the sessions where conviction clears the gate — and knowing which sessions those are.
+
+[3:35]  Paper trading and historical analysis only. Not investment advice.
+         (*) 3:40 - you should be about here
+
+[3:40]  I would rather tell you that than show you a number I invented.
+
+[3:47]  END - hold two seconds of room tone before you stop.

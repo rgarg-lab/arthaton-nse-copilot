@@ -1,0 +1,23 @@
+{
+  "generated_at": "2026-11-21T18:51:20",
+  "targets": {
+    "integrated_lufs": -15.6,
+    "true_peak_dbfs": -1.6,
+    "bed_rms_db": -21.96,
+    "bpm": 119.7,
+    "duck_db": -9.0,
+    "duck_status": "chosen, not measured \u2014 see STYLE_SPEC.md \u00a76.3"
+  },
+  "achieved": {
+    "integrated_lufs": -15.61,
+    "true_peak_dbfs": -3.29,
+    "bed_rms_db_where_exposed": -15.14,
+    "bed_rms_db_whole_track": -15.23,
+    "mix_rms_db": -15.23,
+    "music_only_share": 0.98,
+    "reference_music_only_share": 0.273
+  },
+  "ships": "public/audio/mix.wav (stems written alongside for reference)",
+  "tts_available": false,
+  "lines": []
+}

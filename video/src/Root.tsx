@@ -3,6 +3,7 @@ import { Composition } from "remotion";
 import { Main } from "./Main";
 import { DURATION_FRAMES, FPS, HEIGHT, WIDTH } from "./theme";
 import { Abstention } from "./three/Abstention";
+import { BotLookDev } from "./three/BotLookDev";
 import { CalibrationRibbon } from "./three/CalibrationRibbon";
 import { ConfidenceLadder } from "./three/ConfidenceLadder";
 import { UniverseGrid } from "./three/UniverseGrid";
@@ -22,6 +23,15 @@ export const RemotionRoot: React.FC = () => (
       id="MainComposition"
       component={Main}
       durationInFrames={DURATION_FRAMES}
+      fps={FPS}
+      width={WIDTH}
+      height={HEIGHT}
+    />
+
+    <Composition
+      id="LookDev-Copilot"
+      component={BotLookDev}
+      durationInFrames={sec(6)}
       fps={FPS}
       width={WIDTH}
       height={HEIGHT}

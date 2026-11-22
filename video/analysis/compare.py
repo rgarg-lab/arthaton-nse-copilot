@@ -4,6 +4,7 @@ The same code that measured the reference measures the output, so "does it
 match the reference" has an answer instead of an opinion. Writes COMPARISON.md.
 """
 import json
+import re
 import subprocess
 import sys
 import wave
@@ -66,13 +67,28 @@ def palette_of(video: Path, tag: str) -> dict:
 
 
 def audio_of(video: Path, tag: str) -> dict:
+    """Measure a render's audio, extracting it fresh every time.
+
+    This used to reuse `audio_<tag>.wav` if it was already on disk. After the
+    film went silent that cache made the report state an integrated loudness
+    and a true peak for a file with no audio stream at all — a measurement of
+    the previous cut, presented as a measurement of this one. The extraction
+    costs a few seconds; a false number costs more than that.
+    """
     wav = HERE / f"audio_{tag}.wav"
-    if not wav.exists():
-        subprocess.run(
-            [FFMPEG, "-v", "error", "-i", str(video), "-ac", "2", "-ar", str(SR),
-             "-f", "wav", "-y", str(wav)],
-            check=True,
-        )
+    wav.unlink(missing_ok=True)
+    # The imageio-ffmpeg wheel ships no ffprobe, so ask ffmpeg itself: it
+    # prints the stream table to stderr and exits non-zero with no output file,
+    # which is fine here because the table is all we want.
+    info = subprocess.run([FFMPEG, "-hide_banner", "-i", str(video)],
+                          capture_output=True, text=True).stderr
+    if not re.search(r"Stream #\d+:\d+.*: Audio:", info):
+        return {"silent": True}
+    subprocess.run(
+        [FFMPEG, "-v", "error", "-i", str(video), "-ac", "2", "-ar", str(SR),
+         "-f", "wav", "-y", str(wav)],
+        check=True,
+    )
     with wave.open(str(wav), "rb") as w:
         if w.getnframes() == 0:
             return {"silent": True}
@@ -115,7 +131,13 @@ def main():
     from build_audio import read_vo_lines  # noqa: E402
 
     lines = read_vo_lines()
-    words = sum(len(l["text"].split()) for l in lines)
+    # Alphanumeric tokens only, matching honesty.test.ts and check_script.py.
+    # Counting bare em-dashes as words put this row 1.4 points above the other
+    # two checks measuring the same script.
+    words = sum(
+        len([w for w in re.split(r"\s+", l["text"]) if re.search(r"[A-Za-z0-9]", w)])
+        for l in lines
+    )
     runtime = out_probe["duration_s"]
     out_wpm = words / (runtime / 60)
     ref_wpm = ref_audio["vo"]["wpm_over_runtime"]
@@ -129,7 +151,7 @@ def main():
                      "pass": bool(ok), "note": note})
 
     row("Duration", f'{ref_probe["duration_s"]:.1f} s', f"{runtime:.1f} s",
-        170 <= runtime <= 190, "brief requires 170-190 s")
+        170 <= runtime <= 300, "brief requires 170-300 s; the author raised the ceiling to 5 min")
     row("Resolution",
         f'{ref_probe["video"]["width"]}x{ref_probe["video"]["height"]}',
         f'{out_probe["video"]["width"]}x{out_probe["video"]["height"]}',

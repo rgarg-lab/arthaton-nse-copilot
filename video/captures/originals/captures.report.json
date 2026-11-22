@@ -1,0 +1,66 @@
+{
+  "generatedAt": "2026-11-22T10:36:52.479Z",
+  "fps": 60,
+  "report": [
+    {
+      "name": "abstention-card",
+      "dur": "00:00:11.23",
+      "sizeMB": "8.03"
+    },
+    {
+      "name": "dashboard",
+      "dur": "00:00:16.08",
+      "sizeMB": "11.59"
+    },
+    {
+      "name": "evidence",
+      "dur": "00:00:11.00",
+      "sizeMB": "5.42"
+    },
+    {
+      "name": "landing-deck",
+      "dur": "00:00:23.43",
+      "sizeMB": "12.17"
+    },
+    {
+      "name": "landing-hero",
+      "dur": "00:00:15.60",
+      "sizeMB": "5.97"
+    },
+    {
+      "name": "memory",
+      "dur": "00:00:08.92",
+      "sizeMB": "1.82"
+    },
+    {
+      "name": "outbox",
+      "dur": "00:00:11.83",
+      "sizeMB": "3.38"
+    },
+    {
+      "name": "signals-board",
+      "dur": "00:00:08.80",
+      "sizeMB": "7.57"
+    },
+    {
+      "name": "signals-tiles",
+      "dur": "00:00:12.20",
+      "sizeMB": "8.51"
+    },
+    {
+      "name": "watchlist",
+      "dur": "00:00:17.60",
+      "sizeMB": "12.97"
+    },
+    {
+      "name": "workspace-chat",
+      "dur": "00:00:55.63",
+      "sizeMB": "26.76"
+    },
+    {
+      "name": "workspace-tabs",
+      "dur": "00:00:22.20",
+      "sizeMB": "11.59"
+    }
+  ]
+}

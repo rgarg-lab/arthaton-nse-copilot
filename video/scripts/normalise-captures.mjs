@@ -12,7 +12,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const DIR = join(HERE, "..", "public", "captures");
+const DIR = join(HERE, "..", "captures", "originals");
 
 /**
  * ffmpeg comes from the `imageio-ffmpeg` wheel the Stage 0 analysis already

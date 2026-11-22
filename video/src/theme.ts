@@ -10,7 +10,7 @@
 export const FPS = 60;
 export const WIDTH = 1920;
 export const HEIGHT = 1080;
-export const DURATION_S = 180;
+export const DURATION_S = 227;
 export const DURATION_FRAMES = DURATION_S * FPS;
 
 /** Seconds to frames. Scene boundaries in SCRIPT.md are written in seconds. */

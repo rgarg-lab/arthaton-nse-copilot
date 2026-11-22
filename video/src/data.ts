@@ -12,6 +12,7 @@
  * The imports are resolved when Remotion bundles, which happens once per render,
  * so a re-render always reflects the artifacts on disk.
  */
+import workedExampleJson from "../analysis/worked_example.json";
 import confidenceTiers from "../../ml/artifacts/confidence_tiers.json";
 import latestSignals from "../../ml/artifacts/latest_signals.json";
 import magnitude from "../../ml/artifacts/magnitude_metrics.json";
@@ -323,6 +324,31 @@ export const experiments = {
   )} – ${pct(
     Math.max(...(confirmation as { accuracy: number }[]).map((r) => r.accuracy)),
   )}`,
+} as const;
+
+/**
+ * One real call, queried from the committed walk-forward predictions by
+ * `scripts/build_example.py` — never authored.
+ *
+ * The film needed a concrete case and the honest way to get one is to search
+ * the artifact rather than invent it. The script picks the largest correct move
+ * among calls that cleared the frozen gate, and asserts all of that before
+ * writing, so this cannot silently become a losing example.
+ *
+ * **It is validation data, not the holdout**, and `basisLabel` must be on
+ * screen wherever the figures are.
+ */
+export const workedExample = {
+  ...workedExampleJson,
+  basisLabel: workedExampleJson.basis_label,
+  dateDisplay: workedExampleJson.date_display,
+  nextDateDisplay: workedExampleJson.next_date_display,
+  convictionDisplay: workedExampleJson.conviction_display,
+  gateDisplay: workedExampleJson.gate_display,
+  closeBeforeDisplay: workedExampleJson.close_before_display,
+  closeAfterDisplay: workedExampleJson.close_after_display,
+  returnDisplay: workedExampleJson.actual_return_display,
+  bin: workedExampleJson.calibration_bin,
 } as const;
 
 /** R-squared on return magnitude: approximately zero, and reported as such. */

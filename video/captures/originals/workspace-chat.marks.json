@@ -1,0 +1,22 @@
+[
+  {
+    "label": "agent-tab",
+    "at": 3.048
+  },
+  {
+    "label": "q1-sent",
+    "at": 7.624
+  },
+  {
+    "label": "q1-answered",
+    "at": 18.543
+  },
+  {
+    "label": "q2-sent",
+    "at": 33.487
+  },
+  {
+    "label": "q2-answered",
+    "at": 38.044
+  }
+]

@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { headline } from "./data";
+import { DURATION_S } from "./theme";
 import { VO, voWordCount } from "./vo";
 
 /**
@@ -16,7 +17,7 @@ import { VO, voWordCount } from "./vo";
  */
 
 const SRC = __dirname;
-const SCANNED = ["scenes", "three"];
+const SCANNED = ["scenes", "three", "bot"];
 
 const walk = (dir: string): string[] => {
   const out: string[] = [];
@@ -133,7 +134,9 @@ describe("figures are bound to the artifacts", () => {
 
 /** The VO has to stay inside the cadence measured off the reference. */
 describe("voice-over cadence", () => {
-  const RUNTIME_S = 180;
+  // Reads the composition length rather than restating it, so a retime cannot
+  // leave this check measuring a film that no longer exists.
+  const RUNTIME_S = DURATION_S;
   const REFERENCE_WPM = 119.3; // analysis/transcript.json, measured
 
   it("word count lands within 10% of the reference cadence", () => {

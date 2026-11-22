@@ -10,29 +10,32 @@ The repo's own `HUMAN_TASKS.md` at the root is a different file and still applie
 
 ## 1. Record the voice-over — only you can do this
 
-**Status: not done. The shipped video currently has a synthetic scratch voice.**
+**Status: not done. The shipped video has no audio at all.**
 
-This is the one item that genuinely must be done before submitting. The video is finished
-around it: the edit, the captions, the timings and the mix are all built against a TTS
-scratch track so that nothing waits on your recording.
+Three rounds of synthesised score were built and you rejected all three on playback — the
+last report named it exactly: a beat sound in the background and two automated sounds
+layered over each other. So the film ships **silent**, and every line is burned in as a
+caption instead. It plays, it reads, and it is honest about the fact that nobody has
+narrated it. But a silent submission is a real risk if the judges expect sound, and this
+is the one item worth doing before you submit.
 
 The script, with per-line windows and delivery notes, is **[`audio/VO_SCRIPT.md`](./audio/VO_SCRIPT.md)**
-— 25 lines, 369 words, 180 s, paced to the reference's measured 119.3 wpm.
+— 26 lines, 414 words, 190 s, paced to the reference's measured 119.3 wpm.
 
 ```bash
 # 1. record the whole thing to video/audio/vo-take.wav  (48 kHz, mono is fine)
-# 2. point scripts/build_audio.py at it instead of the TTS
-cd video && python scripts/build_audio.py
-cd video && npx remotion render MainComposition out/arthaton-submission.mp4 --codec=h264 --crf=18
+# 2. build the mix from your take
+cd video && WITH_VOICE=1 python scripts/build_audio.py
+# 3. point audio.manifest.ts at the result (mix: "audio/mix.wav"), then
+cd video && NO_AUDIO=0 npm run render
 ```
 
-`build_audio.py` re-ducks the bed against your actual envelope and re-normalises to the
-reference's loudness. **Nothing in the edit moves** — the burned-in captions come from
-`src/vo.ts`, not from the recording, so re-recording cannot desync them.
+**Nothing in the edit moves.** The burned-in captions come from `src/vo.ts`, not from the
+recording, so re-recording cannot desync them, and the beat boundaries are fixed in
+`src/Main.tsx` independently of any audio.
 
-> **Do not submit with the synthetic voice presented as yours.** `CREDITS.md` labels it a
-> placeholder. The three lines that matter most for delivery are beat 1.1–1.3 (slowest in
-> the film) and beat 4.5, where you stop talking and let the abstention hold in silence.
+> The two moments that matter most for delivery are beats 1.1–1.3, the slowest in the
+> film, and beat 4.5 — where you stop talking and let the abstention hold.
 
 ---
 
