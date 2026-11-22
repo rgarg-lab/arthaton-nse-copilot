@@ -76,7 +76,10 @@ def main() -> int:
     print(f"  tickers        : {meta['tickers']}")
     print(f"  features       : {meta['feature_count']} (ceiling {MAX_FEATURES})")
     print(f"  date range     : {meta['date_range'][0]} -> {meta['date_range'][1]}")
-    print(f"  last session   : {fresh['last_session']} ({fresh['sessions_behind']} sessions behind)")
+    print(
+        f"  last session   : {fresh['last_session']} "
+        f"({fresh['sessions_behind']} sessions behind)"
+    )
     print(f"  labelled rows  : {summary['labelled_rows']:,}")
     print(f"  up-rate        : {summary['up_rate']}")
     print(f"  NaN fraction   : {meta['nan_fraction_overall']:.4f}")

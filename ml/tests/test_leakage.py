@@ -43,7 +43,11 @@ def _negative_shift_calls(module) -> list[str]:
             # negative literal.
             if isinstance(arg, ast.UnaryOp) and isinstance(arg.op, ast.USub):
                 found.append(f"line {node.lineno}: .{node.func.attr}(-...)")
-            elif isinstance(arg, ast.Constant) and isinstance(arg.value, int | float) and arg.value < 0:
+            elif (
+                isinstance(arg, ast.Constant)
+                and isinstance(arg.value, int | float)
+                and arg.value < 0
+            ):
                 found.append(f"line {node.lineno}: .{node.func.attr}({arg.value})")
     return found
 
@@ -211,7 +215,9 @@ def test_sentiment_is_shifted_by_one_session():
         macro[f"{key}_close"] = 100.0
 
     news_day = dates[10]
-    sent = pd.DataFrame([{"date": news_day, "ticker": "RELIANCE.NS", "sent_raw": 0.8, "news_count": 1}])
+    sent = pd.DataFrame(
+        [{"date": news_day, "ticker": "RELIANCE.NS", "sent_raw": 0.8, "news_count": 1}]
+    )
 
     out = build_features(prices, macro, sent).sort_values("date").reset_index(drop=True)
     i = int(out.index[out["date"] == news_day][0])

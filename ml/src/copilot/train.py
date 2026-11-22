@@ -226,7 +226,9 @@ def walk_forward_oof(panel: pd.DataFrame, params: dict[str, object]) -> pd.DataF
     return pd.concat(pieces, ignore_index=True)
 
 
-def select_hyperparameters(panel: pd.DataFrame) -> tuple[dict[str, object], pd.DataFrame, list[dict]]:
+def select_hyperparameters(
+    panel: pd.DataFrame,
+) -> tuple[dict[str, object], pd.DataFrame, list[dict]]:
     """Pick the parameter set with the best mean per-fold log loss.
 
     Log loss, not accuracy: the product shows a *probability*, so the thing worth

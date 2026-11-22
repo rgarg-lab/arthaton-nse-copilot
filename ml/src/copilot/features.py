@@ -246,7 +246,9 @@ def _calendar_features(dates: pd.Series) -> pd.DataFrame:
     # Thursday is weekday 3; step back from month end to the most recent Thursday.
     days_back = (month_end.dt.dayofweek - 3) % 7
     last_thursday = month_end - pd.to_timedelta(days_back, unit="D")
-    same_iso_week = (d.dt.isocalendar().week.to_numpy() == last_thursday.dt.isocalendar().week.to_numpy()) & (
+    same_iso_week = (
+        d.dt.isocalendar().week.to_numpy() == last_thursday.dt.isocalendar().week.to_numpy()
+    ) & (
         d.dt.year.to_numpy() == last_thursday.dt.year.to_numpy()
     )
     out["cal_expiry_week"] = same_iso_week.astype("int8")
@@ -283,7 +285,9 @@ def _sentiment_features(df: pd.DataFrame, daily: pd.DataFrame) -> pd.DataFrame:
     has_news = merged["sent_raw"].notna()
 
     pieces = []
-    for ticker, g in merged.assign(_has=has_news).groupby("ticker", sort=False):
+    # `_ticker` is the groupby key and is deliberately unused: the loop writes back
+    # by positional index, not by name.
+    for _ticker, g in merged.assign(_has=has_news).groupby("ticker", sort=False):
         raw = g["sent_raw"].to_numpy(dtype=float)
         flag = g["_has"].to_numpy()
         decayed = np.zeros(len(g), dtype=float)
@@ -312,7 +316,9 @@ def _sentiment_features(df: pd.DataFrame, daily: pd.DataFrame) -> pd.DataFrame:
 # ─── assembly ─────────────────────────────────────────────────────────────────
 
 
-def build_features(prices: pd.DataFrame, macro: pd.DataFrame, daily_sent: pd.DataFrame) -> pd.DataFrame:
+def build_features(
+    prices: pd.DataFrame, macro: pd.DataFrame, daily_sent: pd.DataFrame
+) -> pd.DataFrame:
     """Long panel: one row per (date, ticker), identity columns + 58 features.
 
     `prices` is the long OHLCV frame from `ingest.fetch_universe`, `macro` the

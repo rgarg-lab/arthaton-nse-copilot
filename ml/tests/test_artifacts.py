@@ -285,6 +285,8 @@ def test_neighbors_are_strictly_causal(panel):
     )
     assert result["neighbours_found"] == 25
     for n in result["neighbours"]:
-        assert pd.Timestamp(n["date"]) < as_of, f"neighbour {n['date']} is not before {as_of.date()}"
+        assert pd.Timestamp(n["date"]) < as_of, (
+            f"neighbour {n['date']} is not before {as_of.date()}"
+        )
     assert 0.0 <= result["empirical_up_rate"] <= 1.0
     assert result["up_count"] + result["down_count"] == 25

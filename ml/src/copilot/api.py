@@ -39,10 +39,10 @@ from pydantic import BaseModel, Field
 
 from . import __version__
 from .config import (
+    ARTIFACTS_DIR,
     CALIBRATOR_PATH,
     DISCLAIMER,
     IMPORTANCE_PATH,
-    ARTIFACTS_DIR,
     MAGNITUDE_METRICS_PATH,
     MAGNITUDE_MODEL_PATH,
     METRICS_PATH,

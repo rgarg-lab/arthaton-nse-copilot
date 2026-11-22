@@ -65,7 +65,7 @@ from .config import (
     UNIVERSE,
     WALK_FORWARD_FOLDS,
 )
-from .features import Preprocessor, feature_columns
+from .features import Preprocessor
 from .labels import labelled
 from .train import coverage_accuracy_curve, log_loss_safe
 from .validation import holdout_split, purged_walk_forward

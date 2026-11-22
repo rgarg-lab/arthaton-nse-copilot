@@ -1,5 +1,5 @@
 {
-  "rows": 52812,
+  "rows": 52830,
   "tickers": 18,
   "feature_count": 57,
   "feature_columns": [
@@ -63,20 +63,20 @@
   ],
   "date_range": [
     "2015-01-01",
-    "2026-11-19"
+    "2026-11-20"
   ],
   "freshness": {
-    "last_session": "2026-11-19",
+    "last_session": "2026-11-20",
     "as_of": "2026-11-22",
-    "calendar_days_behind": 3,
-    "sessions_behind": 1
+    "calendar_days_behind": 2,
+    "sessions_behind": 0
   },
   "labels": {
     "horizon_sessions": 1,
-    "labelled_rows": 52794,
+    "labelled_rows": 52812,
     "unlabelled_rows": 18,
-    "up_rate": 0.506383,
-    "mean_abs_return": 0.012309
+    "up_rate": 0.506457,
+    "mean_abs_return": 0.01231
   },
-  "nan_fraction_overall": 0.004873
+  "nan_fraction_overall": 0.004871
 }
