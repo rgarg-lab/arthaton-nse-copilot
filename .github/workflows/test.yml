@@ -1,14 +1,10 @@
-# PARKED, not inactive. This file belongs at `.github/workflows/test.yml`; the `gh` token
-# on the build machine lacks the `workflow` scope, so it cannot be written there. One
-# command activates it — see HUMAN_TASKS.md task 3:
-#
-#     gh auth refresh -h github.com -s workflow
-#     git mv ci/test.yml .github/workflows/test.yml
-#
 # Every push to main and every pull request: types, lint, the full Vitest suite on both
 # platforms, and the Python suite. The Windows leg catches line-ending and path-separator
 # problems; the Python leg is the one that matters most here, because it runs the leakage
 # and purge tests against the committed artifacts.
+#
+# Activated 2026-11-22. It was parked at `ci/test.yml` because the `gh` token lacked the
+# `workflow` scope; the file was always correct, it just could not be written here.
 name: test
 
 on:
