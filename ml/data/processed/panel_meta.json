@@ -67,8 +67,8 @@
   ],
   "freshness": {
     "last_session": "2026-11-19",
-    "as_of": "2026-11-20",
-    "calendar_days_behind": 1,
+    "as_of": "2026-11-22",
+    "calendar_days_behind": 3,
     "sessions_behind": 1
   },
   "labels": {

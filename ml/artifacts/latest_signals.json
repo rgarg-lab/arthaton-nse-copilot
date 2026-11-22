@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-16T23:43:36",
+  "generated_at": "2026-11-22T14:54:14",
   "generated_by": "ml/src/copilot/signals.py from the frozen model in artifacts/",
   "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
   "model": {
@@ -11,108 +11,106 @@
     "calibration": "isotonic regression on out-of-fold walk-forward predictions"
   },
   "data": {
-    "last_session": "2026-11-11",
-    "as_of": "2026-11-16",
-    "calendar_days_behind": 5,
-    "sessions_behind": 3
+    "last_session": "2026-11-19",
+    "as_of": "2026-11-22",
+    "calendar_days_behind": 3,
+    "sessions_behind": 1
   },
-  "universe_size": 17,
+  "universe_size": 18,
   "universe_configured": 18,
-  "universe_missing": [
-    "TATAMOTORS.NS"
-  ],
+  "universe_missing": [],
   "summary": {
-    "signals_emitted": 0,
-    "abstained": 17,
+    "signals_emitted": 8,
+    "abstained": 10,
     "up_calls": 0,
-    "down_calls": 0,
-    "mean_probability_up": 0.520641
+    "down_calls": 8,
+    "mean_probability_up": 0.431322
   },
   "signals": [
     {
       "ticker": "ASIANPAINT.NS",
       "name": "Asian Paints",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
-      "abstain": true,
-      "probability_up": 0.518284,
-      "conviction": 0.518284,
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
+      "abstain": false,
+      "probability_up": 0.390597,
+      "conviction": 0.609403,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.528606,
+        "value": 0.386079,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
-        "band": "0.50-0.55",
-        "confidence": "no call",
-        "band_accuracy": 0.5250048459003683,
-        "band_coverage": 0.7041080933533507,
-        "calls": false
+        "band": "0.60-0.65",
+        "confidence": "high",
+        "band_accuracy": 0.6115357887421821,
+        "band_coverage": 0.09819844411082299,
+        "calls": true
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": 0.00049,
-        "low": -0.01611,
-        "high": 0.017089,
+        "centre": -0.003124,
+        "low": -0.01972,
+        "high": 0.013471,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 2550.3,
+      "latest_close": 2595.0,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.518 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "direction": "down"
     },
     {
       "ticker": "AXISBANK.NS",
       "name": "Axis Bank",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
-      "abstain": true,
-      "probability_up": 0.520778,
-      "conviction": 0.520778,
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
+      "abstain": false,
+      "probability_up": 0.390597,
+      "conviction": 0.609403,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.54217,
+        "value": 0.387598,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
-        "band": "0.50-0.55",
-        "confidence": "no call",
-        "band_accuracy": 0.5250048459003683,
-        "band_coverage": 0.7041080933533507,
-        "calls": false
+        "band": "0.60-0.65",
+        "confidence": "high",
+        "band_accuracy": 0.6115357887421821,
+        "band_coverage": 0.09819844411082299,
+        "calls": true
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": -5.2e-05,
-        "low": -0.018368,
-        "high": 0.018264,
+        "centre": -0.003358,
+        "low": -0.017586,
+        "high": 0.010869,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 1336.4,
+      "latest_close": 1380.8,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.521 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "direction": "down"
     },
     {
       "ticker": "BAJFINANCE.NS",
       "name": "Bajaj Finance",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
       "abstain": true,
-      "probability_up": 0.518284,
-      "conviction": 0.518284,
+      "probability_up": 0.456271,
+      "conviction": 0.543729,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.50891,
+        "value": 0.398209,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
         "band": "0.50-0.55",
         "confidence": "no call",
@@ -120,33 +118,33 @@
         "band_coverage": 0.7041080933533507,
         "calls": false
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": -0.0006,
-        "low": -0.025618,
-        "high": 0.024418,
+        "centre": -0.003061,
+        "low": -0.025536,
+        "high": 0.019414,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 1078.8,
+      "latest_close": 1092.85,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.518 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "abstain_reason": "Calibrated conviction 0.544 is below the frozen abstention threshold 0.600. In the normal volatility regime this model's measured edge does not justify a directional call today."
     },
     {
       "ticker": "BHARTIARTL.NS",
       "name": "Bharti Airtel",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
       "abstain": true,
-      "probability_up": 0.518284,
-      "conviction": 0.518284,
+      "probability_up": 0.456271,
+      "conviction": 0.543729,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.527557,
+        "value": 0.423147,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
         "band": "0.50-0.55",
         "confidence": "no call",
@@ -154,67 +152,67 @@
         "band_coverage": 0.7041080933533507,
         "calls": false
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": 0.000171,
-        "low": -0.01648,
-        "high": 0.016821,
+        "centre": -0.002053,
+        "low": -0.016847,
+        "high": 0.01274,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 2109.0,
+      "latest_close": 2144.0,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.518 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "abstain_reason": "Calibrated conviction 0.544 is below the frozen abstention threshold 0.600. In the normal volatility regime this model's measured edge does not justify a directional call today."
     },
     {
       "ticker": "HDFCBANK.NS",
       "name": "HDFC Bank",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
-      "abstain": true,
-      "probability_up": 0.518284,
-      "conviction": 0.518284,
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
+      "abstain": false,
+      "probability_up": 0.390597,
+      "conviction": 0.609403,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.509298,
+        "value": 0.382314,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
-        "band": "0.50-0.55",
-        "confidence": "no call",
-        "band_accuracy": 0.5250048459003683,
-        "band_coverage": 0.7041080933533507,
-        "calls": false
+        "band": "0.60-0.65",
+        "confidence": "high",
+        "band_accuracy": 0.6115357887421821,
+        "band_coverage": 0.09819844411082299,
+        "calls": true
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": -0.000543,
-        "low": -0.017468,
-        "high": 0.016381,
+        "centre": -0.003359,
+        "low": -0.019044,
+        "high": 0.012326,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 806.6,
+      "latest_close": 821.8,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.518 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "direction": "down"
     },
     {
       "ticker": "HINDUNILVR.NS",
       "name": "Hindustan Unilever",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
       "abstain": true,
-      "probability_up": 0.518284,
-      "conviction": 0.518284,
+      "probability_up": 0.456271,
+      "conviction": 0.543729,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.528526,
+        "value": 0.416313,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
         "band": "0.50-0.55",
         "confidence": "no call",
@@ -222,67 +220,67 @@
         "band_coverage": 0.7041080933533507,
         "calls": false
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": 0.000174,
-        "low": -0.013507,
-        "high": 0.013855,
+        "centre": -0.002665,
+        "low": -0.017037,
+        "high": 0.011706,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 2003.4,
+      "latest_close": 2074.2,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.518 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "abstain_reason": "Calibrated conviction 0.544 is below the frozen abstention threshold 0.600. In the normal volatility regime this model's measured edge does not justify a directional call today."
     },
     {
       "ticker": "ICICIBANK.NS",
       "name": "ICICI Bank",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
-      "abstain": true,
-      "probability_up": 0.518284,
-      "conviction": 0.518284,
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
+      "abstain": false,
+      "probability_up": 0.390597,
+      "conviction": 0.609403,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.516968,
+        "value": 0.388735,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
-        "band": "0.50-0.55",
-        "confidence": "no call",
-        "band_accuracy": 0.5250048459003683,
-        "band_coverage": 0.7041080933533507,
-        "calls": false
+        "band": "0.60-0.65",
+        "confidence": "high",
+        "band_accuracy": 0.6115357887421821,
+        "band_coverage": 0.09819844411082299,
+        "calls": true
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": -0.000251,
-        "low": -0.019847,
-        "high": 0.019345,
+        "centre": -0.003139,
+        "low": -0.020347,
+        "high": 0.01407,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 1571.6,
+      "latest_close": 1608.9,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.518 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "direction": "down"
     },
     {
       "ticker": "INFY.NS",
       "name": "Infosys",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
       "abstain": true,
-      "probability_up": 0.520778,
-      "conviction": 0.520778,
+      "probability_up": 0.486262,
+      "conviction": 0.513738,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.543583,
+        "value": 0.46652,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
         "band": "0.50-0.55",
         "confidence": "no call",
@@ -290,101 +288,101 @@
         "band_coverage": 0.7041080933533507,
         "calls": false
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": 0.000777,
-        "low": -0.023482,
-        "high": 0.025035,
+        "centre": -0.000465,
+        "low": -0.018966,
+        "high": 0.018036,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 1155.0,
+      "latest_close": 1091.9,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.521 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "abstain_reason": "Calibrated conviction 0.514 is below the frozen abstention threshold 0.600. In the normal volatility regime this model's measured edge does not justify a directional call today."
     },
     {
       "ticker": "ITC.NS",
       "name": "ITC",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
-      "abstain": true,
-      "probability_up": 0.518284,
-      "conviction": 0.518284,
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
+      "abstain": false,
+      "probability_up": 0.390597,
+      "conviction": 0.609403,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.506591,
+        "value": 0.387714,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
-        "band": "0.50-0.55",
-        "confidence": "no call",
-        "band_accuracy": 0.5250048459003683,
-        "band_coverage": 0.7041080933533507,
-        "calls": false
+        "band": "0.60-0.65",
+        "confidence": "high",
+        "band_accuracy": 0.6115357887421821,
+        "band_coverage": 0.09819844411082299,
+        "calls": true
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": -0.000323,
-        "low": -0.012562,
-        "high": 0.011916,
+        "centre": -0.003449,
+        "low": -0.017344,
+        "high": 0.010446,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 285.0,
+      "latest_close": 301.0,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.518 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "direction": "down"
     },
     {
       "ticker": "KOTAKBANK.NS",
       "name": "Kotak Mahindra Bank",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
-      "abstain": true,
-      "probability_up": 0.518284,
-      "conviction": 0.518284,
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
+      "abstain": false,
+      "probability_up": 0.390597,
+      "conviction": 0.609403,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.516614,
+        "value": 0.381021,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
-        "band": "0.50-0.55",
-        "confidence": "no call",
-        "band_accuracy": 0.5250048459003683,
-        "band_coverage": 0.7041080933533507,
-        "calls": false
+        "band": "0.60-0.65",
+        "confidence": "high",
+        "band_accuracy": 0.6115357887421821,
+        "band_coverage": 0.09819844411082299,
+        "calls": true
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": -0.000169,
-        "low": -0.016087,
-        "high": 0.015749,
+        "centre": -0.003395,
+        "low": -0.017827,
+        "high": 0.011038,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 487.7,
+      "latest_close": 503.0,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.518 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "direction": "down"
     },
     {
       "ticker": "LT.NS",
       "name": "Larsen & Toubro",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
       "abstain": true,
-      "probability_up": 0.518284,
-      "conviction": 0.518284,
+      "probability_up": 0.456271,
+      "conviction": 0.543729,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.530602,
+        "value": 0.396448,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
         "band": "0.50-0.55",
         "confidence": "no call",
@@ -392,33 +390,33 @@
         "band_coverage": 0.7041080933533507,
         "calls": false
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": 0.000172,
-        "low": -0.011382,
-        "high": 0.011726,
+        "centre": -0.00292,
+        "low": -0.014424,
+        "high": 0.008584,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 4212.0,
+      "latest_close": 4211.0,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.518 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "abstain_reason": "Calibrated conviction 0.544 is below the frozen abstention threshold 0.600. In the normal volatility regime this model's measured edge does not justify a directional call today."
     },
     {
       "ticker": "MARUTI.NS",
       "name": "Maruti Suzuki",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
       "abstain": true,
-      "probability_up": 0.518284,
-      "conviction": 0.518284,
+      "probability_up": 0.451923,
+      "conviction": 0.548077,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.494168,
+        "value": 0.395187,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
         "band": "0.50-0.55",
         "confidence": "no call",
@@ -426,33 +424,33 @@
         "band_coverage": 0.7041080933533507,
         "calls": false
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": -0.001333,
-        "low": -0.018207,
-        "high": 0.015541,
+        "centre": -0.003535,
+        "low": -0.026447,
+        "high": 0.019378,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 13185.0,
+      "latest_close": 13589.0,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.518 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "abstain_reason": "Calibrated conviction 0.548 is below the frozen abstention threshold 0.600. In the normal volatility regime this model's measured edge does not justify a directional call today."
     },
     {
       "ticker": "NTPC.NS",
       "name": "NTPC",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
       "abstain": true,
-      "probability_up": 0.548387,
-      "conviction": 0.548387,
+      "probability_up": 0.456271,
+      "conviction": 0.543729,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.56535,
+        "value": 0.40502,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
         "band": "0.50-0.55",
         "confidence": "no call",
@@ -460,101 +458,101 @@
         "band_coverage": 0.7041080933533507,
         "calls": false
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": 0.001235,
-        "low": -0.012987,
-        "high": 0.015456,
+        "centre": -0.002339,
+        "low": -0.015786,
+        "high": 0.011107,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 327.0,
+      "latest_close": 325.0,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.548 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "abstain_reason": "Calibrated conviction 0.544 is below the frozen abstention threshold 0.600. In the normal volatility regime this model's measured edge does not justify a directional call today."
     },
     {
       "ticker": "RELIANCE.NS",
       "name": "Reliance Industries",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
-      "abstain": true,
-      "probability_up": 0.518284,
-      "conviction": 0.518284,
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
+      "abstain": false,
+      "probability_up": 0.390597,
+      "conviction": 0.609403,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.523303,
+        "value": 0.3825,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
-        "band": "0.50-0.55",
-        "confidence": "no call",
-        "band_accuracy": 0.5250048459003683,
-        "band_coverage": 0.7041080933533507,
-        "calls": false
+        "band": "0.60-0.65",
+        "confidence": "high",
+        "band_accuracy": 0.6115357887421821,
+        "band_coverage": 0.09819844411082299,
+        "calls": true
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": 4e-06,
-        "low": -0.028559,
-        "high": 0.028567,
+        "centre": -0.003352,
+        "low": -0.031172,
+        "high": 0.024468,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 1335.4,
+      "latest_close": 1375.6,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.518 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "direction": "down"
     },
     {
       "ticker": "SBIN.NS",
       "name": "State Bank of India",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
-      "abstain": true,
-      "probability_up": 0.518284,
-      "conviction": 0.518284,
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
+      "abstain": false,
+      "probability_up": 0.390597,
+      "conviction": 0.609403,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.513987,
+        "value": 0.366141,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
-        "band": "0.50-0.55",
-        "confidence": "no call",
-        "band_accuracy": 0.5250048459003683,
-        "band_coverage": 0.7041080933533507,
-        "calls": false
+        "band": "0.60-0.65",
+        "confidence": "high",
+        "band_accuracy": 0.6115357887421821,
+        "band_coverage": 0.09819844411082299,
+        "calls": true
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": -0.000237,
-        "low": -0.014116,
-        "high": 0.013641,
+        "centre": -0.004533,
+        "low": -0.019022,
+        "high": 0.009956,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 1061.2,
+      "latest_close": 1156.0,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.518 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "direction": "down"
     },
     {
       "ticker": "SUNPHARMA.NS",
       "name": "Sun Pharmaceutical",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
       "abstain": true,
-      "probability_up": 0.520778,
-      "conviction": 0.520778,
+      "probability_up": 0.456271,
+      "conviction": 0.543729,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.53917,
+        "value": 0.407638,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
         "band": "0.50-0.55",
         "confidence": "no call",
@@ -562,33 +560,67 @@
         "band_coverage": 0.7041080933533507,
         "calls": false
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": 0.000733,
-        "low": -0.010097,
-        "high": 0.011563,
+        "centre": -0.002339,
+        "low": -0.0129,
+        "high": 0.008221,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 1902.3,
+      "latest_close": 1900.0,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.521 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "abstain_reason": "Calibrated conviction 0.544 is below the frozen abstention threshold 0.600. In the normal volatility regime this model's measured edge does not justify a directional call today."
+    },
+    {
+      "ticker": "TATAMOTORS.NS",
+      "name": "Tata Motors",
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
+      "abstain": true,
+      "probability_up": 0.476943,
+      "conviction": 0.523057,
+      "threshold": 0.6,
+      "raw_model_output": {
+        "value": 0.441063,
+        "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
+      },
+      "lean": {
+        "direction": "down",
+        "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
+        "band": "0.50-0.55",
+        "confidence": "no call",
+        "band_accuracy": 0.5250048459003683,
+        "band_coverage": 0.7041080933533507,
+        "calls": false
+      },
+      "volatility_regime": "normal",
+      "predicted_range": {
+        "centre": -0.000871,
+        "low": -0.030556,
+        "high": 0.028814,
+        "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
+      },
+      "latest_close": 263.5,
+      "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
+      "abstain_reason": "Calibrated conviction 0.523 is below the frozen abstention threshold 0.600. In the normal volatility regime this model's measured edge does not justify a directional call today."
     },
     {
       "ticker": "TCS.NS",
       "name": "Tata Consultancy Services",
-      "as_of_session": "2026-11-11",
-      "predicts_session_after": "2026-11-11",
-      "predicts": "the next NSE trading session after 2026-11-11",
+      "as_of_session": "2026-11-19",
+      "predicts_session_after": "2026-11-19",
+      "predicts": "the next NSE trading session after 2026-11-19",
       "abstain": true,
-      "probability_up": 0.520778,
-      "conviction": 0.520778,
+      "probability_up": 0.486262,
+      "conviction": 0.513738,
       "threshold": 0.6,
       "raw_model_output": {
-        "value": 0.543822,
+        "value": 0.461457,
         "note": "Uncalibrated classifier output. Shown for transparency only; never present this as a confidence (\u00a74.6)."
       },
       "lean": {
-        "direction": "up",
+        "direction": "down",
         "note": "The side the probability falls on. NOT a call: below the frozen threshold the model declines, and `direction` is absent. Read this only together with `band_accuracy`.",
         "band": "0.50-0.55",
         "confidence": "no call",
@@ -596,16 +628,16 @@
         "band_coverage": 0.7041080933533507,
         "calls": false
       },
-      "volatility_regime": "stressed",
+      "volatility_regime": "normal",
       "predicted_range": {
-        "centre": 0.00081,
-        "low": -0.021412,
-        "high": 0.023032,
+        "centre": -0.000591,
+        "low": -0.012116,
+        "high": 0.010933,
         "basis": "Centre is the return regressor's point estimate. The band is plus/minus one session of realised volatility from rv_20. This is a volatility-implied range, NOT a model confidence interval \u2014 the regressor's R-squared on next-session returns is approximately zero (see metrics.json)."
       },
-      "latest_close": 2472.1,
+      "latest_close": 2342.7,
       "disclaimer": "Historical and paper-trading analysis only. Not investment advice, and not from a SEBI-registered investment adviser. Past measured accuracy does not predict future results.",
-      "abstain_reason": "Calibrated conviction 0.521 is below the frozen abstention threshold 0.600. In the stressed volatility regime this model's measured edge does not justify a directional call today."
+      "abstain_reason": "Calibrated conviction 0.514 is below the frozen abstention threshold 0.600. In the normal volatility regime this model's measured edge does not justify a directional call today."
     }
   ]
 }
