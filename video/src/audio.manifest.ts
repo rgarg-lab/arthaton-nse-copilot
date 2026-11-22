@@ -33,6 +33,6 @@ export const audioManifest: {
   // `audio/mix.wav` in afterwards, so shipping a 33 MB wav into every render
   // bundle bought nothing. Point this at a file under `public/` if you ever
   // want audio previewing in the studio.
-  mix: null,
+  mix: "audio/mix.wav",
   gain: 1,
 };
